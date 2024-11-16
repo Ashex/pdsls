@@ -495,6 +495,11 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
               <A href="/login">Login</A>
             </div>
           </Show>
+          <Show when={loginState()}>
+            <div>
+              <A href={`/at/${agent.sub}`}>Repo</A>
+            </div>
+          </Show>
         </div>
         <div class="basis-1/3 text-center font-mono text-xl font-bold">
           <A href="/" class="hover:underline">
