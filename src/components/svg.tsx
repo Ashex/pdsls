@@ -128,6 +128,61 @@ const BsClipboardCheck: Component<{ class?: string }> = (props) => {
   );
 };
 
+const FiLogIn: Component<{ class?: string }> = (props) => {
+  return (
+    <div class={props.class}>
+      <svg
+        class="size-full"
+        fill="none"
+        stroke-width="2"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 24 24"
+        height="1em"
+        width="1em"
+        style="overflow: visible; color: currentcolor;"
+      >
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+        <path d="M10 17 15 12 10 7"></path>
+        <path d="M15 12 3 12"></path>
+      </svg>
+    </div>
+  );
+};
+
+const TbBinaryTree: Component<{ class?: string }> = (props) => {
+  return (
+    <div class={props.class}>
+      <svg
+        class="size-full"
+        fill="none"
+        stroke-width="2"
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        height="1em"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        style="overflow: visible; color: currentcolor;"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M6 20a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z"></path>
+        <path d="M16 4a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z"></path>
+        <path d="M16 20a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z"></path>
+        <path d="M11 12a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z"></path>
+        <path d="M21 12a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z"></path>
+        <path d="M5.058 18.306l2.88 -4.606"></path>
+        <path d="M10.061 10.303l2.877 -4.604"></path>
+        <path d="M10.065 13.705l2.876 4.6"></path>
+        <path d="M15.063 5.7l2.881 4.61"></path>
+      </svg>
+    </div>
+  );
+};
+
 export {
   AiFillGithub,
   Bluesky,
@@ -135,4 +190,6 @@ export {
   TbSun,
   BsClipboard,
   BsClipboardCheck,
+  FiLogIn,
+  TbBinaryTree,
 };

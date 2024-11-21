@@ -29,6 +29,8 @@ import {
   Bluesky,
   BsClipboard,
   BsClipboardCheck,
+  FiLogIn,
+  TbBinaryTree,
   TbMoonStar,
   TbSun,
 } from "./components/svg.jsx";
@@ -557,9 +559,10 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
       class="m-5 flex flex-col items-center text-slate-900 dark:text-slate-100"
     >
       <div class="mb-2 flex w-[20rem] items-center">
-        <div class="flex basis-1/3 gap-x-2">
+        <div class="flex basis-1/3 gap-x-1">
           <div
             class="w-fit cursor-pointer"
+            title="Theme"
             onclick={() => {
               setTheme(theme() === "light" ? "dark" : "light");
               if (theme() === "dark")
@@ -573,13 +576,17 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
             : <TbSun class="size-6" />}
           </div>
           <Show when={!loginState()}>
-            <div>
-              <A href="/login">Login</A>
+            <div title="Login">
+              <A href="/login">
+                <FiLogIn class="size-6" />
+              </A>
             </div>
           </Show>
           <Show when={loginState()}>
-            <div>
-              <A href={`/at/${agent.sub}`}>Repo</A>
+            <div title="Repository">
+              <A href={`/at/${agent.sub}`}>
+                <TbBinaryTree class="size-6" />
+              </A>
             </div>
           </Show>
         </div>
@@ -590,46 +597,53 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
         </div>
         <div class="justify-right flex basis-1/3 gap-x-2">
           <a
+            title="Bluesky"
             href="https://bsky.app/profile/did:plc:b3pn34agqqchkaf75v7h43dk"
             target="_blank"
           >
             <Bluesky class="size-6" />
           </a>
-          <a href="https://github.com/notjuliet/pdsls" target="_blank">
+          <a
+            title="GitHub"
+            href="https://github.com/notjuliet/pdsls"
+            target="_blank"
+          >
             <AiFillGithub class="size-6" />
           </a>
         </div>
       </div>
       <LoginStatus />
       <div class="mb-5 flex max-w-full flex-col items-center text-pretty lg:max-w-screen-lg">
-        <form
-          class="flex flex-col items-center gap-y-1"
-          id="uriForm"
-          method="post"
-          action={processInput}
-        >
-          <div class="w-full">
-            <label for="input" class="ml-0.5 text-sm">
-              PDS URL or AT URI
-            </label>
-          </div>
-          <div class="flex gap-x-2">
-            <input
-              type="text"
-              id="input"
-              name="input"
-              autofocus
-              spellcheck={false}
-              class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
-            />
-            <button
-              type="submit"
-              class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300"
-            >
-              Go
-            </button>
-          </div>
-        </form>
+        <Show when={useLocation().pathname !== "/login"}>
+          <form
+            class="flex flex-col items-center gap-y-1"
+            id="uriForm"
+            method="post"
+            action={processInput}
+          >
+            <div class="w-full">
+              <label for="input" class="ml-0.5 text-sm">
+                PDS URL or AT URI
+              </label>
+            </div>
+            <div class="flex gap-x-2">
+              <input
+                type="text"
+                id="input"
+                name="input"
+                autofocus
+                spellcheck={false}
+                class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              />
+              <button
+                type="submit"
+                class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              >
+                Go
+              </button>
+            </div>
+          </form>
+        </Show>
         <Show when={params.pds}>
           <div class="mb-3 mt-4 flex flex-wrap font-mono">
             <Show when={pds() && params.pds}>
