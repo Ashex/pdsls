@@ -680,6 +680,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
               {params.rkey}
             </Show>
             <span
+              title="Copy URL"
               class="ml-1.5 flex cursor-pointer items-center"
               onclick={() =>
                 navigator.clipboard.writeText(location.href).then(() => {
