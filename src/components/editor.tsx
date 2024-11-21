@@ -24,7 +24,7 @@ const Editor: Component<{ theme: string; model: monaco.editor.IModel }> = (
   });
 
   return (
-    <div ref={editorDiv} class="w-xs h-sm sm:w-xl sm:h-lg lg:w-[64rem]"></div>
+    <div ref={editorDiv} class="w-xs h-sm sm:w-xl sm:h-lg lg:w-[60rem]"></div>
   );
 };
 
