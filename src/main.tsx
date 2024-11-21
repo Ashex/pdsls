@@ -631,7 +631,9 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                 <div title={`Repository`}>
                   <a href={`/at/${agent.sub}`}>
                     <TbBinaryTree class="size-6" />
-                    <Navigate href={`/at/${agent.sub}`} />
+                    <Show when={location.pathname === "/"}>
+                      <Navigate href={`/at/${agent.sub}`} />
+                    </Show>
                   </a>
                 </div>
               </Show>
