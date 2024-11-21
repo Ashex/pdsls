@@ -152,6 +152,30 @@ const FiLogIn: Component<{ class?: string }> = (props) => {
   );
 };
 
+const FiLogOut: Component<{ class?: string }> = (props) => {
+  return (
+    <div class={props.class}>
+      <svg
+        class="size-full"
+        fill="none"
+        stroke-width="2"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 24 24"
+        height="1em"
+        width="1em"
+        style="overflow: visible; color: currentcolor;"
+      >
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <path d="M16 17 21 12 16 7"></path>
+        <path d="M21 12 9 12"></path>
+      </svg>
+    </div>
+  );
+};
+
 const TbBinaryTree: Component<{ class?: string }> = (props) => {
   return (
     <div class={props.class}>
@@ -191,5 +215,6 @@ export {
   BsClipboard,
   BsClipboardCheck,
   FiLogIn,
+  FiLogOut,
   TbBinaryTree,
 };

@@ -29,8 +29,6 @@ import {
   Bluesky,
   BsClipboard,
   BsClipboardCheck,
-  FiLogIn,
-  TbBinaryTree,
   TbMoonStar,
   TbSun,
 } from "./components/svg.jsx";
@@ -515,33 +513,33 @@ const Home: Component = () => {
         <span class="font-semibold text-orange-400">PDS URL</span> (https://
         required):
         <div>
-          <A href="/pds.bsky.mom" class="text-lightblue-500 hover:underline">
+          <a href="/pds.bsky.mom" class="text-lightblue-500 hover:underline">
             https://pds.bsky.mom
-          </A>
+          </a>
         </div>
       </div>
       <div>
         <span class="font-semibold text-orange-400">AT URI</span> (at://
         optional, DID or handle alone also works):
         <div>
-          <A
+          <a
             href="/at/did:plc:oisofpd7lj26yvgiivf3lxsi/app.bsky.feed.post/3l2zpbbhuvw2h"
             class="text-lightblue-500 hover:underline"
           >
             at://did:plc:oisofpd7lj26yvgiivf3lxsi/app.bsky.feed.post/3l2zpbbhuvw2h
-          </A>
+          </a>
         </div>
       </div>
       <div>
         <span class="font-semibold text-orange-400">Bluesky Link</span> (posts
         and profiles):
         <div>
-          <A
+          <a
             href="/at/did:plc:ia76kvnndjutgedggx2ibrem/app.bsky.feed.post/3kenlltlvus2u"
             class="text-lightblue-500 hover:underline"
           >
             https://bsky.app/profile/mary.my.id/post/3kenlltlvus2u
-          </A>
+          </a>
         </div>
       </div>
     </div>
@@ -575,25 +573,12 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
               <TbMoonStar class="size-6" />
             : <TbSun class="size-6" />}
           </div>
-          <Show when={!loginState()}>
-            <div title="Login">
-              <A href="/login">
-                <FiLogIn class="size-6" />
-              </A>
-            </div>
-          </Show>
-          <Show when={loginState()}>
-            <div title="Repository">
-              <A href={`/at/${agent.sub}`}>
-                <TbBinaryTree class="size-6" />
-              </A>
-            </div>
-          </Show>
+          <LoginStatus />
         </div>
         <div class="basis-1/3 text-center font-mono text-xl font-bold">
-          <A href="/" class="hover:underline">
+          <a href="/" class="hover:underline">
             PDSls
-          </A>
+          </a>
         </div>
         <div class="justify-right flex basis-1/3 gap-x-2">
           <a
@@ -612,7 +597,6 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
           </a>
         </div>
       </div>
-      <LoginStatus />
       <div class="mb-5 flex max-w-full flex-col items-center text-pretty lg:max-w-screen-lg">
         <Show when={useLocation().pathname !== "/login"}>
           <form

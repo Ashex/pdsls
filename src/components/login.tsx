@@ -9,6 +9,8 @@ import {
   type Session,
 } from "@atcute/oauth-browser-client";
 import { At } from "@atcute/client/lexicons";
+import { FiLogIn, FiLogOut, TbBinaryTree } from "./svg";
+import { Navigate } from "@solidjs/router";
 
 configureOAuth({
   metadata: {
@@ -141,18 +143,26 @@ const LoginStatus: Component = () => {
   };
 
   return (
-    <Show when={loginState() && handle()}>
-      <div class="mb-2">
-        Logged in as @{handle()}
-        <a
-          href=""
-          class="ml-2 text-red-500 dark:text-red-400"
-          onclick={() => logoutBsky()}
-        >
-          Logout
-        </a>
-      </div>
-    </Show>
+    <>
+      <Show when={loginState()}>
+        <div title="Logout" class="cursor-pointer" onclick={() => logoutBsky()}>
+          <FiLogOut class="size-6" />
+        </div>
+        <div title={`Repository (${handle()})`}>
+          <a href={`/at/${agent.sub}`}>
+            <TbBinaryTree class="size-6" />
+            <Navigate href={`/at/${agent.sub}`} />
+          </a>
+        </div>
+      </Show>
+      <Show when={!loginState()}>
+        <div title="Login">
+          <a href="/login">
+            <FiLogIn class="size-6" />
+          </a>
+        </div>
+      </Show>
+    </>
   );
 };
 
