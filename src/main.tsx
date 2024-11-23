@@ -198,25 +198,43 @@ const RecordView: Component = () => {
     "getRecord",
   );
 
-  const editRecord = action(async () => {
+  const editRecord = action(async (formData: FormData) => {
     const record = model.getValue();
     if (!record) return;
     rpc = new XRPC({ handler: agent });
     try {
-      await rpc.call("com.atproto.repo.putRecord", {
-        data: {
-          repo: params.repo,
-          collection: params.collection,
-          rkey: params.rkey,
-          record: JSON.parse(record.toString()),
-        },
-      });
-    } catch {
-      setEditNotice("Invalid input");
-      return;
+      const editedRecord = JSON.parse(record.toString());
+      if (formData.get("recreate")) {
+        await rpc.call("com.atproto.repo.deleteRecord", {
+          data: {
+            repo: params.repo,
+            collection: params.collection,
+            rkey: params.rkey,
+          },
+        });
+        await rpc.call("com.atproto.repo.createRecord", {
+          data: {
+            repo: params.repo,
+            collection: params.collection,
+            rkey: params.rkey,
+            record: editedRecord,
+          },
+        });
+      } else {
+        await rpc.call("com.atproto.repo.putRecord", {
+          data: {
+            repo: params.repo,
+            collection: params.collection,
+            rkey: params.rkey,
+            record: editedRecord,
+          },
+        });
+      }
+      setOpenEdit(false);
+      setTimeout(async () => window.location.reload(), 500);
+    } catch (err: any) {
+      setEditNotice(err.message);
     }
-    setOpenEdit(false);
-    setTimeout(async () => window.location.reload(), 500);
   });
 
   const deleteRecord = action(async () => {
@@ -250,22 +268,35 @@ const RecordView: Component = () => {
                 <h3 class="mb-2 text-lg font-bold">Editing record</h3>
                 <form action={editRecord} method="post">
                   <Editor theme={theme()} model={model!} />
-                  <div class="mt-2 flex w-full justify-end gap-2">
-                    <div class="justify-start text-red-500 dark:text-red-400">
+                  <div class="mt-2 flex flex-col gap-2">
+                    <div class="text-red-500 dark:text-red-400">
                       {editNotice()}
                     </div>
-                    <button
-                      onclick={() => setOpenEdit(false)}
-                      class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      class="rounded-lg bg-green-500 px-2.5 py-1.5 text-sm font-bold text-slate-100 hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:bg-green-600 dark:hover:bg-green-500 dark:focus:ring-slate-300"
-                    >
-                      Confirm
-                    </button>
+                    <div class="flex items-center justify-end gap-2">
+                      <div class="flex items-center gap-1">
+                        <input
+                          id="recreate"
+                          class="size-4"
+                          name="recreate"
+                          type="checkbox"
+                        />
+                        <label for="recreate" class="select-none">
+                          Recreate record
+                        </label>
+                      </div>
+                      <button
+                        onclick={() => setOpenEdit(false)}
+                        class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        class="rounded-lg bg-green-500 px-2.5 py-1.5 text-sm font-bold text-slate-100 hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:bg-green-600 dark:hover:bg-green-500 dark:focus:ring-slate-300"
+                      >
+                        Confirm
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
