@@ -583,7 +583,8 @@ const Home: Component = () => {
 
 const Layout: Component<RouteSectionProps<unknown>> = (props) => {
   const params = useParams();
-  const [clip, setClip] = createSignal(false);
+  const [clipPDS, setClipPDS] = createSignal(false);
+  const [clipAt, setClipAt] = createSignal(false);
   setNotice("");
 
   return (
@@ -685,6 +686,26 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                 >
                   {pds()}
                 </A>
+                <span
+                  title="Copy PDS URL"
+                  class="ml-1 flex cursor-pointer items-center pb-0.5"
+                  onclick={() =>
+                    navigator.clipboard
+                      .writeText(
+                        `${location.protocol}//${location.host}/${pds()}`,
+                      )
+                      .then(() => {
+                        setClipPDS(true);
+                        setTimeout(() => {
+                          setClipPDS(false);
+                        }, 3000);
+                      })
+                  }
+                >
+                  {clipPDS() ?
+                    <BsClipboardCheck class="size-4" />
+                  : <BsClipboard class="size-4" />}
+                </span>
               </div>
             </Show>
             <div class="mt-1 flex flex-wrap items-center">
@@ -712,22 +733,24 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                 <span class="mx-1">/</span>
                 {params.rkey}
               </Show>
-              <span
-                title="Copy URL"
-                class="ml-1 flex cursor-pointer items-center pb-0.5"
-                onclick={() =>
-                  navigator.clipboard.writeText(location.href).then(() => {
-                    setClip(true);
-                    setTimeout(() => {
-                      setClip(false);
-                    }, 3000);
-                  })
-                }
-              >
-                {clip() ?
-                  <BsClipboardCheck class="size-4" />
-                : <BsClipboard class="size-4" />}
-              </span>
+              <Show when={params.repo}>
+                <span
+                  title="Copy AT URI URL"
+                  class="ml-1 flex cursor-pointer items-center pb-0.5"
+                  onclick={() =>
+                    navigator.clipboard.writeText(location.href).then(() => {
+                      setClipAt(true);
+                      setTimeout(() => {
+                        setClipAt(false);
+                      }, 3000);
+                    })
+                  }
+                >
+                  {clipAt() ?
+                    <BsClipboardCheck class="size-4" />
+                  : <BsClipboard class="size-4" />}
+                </span>
+              </Show>
             </div>
           </div>
         </Show>
