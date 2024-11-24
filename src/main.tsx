@@ -686,7 +686,12 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                 </A>
               </div>
             </Show>
-            <div class="flex flex-col flex-wrap md:mt-1 md:flex-row">
+            <div
+              classList={{
+                "flex flex-col flex-wrap md:flex-row": true,
+                "md:mt-1": !!params.repo,
+              }}
+            >
               <Show when={params.repo}>
                 <div class="mt-1 flex items-center md:mt-0">
                   <FaSolidAt class="mr-1 size-3.5" />
