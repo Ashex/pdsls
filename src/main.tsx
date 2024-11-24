@@ -30,8 +30,10 @@ import {
   Bluesky,
   BsClipboard,
   BsClipboardCheck,
+  FaSolidAt,
   TbBinaryTree,
   TbMoonStar,
+  TbServer,
   TbSun,
 } from "./components/svg.jsx";
 import { authenticate_post_with_doc } from "public-transport";
@@ -672,56 +674,61 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
           </form>
         </Show>
         <Show when={params.pds}>
-          <div class="mb-3 mt-4 flex flex-wrap font-mono">
+          <div class="mb-3 mt-4 flex flex-col font-mono">
             <Show when={pds() && params.pds}>
-              <A
-                end
-                href={pds()!}
-                inactiveClass="text-lightblue-500 hover:underline"
+              <div class="flex items-center">
+                <TbServer class="mr-1 size-4" />
+                <A
+                  end
+                  href={pds()!}
+                  inactiveClass="text-lightblue-500 hover:underline"
+                >
+                  {pds()}
+                </A>
+              </div>
+            </Show>
+            <div class="mt-1 flex flex-wrap items-center">
+              <Show when={params.repo}>
+                <FaSolidAt class="mr-1 size-3.5" />
+                <A
+                  end
+                  href={`at/${params.repo}`}
+                  inactiveClass="text-lightblue-500 hover:underline"
+                >
+                  {params.repo}
+                </A>
+              </Show>
+              <Show when={params.collection}>
+                <span class="mx-1">/</span>
+                <A
+                  end
+                  href={`at/${params.repo}/${params.collection}`}
+                  inactiveClass="text-lightblue-500 hover:underline"
+                >
+                  {params.collection}
+                </A>
+              </Show>
+              <Show when={params.rkey}>
+                <span class="mx-1">/</span>
+                {params.rkey}
+              </Show>
+              <span
+                title="Copy URL"
+                class="ml-1 flex cursor-pointer items-center pb-0.5"
+                onclick={() =>
+                  navigator.clipboard.writeText(location.href).then(() => {
+                    setClip(true);
+                    setTimeout(() => {
+                      setClip(false);
+                    }, 3000);
+                  })
+                }
               >
-                {pds()}
-              </A>
-            </Show>
-            <Show when={params.repo}>
-              <span class="mx-1.5">/</span>
-              <A
-                end
-                href={`at/${params.repo}`}
-                inactiveClass="text-lightblue-500 hover:underline"
-              >
-                {params.repo}
-              </A>
-            </Show>
-            <Show when={params.collection}>
-              <span class="mx-1.5">/</span>
-              <A
-                end
-                href={`at/${params.repo}/${params.collection}`}
-                inactiveClass="text-lightblue-500 hover:underline"
-              >
-                {params.collection}
-              </A>
-            </Show>
-            <Show when={params.rkey}>
-              <span class="mx-1.5">/</span>
-              {params.rkey}
-            </Show>
-            <span
-              title="Copy URL"
-              class="ml-1.5 flex cursor-pointer items-center"
-              onclick={() =>
-                navigator.clipboard.writeText(location.href).then(() => {
-                  setClip(true);
-                  setTimeout(() => {
-                    setClip(false);
-                  }, 3000);
-                })
-              }
-            >
-              {clip() ?
-                <BsClipboardCheck class="size-4" />
-              : <BsClipboard class="size-4" />}
-            </span>
+                {clip() ?
+                  <BsClipboardCheck class="size-4" />
+                : <BsClipboard class="size-4" />}
+              </span>
+            </div>
           </div>
         </Show>
         <Show when={notice()}>
