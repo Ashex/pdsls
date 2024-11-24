@@ -681,7 +681,6 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                   end
                   href={pds()!}
                   inactiveClass="text-lightblue-500 hover:underline"
-                  onclick={() => navigator.clipboard.writeText(location.href)}
                 >
                   {pds()}
                 </A>
@@ -695,7 +694,6 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                     end
                     href={`at/${params.repo}`}
                     inactiveClass="text-lightblue-500 hover:underline"
-                    onclick={() => navigator.clipboard.writeText(location.href)}
                   >
                     {params.repo}
                   </A>
@@ -709,7 +707,6 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                     end
                     href={`at/${params.repo}/${params.collection}`}
                     inactiveClass="text-lightblue-500 hover:underline"
-                    onclick={() => navigator.clipboard.writeText(location.href)}
                   >
                     {params.collection}
                   </A>
@@ -719,12 +716,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                 <div class="mt-1 flex items-center md:mt-0">
                   <VsJson class="mr-1 size-3.5 md:hidden" />
                   <span class="mx-1 hidden md:inline">/</span>
-                  <span
-                    class="cursor-pointer"
-                    onclick={() => navigator.clipboard.writeText(location.href)}
-                  >
-                    {params.rkey}
-                  </span>
+                  <span class="cursor-pointer">{params.rkey}</span>
                 </div>
               </Show>
             </div>
