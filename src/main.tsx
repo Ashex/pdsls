@@ -259,7 +259,7 @@ const RecordView: Component = () => {
 
   return (
     <Show when={record()}>
-      <Show when={loginState() && agent.sub === params.repo}>
+      <Show when={loginState() && agent.sub === record()?.uri.split("/")[2]}>
         <div class="flex w-full justify-center gap-x-2">
           <Show when={openEdit()}>
             <dialog
