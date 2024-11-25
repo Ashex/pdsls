@@ -33,6 +33,7 @@ import {
   FaSolidAt,
   IoList,
   TbBinaryTree,
+  TbExternalLink,
   TbMoonStar,
   TbServer,
   TbSun,
@@ -461,7 +462,7 @@ const RepoView: Component = () => {
 
   return (
     <>
-      <div class="flex max-w-full flex-col self-center overflow-y-auto">
+      <div class="mb-3 flex max-w-full flex-col self-center overflow-y-auto">
         <For each={repo()?.collections}>
           {(collection) => (
             <A
@@ -474,9 +475,71 @@ const RepoView: Component = () => {
         </For>
       </div>
       <Show when={repo()}>
-        <div class="overflow-y-auto pl-4 text-sm">
-          <JSONValue data={repo()?.didDoc as any} repo={repo()!.did} />
+        <div class="overflow-y-auto text-sm">
+          <div class="mb-3">
+            <span class="font-semibold text-stone-600 dark:text-stone-400">
+              DID{" "}
+            </span>
+            <span>{(repo()?.didDoc as any).id}</span>
+          </div>
+          <div class="mb-3">
+            <p class="font-semibold text-stone-600 dark:text-stone-400">
+              Identities
+            </p>
+            <ul class="ml-3">
+              <For each={(repo()?.didDoc as any).alsoKnownAs}>
+                {(alias) => <li>{alias}</li>}
+              </For>
+            </ul>
+          </div>
+          <div class="mb-3">
+            <p class="font-semibold text-stone-600 dark:text-stone-400">
+              Services
+            </p>
+            <ul class="ml-3">
+              <For each={(repo()?.didDoc as any).service}>
+                {(service) => (
+                  <li class="mb-2 flex flex-col">
+                    <span>{service.id}</span>
+                    <a
+                      class="text-lightblue-500 w-fit hover:underline"
+                      href={service.serviceEndpoint}
+                      target="_blank"
+                    >
+                      {service.serviceEndpoint}
+                    </a>
+                  </li>
+                )}
+              </For>
+            </ul>
+          </div>
+          <div>
+            <p class="font-semibold text-stone-600 dark:text-stone-400">
+              Verification methods
+            </p>
+            <ul class="ml-3">
+              <For each={(repo()?.didDoc as any).verificationMethod}>
+                {(verif) => (
+                  <li class="mb-2 flex flex-col">
+                    <span>#{verif.id.split("#")[1]}</span>
+                    <span>{verif.publicKeyMultibase}</span>
+                  </li>
+                )}
+              </For>
+            </ul>
+          </div>
         </div>
+        <a
+          class="text-lightblue-500 flex w-fit items-center text-sm hover:underline"
+          href={
+            repo()?.did.startsWith("did:plc") ?
+              `https://plc.directory/${repo()?.did}`
+            : `https://${repo()?.did.split("did:web:")[1]}/.well-known/did.json`
+          }
+          target="_blank"
+        >
+          DID document <TbExternalLink class="ml-0.5 size-3.5" />
+        </a>
       </Show>
     </>
   );
