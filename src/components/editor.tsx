@@ -20,6 +20,7 @@ const Editor: Component<{ theme: string; model: monaco.editor.IModel }> = (
       minimap: { enabled: false },
       theme: props.theme === "dark" ? "vs-dark" : "vs",
       model: props.model,
+      wordWrap: "on",
     });
   });
 
