@@ -1,5 +1,4 @@
 import { createSignal, Show, type Component } from "solid-js";
-import { CredentialManager, XRPC } from "@atcute/client";
 import {
   A,
   action,
@@ -34,9 +33,6 @@ export const [theme, setTheme] = createSignal(
     "dark"
   : "light",
 );
-let rpc = new XRPC({
-  handler: new CredentialManager({ service: "https://public.api.bsky.app" }),
-});
 export const [notice, setNotice] = createSignal("");
 export const [pds, setPDS] = createSignal<string>();
 export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(
@@ -63,11 +59,6 @@ const processInput = action(async (formData: FormData) => {
     .replace("/post/", "/app.bsky.feed.post/");
   let did = "";
   try {
-    rpc = new XRPC({
-      handler: new CredentialManager({
-        service: "https://public.api.bsky.app",
-      }),
-    });
     await resolvePDS(uri.split("/")[0]);
     did =
       !uri.startsWith("did:") ?
