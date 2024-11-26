@@ -22,7 +22,7 @@ import {
   TbSun,
   VsJson,
 } from "./components/svg.jsx";
-import { agent, loginState, LoginStatus } from "./components/login.jsx";
+import { agent, loginState, LoginStatus } from "./views/login.jsx";
 import { resolveHandle, resolvePDS } from "./utils/api.js";
 
 export const [theme, setTheme] = createSignal(

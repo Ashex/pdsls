@@ -9,7 +9,7 @@ import {
   type Session,
 } from "@atcute/oauth-browser-client";
 import { At } from "@atcute/client/lexicons";
-import { FiLogIn, FiLogOut } from "./svg";
+import { FiLogIn, FiLogOut } from "../components/svg";
 
 configureOAuth({
   metadata: {

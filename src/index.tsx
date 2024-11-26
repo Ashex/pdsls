@@ -5,7 +5,7 @@ import "./styles/tailwind-compat.css";
 import "./styles/index.css";
 import { Route, Router } from "@solidjs/router";
 import { Layout, Home } from "./main.tsx";
-import { Login } from "./components/login.tsx";
+import { Login } from "./views/login.tsx";
 import { PdsView } from "./views/pds.tsx";
 import { RepoView } from "./views/repo.tsx";
 import { CollectionView } from "./views/collection.tsx";
