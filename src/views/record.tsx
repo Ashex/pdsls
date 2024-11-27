@@ -159,6 +159,18 @@ const RecordView: Component = () => {
       label: "Bluesky",
       link: `https://bsky.app/profile/${uri.repo}/post/${uri.rkey}`,
     }),
+    "fyi.unravel.frontpage.post": (uri) => ({
+      label: "Frontpage",
+      link: `https://frontpage.fyi/post/${uri.repo}/${uri.rkey}`,
+    }),
+    "com.whtwnd.blog.entry": (uri) => ({
+      label: "WhiteWind",
+      link: `https://whtwnd.com/${uri.repo}/${uri.rkey}`,
+    }),
+    "com.shinolabs.pinksea.oekaki": (uri) => ({
+      label: "PinkSea",
+      link: `https://pinksea.art/${uri.repo}/oekaki/${uri.rkey}`,
+    }),
   };
 
   const checkUri = (uri: string) => {
