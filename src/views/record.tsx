@@ -146,15 +146,9 @@ const RecordView: Component = () => {
     setEditNotice("");
   });
 
-  type atUri = {
-    repo: string;
-    collection: string;
-    rkey: string;
-  };
-
-  interface TemplateMap {
-    [key: string]: ((uri: atUri) => {label: string; link: string});
-  }
+  type AtUri = { repo: string; collection: string; rkey: string; };
+  type TemplateFn = (uri: AtUri) => { label: string; link: string };
+  type TemplateMap = Record<string, TemplateFn>;
 
   const uriTemplates: TemplateMap = {
     "app.bsky.actor.profile": uri => ({
@@ -171,7 +165,7 @@ const RecordView: Component = () => {
     const uriParts = uri.split("/"); // expected: ["at:", "", "repo", "collection", "rkey"]
     if (uriParts.length != 5) return undefined;
     if (uriParts[0] !== "at:" || uriParts[1] !== "") return undefined;
-    const parsedUri: atUri = {
+    const parsedUri: AtUri = {
       repo: uriParts[2],
       collection: uriParts[3],
       rkey: uriParts[4]
