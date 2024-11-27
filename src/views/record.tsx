@@ -179,6 +179,10 @@ const RecordView: Component = () => {
       label: "PinkSea",
       link: `https://pinksea.art/${uri.repo}/oekaki/${uri.rkey}`,
     }),
+    "blue.linkat.board": (uri) => ({
+      label: "Linkat",
+      link: `https://linkat.blue/${uri.repo}`,
+    }),
   };
 
   const checkUri = (uri: string) => {
