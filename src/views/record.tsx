@@ -159,6 +159,14 @@ const RecordView: Component = () => {
       label: "Bluesky",
       link: `https://bsky.app/profile/${uri.repo}/post/${uri.rkey}`,
     }),
+    "app.bsky.graph.list": (uri) => ({
+      label: "Bluesky",
+      link: `https://bsky.app/profile/${uri.repo}/lists/${uri.rkey}`,
+    }),
+    "app.bsky.feed.generator": (uri) => ({
+      label: "Bluesky",
+      link: `https://bsky.app/profile/${uri.repo}/feed/${uri.rkey}`,
+    }),
     "fyi.unravel.frontpage.post": (uri) => ({
       label: "Frontpage",
       link: `https://frontpage.fyi/post/${uri.repo}/${uri.rkey}`,
