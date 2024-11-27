@@ -16,6 +16,7 @@ import { Editor } from "../components/editor.jsx";
 import { editor } from "monaco-editor";
 import { setNotice, setPDS, setValidRecord, theme } from "../main.jsx";
 import { didDocCache, resolvePDS } from "../utils/api.js";
+import { TbExternalLink } from "../components/svg.jsx";
 
 const RecordView: Component = () => {
   const params = useParams();
@@ -24,6 +25,9 @@ const RecordView: Component = () => {
   const [openDelete, setOpenDelete] = createSignal(false);
   const [openEdit, setOpenEdit] = createSignal(false);
   const [editNotice, setEditNotice] = createSignal("");
+  const [externalLink, setExternalLink] = createSignal<
+    { label: string; link: string } | undefined
+  >();
   let model: editor.IModel;
   let rpc: XRPC;
 
@@ -63,6 +67,7 @@ const RecordView: Component = () => {
         didDocCache[res.data.uri.split("/")[2]],
       );
       setValidRecord(true);
+      setExternalLink(checkUri(res.data.uri));
       setNotice("");
     } catch (err: any) {
       if (err.message) setNotice(err.message);
@@ -141,10 +146,34 @@ const RecordView: Component = () => {
     setEditNotice("");
   });
 
+  const checkUri = (uri: string) => {
+    if (uri.includes("/app.bsky.feed.post/")) {
+      return {
+        label: "Bluesky",
+        link: `https://bsky.app/profile/${uri.replace("at://", "").replace("/app.bsky.feed.post/", "/post/")}`,
+      };
+    } else if (uri.includes("/app.bsky.actor.profile/")) {
+      return {
+        label: "Bluesky",
+        link: `https://bsky.app/profile/${uri.split("/")[2]}`,
+      };
+    }
+    return undefined;
+  };
+
   return (
     <Show when={record()}>
-      <Show when={loginState() && agent.sub === record()?.uri.split("/")[2]}>
-        <div class="mb-3 flex w-full justify-center gap-x-2">
+      <div class="mb-3 flex w-full justify-center gap-x-2">
+        <Show when={externalLink()}>
+          <a
+            class="dark:bg-dark-700 dark:hover:bg-dark-800 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 font-sans text-sm font-bold hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
+            target="_blank"
+            href={externalLink()?.link}
+          >
+            {externalLink()?.label} <TbExternalLink class="size-4" />
+          </a>
+        </Show>
+        <Show when={loginState() && agent.sub === record()?.uri.split("/")[2]}>
           <Show when={openEdit()}>
             <dialog
               ref={setModal}
@@ -232,8 +261,8 @@ const RecordView: Component = () => {
           >
             Delete
           </button>
-        </div>
-      </Show>
+        </Show>
+      </div>
       <div class="mt-2 overflow-y-auto pl-4 text-sm sm:text-base">
         <JSONValue data={record() as any} repo={record()!.uri.split("/")[2]} />
       </div>
