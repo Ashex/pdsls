@@ -1,9 +1,10 @@
-import { createSignal, onMount, For, Show, type Component } from "solid-js";
+import { createSignal, onMount, Show, type Component } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { ComAtprotoRepoListRecords } from "@atcute/client/lexicons";
 import { A, query, useParams } from "@solidjs/router";
 import { setNotice, setPDS } from "../main.jsx";
 import { resolvePDS } from "../utils/api.js";
+import * as TID from "@atcute/tid";
 
 const CollectionView: Component = () => {
   const params = useParams();
@@ -47,18 +48,35 @@ const CollectionView: Component = () => {
     "listRecords",
   );
 
+  const getDateFromTID = (rkey: string) =>
+    new Date(
+      TID.parse(rkey).timestamp / 1000 -
+        new Date().getTimezoneOffset() * 60 * 1000,
+    )
+      .toISOString()
+      .split(".")[0]
+      .replace("T", " ");
+
   return (
     <div class="flex flex-col">
-      <For each={records()}>
-        {(record) => (
-          <A
-            href={`${record.uri.split("/").pop()}`}
-            class="text-lightblue-500 hover:underline"
-          >
-            {record.uri.split("/").pop()!}
-          </A>
-        )}
-      </For>
+      <Show when={records()}>
+        {records()!.map((record) => {
+          const rkey = record.uri.split("/").pop()!;
+          return (
+            <A
+              href={`${rkey}`}
+              class="hover:bg-neutral-300 dark:hover:bg-neutral-700"
+            >
+              <span class="text-lightblue-500">{rkey}</span>
+              <Show when={TID.validate(rkey)}>
+                <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
+                  {getDateFromTID(rkey)}
+                </span>
+              </Show>
+            </A>
+          );
+        })}
+      </Show>
       <Show when={cursorRecord()}>
         <button
           type="button"

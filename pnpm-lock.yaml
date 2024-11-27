@@ -14,6 +14,9 @@ importers:
       '@atcute/oauth-browser-client':
         specifier: ^1.0.6
         version: 1.0.6
+      '@atcute/tid':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@solidjs/router':
         specifier: ^0.15.1
         version: 0.15.1(solid-js@1.9.3)
@@ -69,6 +72,9 @@ packages:
 
   '@atcute/oauth-browser-client@1.0.6':
     resolution: {integrity: sha512-O9M7YdpPTWdXfqqdGNlYFmyMwbTEwHvMz5Ew79ASiQFsrcAdFhdVywe/rMDT6jd2La6gQDhyhfLofUPMCRiDGQ==}
+
+  '@atcute/tid@1.0.1':
+    resolution: {integrity: sha512-3CjXIauzpIXi86MS1HLCDTzXmxtghSynNpWygd6pD/hnwJX4CK04ZU7S44qGVcLQmpiuAiGtqABkBAAK3V8BRw==}
 
   '@babel/code-frame@7.26.2':
     resolution: {integrity: sha512-RJlIHRueQgwWitWgF8OdFYGZX328Ax5BCemNGlqHfplnRT9ESi8JkFlvaVYbS+UubVY6dpv87Fs2u5M29iNFVQ==}
@@ -1225,6 +1231,8 @@ snapshots:
     dependencies:
       '@atcute/client': 2.0.6
       nanoid: 5.0.9
+
+  '@atcute/tid@1.0.1': {}
 
   '@babel/code-frame@7.26.2':
     dependencies:
