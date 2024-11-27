@@ -11,6 +11,7 @@ const CollectionView: Component = () => {
   const [cursorRecord, setCursorRecord] = createSignal<string>();
   const [records, setRecords] =
     createSignal<ComAtprotoRepoListRecords.Record[]>();
+  const [filter, setFilter] = createSignal<string>();
   let rpc: XRPC;
 
   onMount(async () => {
@@ -60,22 +61,35 @@ const CollectionView: Component = () => {
   return (
     <div class="flex flex-col">
       <Show when={records()}>
-        {records()!.map((record) => {
-          const rkey = record.uri.split("/").pop()!;
-          return (
-            <A
-              href={`${rkey}`}
-              class="hover:bg-neutral-300 dark:hover:bg-neutral-700"
-            >
-              <span class="text-lightblue-500">{rkey}</span>
-              <Show when={TID.validate(rkey)}>
-                <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
-                  {getDateFromTID(rkey)}
-                </span>
-              </Show>
-            </A>
-          );
-        })}
+        <div class="mb-3 flex w-full justify-center gap-x-2 font-sans">
+          <input
+            type="text"
+            spellcheck={false}
+            placeholder="Filter by substring"
+            class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            onInput={(e) => setFilter(e.currentTarget.value)}
+          />
+        </div>
+        {records()!
+          .filter((rec) =>
+            filter() ? JSON.stringify(rec.value).includes(filter()!) : true,
+          )
+          .map((record) => {
+            const rkey = record.uri.split("/").pop()!;
+            return (
+              <A
+                href={`${rkey}`}
+                class="hover:bg-neutral-300 dark:hover:bg-neutral-700"
+              >
+                <span class="text-lightblue-500">{rkey}</span>
+                <Show when={TID.validate(rkey)}>
+                  <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
+                    {getDateFromTID(rkey)}
+                  </span>
+                </Show>
+              </A>
+            );
+          })}
       </Show>
       <Show when={cursorRecord()}>
         <button
