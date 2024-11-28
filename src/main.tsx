@@ -77,7 +77,7 @@ const processInput = action(async (formData: FormData) => {
 const Home: Component = () => {
   setNotice("");
   return (
-    <div class="mt-3 flex flex-col break-words font-sans">
+    <div class="mt-3 flex flex-col break-words">
       <div>
         <span class="font-semibold text-orange-400">PDS URL</span> (https://
         required):
@@ -276,7 +276,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
         <Show when={notice()}>
           <div class="mb-3 w-full break-words text-center">{notice()}</div>
         </Show>
-        <div class="flex max-w-full flex-col space-y-1 font-mono">
+        <div class="flex max-w-full flex-col space-y-1">
           <Show keyed when={useLocation().pathname}>
             {props.children}
           </Show>

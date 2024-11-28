@@ -37,7 +37,7 @@ const RepoView: Component = () => {
 
   return (
     <>
-      <div class="mb-3 flex max-w-full flex-col self-center overflow-y-auto">
+      <div class="mb-3 flex max-w-full flex-col self-center overflow-y-auto font-mono">
         <For each={repo()?.collections}>
           {(collection) => (
             <A
@@ -50,7 +50,7 @@ const RepoView: Component = () => {
         </For>
       </div>
       <Show when={repo()}>
-        <div class="flex flex-col gap-y-1 break-words font-sans">
+        <div class="flex flex-col gap-y-1 break-words">
           <div>
             <span class="font-semibold text-stone-600 dark:text-stone-400">
               DID{" "}

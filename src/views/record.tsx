@@ -204,7 +204,7 @@ const RecordView: Component = () => {
       <div class="mb-3 flex w-full justify-center gap-x-2">
         <Show when={externalLink()}>
           <a
-            class="dark:bg-dark-700 dark:hover:bg-dark-800 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 font-sans text-sm font-bold hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
+            class="dark:bg-dark-700 dark:hover:bg-dark-800 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
             target="_blank"
             href={externalLink()?.link}
           >
@@ -215,7 +215,7 @@ const RecordView: Component = () => {
           <Show when={openEdit()}>
             <dialog
               ref={setModal}
-              class="fixed left-0 top-0 z-[2] flex h-screen w-screen items-center justify-center bg-transparent font-sans"
+              class="fixed left-0 top-0 z-[2] flex h-screen w-screen items-center justify-center bg-transparent"
             >
               <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
                 <h3 class="mb-2 text-lg font-bold">Editing record</h3>
@@ -263,14 +263,14 @@ const RecordView: Component = () => {
               );
               setOpenEdit(true);
             }}
-            class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 font-sans text-sm font-bold hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
+            class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
           >
             Edit
           </button>
           <Show when={openDelete()}>
             <dialog
               ref={setModal}
-              class="fixed left-0 top-0 z-[2] flex h-screen w-screen items-center justify-center bg-transparent font-sans"
+              class="fixed left-0 top-0 z-[2] flex h-screen w-screen items-center justify-center bg-transparent"
             >
               <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
                 <h3 class="text-lg font-bold">Delete this record?</h3>
@@ -295,13 +295,13 @@ const RecordView: Component = () => {
           </Show>
           <button
             onclick={() => setOpenDelete(true)}
-            class="rounded-lg bg-red-500 px-2.5 py-1.5 font-sans text-sm font-bold text-slate-100 hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
+            class="rounded-lg bg-red-500 px-2.5 py-1.5 text-sm font-bold text-slate-100 hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
           >
             Delete
           </button>
         </Show>
       </div>
-      <div class="break-anywhere mt-2 whitespace-pre-wrap pl-4 text-sm sm:text-base">
+      <div class="break-anywhere mt-2 whitespace-pre-wrap pl-4 font-mono text-sm sm:text-base">
         <JSONValue data={record() as any} repo={record()!.uri.split("/")[2]} />
       </div>
     </Show>
