@@ -14,6 +14,7 @@ const CollectionView: Component = () => {
     createSignal<ComAtprotoRepoListRecords.Record[]>();
   const [filter, setFilter] = createSignal<string>();
   let rpc: XRPC;
+  let did: string;
 
   onMount(async () => {
     setNotice("Loading...");
@@ -22,17 +23,17 @@ const CollectionView: Component = () => {
       params.pds.startsWith("localhost") ?
         `http://${params.pds}`
       : `https://${params.pds}`;
-    const did =
+    did =
       params.repo.startsWith("did:") ?
         params.repo
       : await resolveHandle(params.repo);
     if (params.pds === "at") pds = await resolvePDS(did);
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
-    await fetchRecords(did);
+    await fetchRecords();
     setNotice("");
   });
 
-  const fetchRecords = async (did: string) => {
+  const fetchRecords = async () => {
     const res = await listRecords(did, params.collection, cursorRecord());
     setCursorRecord(
       res.data.records.length < 100 ? undefined : res.data.cursor,
