@@ -215,7 +215,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
             >
               <Show when={params.repo}>
                 <div class="mt-1 flex items-center md:mt-0">
-                  <div class="i-lucide-at-sign mr-1 text-sm" />
+                  <div class="i-atproto-logo mr-1 text-sm" />
                   <A
                     end
                     href={`at/${params.repo}`}
