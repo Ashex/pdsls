@@ -2,7 +2,6 @@ import { createSignal, onMount, For, Show, type Component } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { ComAtprotoRepoDescribeRepo } from "@atcute/client/lexicons";
 import { A, query, useParams } from "@solidjs/router";
-import { TbExternalLink } from "../components/svg.jsx";
 import { setNotice, setPDS } from "../main.jsx";
 import { resolvePDS } from "../utils/api.js";
 
@@ -112,7 +111,7 @@ const RepoView: Component = () => {
             }
             target="_blank"
           >
-            DID document <TbExternalLink class="ml-0.5 size-3.5" />
+            DID document <div class="i-tabler-external-link ml-0.5 text-xs" />
           </a>
           <Show when={repo()?.did.startsWith("did:plc")}>
             <a
@@ -120,7 +119,8 @@ const RepoView: Component = () => {
               href={`https://boat.kelinci.net/plc-oplogs?q=${repo()?.did}`}
               target="_blank"
             >
-              PLC operation logs <TbExternalLink class="ml-0.5 size-3.5" />
+              PLC operation logs{" "}
+              <div class="i-tabler-external-link ml-0.5 text-xs" />
             </a>
           </Show>
         </div>

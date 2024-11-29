@@ -1,6 +1,5 @@
 import { A } from "@solidjs/router";
 import VideoPlayer from "./video-player";
-import { BsClipboard, BsClipboardCheck } from "./svg";
 import { createSignal } from "solid-js";
 
 interface AtBlob {
@@ -75,8 +74,9 @@ const JSONObject = ({
             >
               <span class="absolute -left-4 size-3">
                 {clip() ?
-                  <BsClipboardCheck class="hidden size-3 group-hover:block" />
-                : <BsClipboard class="hidden size-3 group-hover:block" />}
+                  <div class="i-bi-clipboard-check-fill hidden text-[0.625rem] group-hover:block" />
+                : <div class="i-bi-clipboard hidden text-[0.625rem] group-hover:block" />
+                }
               </span>
               {key}:
             </span>

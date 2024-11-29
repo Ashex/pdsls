@@ -16,7 +16,6 @@ import { Editor } from "../components/editor.jsx";
 import { editor } from "monaco-editor";
 import { setNotice, setPDS, setValidRecord, theme } from "../main.jsx";
 import { didDocCache, resolvePDS } from "../utils/api.js";
-import { TbExternalLink } from "../components/svg.jsx";
 
 const RecordView: Component = () => {
   const params = useParams();
@@ -208,7 +207,8 @@ const RecordView: Component = () => {
             target="_blank"
             href={externalLink()?.link}
           >
-            {externalLink()?.label} <TbExternalLink class="size-4" />
+            {externalLink()?.label}{" "}
+            <div class="i-tabler-external-link text-sm" />
           </a>
         </Show>
         <Show when={loginState() && agent.sub === record()?.uri.split("/")[2]}>

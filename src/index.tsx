@@ -3,6 +3,7 @@ import { render } from "solid-js/web";
 import "virtual:uno.css";
 import "./styles/tailwind-compat.css";
 import "./styles/index.css";
+import "./styles/icons.css";
 import { Route, Router } from "@solidjs/router";
 import { Layout, Home } from "./main.tsx";
 import { Login } from "./views/login.tsx";

@@ -8,19 +8,6 @@ import {
   useLocation,
   useParams,
 } from "@solidjs/router";
-import {
-  AiFillGithub,
-  Bluesky,
-  FaRegularCircleCheck,
-  FaRegularCircleXmark,
-  FaSolidAt,
-  IoList,
-  TbBinaryTree,
-  TbMoonStar,
-  TbServer,
-  TbSun,
-  VsJson,
-} from "./components/svg.jsx";
 import { agent, loginState, LoginStatus } from "./views/login.jsx";
 import { resolveHandle, resolvePDS } from "./utils/api.js";
 
@@ -138,8 +125,8 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
             }}
           >
             {theme() === "dark" ?
-              <TbMoonStar class="size-6" />
-            : <TbSun class="size-6" />}
+              <div class="i-tabler-moon-stars text-xl" />
+            : <div class="i-tabler-sun text-xl" />}
           </div>
           <LoginStatus />
         </div>
@@ -148,20 +135,20 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
             PDSls
           </a>
         </div>
-        <div class="justify-right flex basis-1/3 gap-x-2">
+        <div class="justify-right flex basis-1/3 items-center gap-x-2">
           <a
             title="Bluesky"
             href="https://bsky.app/profile/did:plc:b3pn34agqqchkaf75v7h43dk"
             target="_blank"
           >
-            <Bluesky class="size-6" />
+            <div class="i-fa6-brands-bluesky text-xl" />
           </a>
           <a
             title="GitHub"
             href="https://github.com/notjuliet/pdsls"
             target="_blank"
           >
-            <AiFillGithub class="size-6" />
+            <div class="i-bi-github text-xl" />
           </a>
         </div>
       </div>
@@ -196,7 +183,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
               <Show when={loginState()}>
                 <div title={`Repository`}>
                   <a href={`/at/${agent.sub}`}>
-                    <TbBinaryTree class="size-6" />
+                    <div class="i-tabler-binary-tree text-xl" />
                     <Show when={location.pathname === "/"}>
                       <Navigate href={`/at/${agent.sub}`} />
                     </Show>
@@ -210,7 +197,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
           <div class="mb-3 mt-4 flex flex-col font-mono">
             <Show when={pds() && params.pds}>
               <div class="flex items-center">
-                <TbServer class="mr-0.5 size-4" />
+                <div class="i-tabler-server mr-1 text-sm" />
                 <A
                   end
                   href={pds()!}
@@ -228,7 +215,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
             >
               <Show when={params.repo}>
                 <div class="mt-1 flex items-center md:mt-0">
-                  <FaSolidAt class="mr-1 size-3.5" />
+                  <div class="i-lucide-at-sign mr-1 text-sm" />
                   <A
                     end
                     href={`at/${params.repo}`}
@@ -240,7 +227,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
               </Show>
               <Show when={params.collection}>
                 <div class="mt-1 flex items-center md:mt-0">
-                  <IoList class="mr-1 size-3.5 md:hidden" />
+                  <div class="i-ion-ios-list mr-1 text-sm md:hidden" />
                   <span class="mx-1 hidden md:inline">/</span>
                   <A
                     end
@@ -253,19 +240,19 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
               </Show>
               <Show when={params.rkey}>
                 <div class="mt-1 flex items-center md:mt-0">
-                  <VsJson class="mr-1 size-3.5 md:hidden" />
+                  <div class="i-mdi-code-json mr-1 text-sm md:hidden" />
                   <span class="mx-1 hidden md:inline">/</span>
                   <span class="cursor-pointer">{params.rkey}</span>
                   <Show when={validRecord()}>
-                    <FaRegularCircleCheck
+                    <div
                       title="This record is valid"
-                      class="ml-1 size-3.5"
+                      class="i-fluent-checkmark-circle-12-regular ml-1"
                     />
                   </Show>
                   <Show when={validRecord() === false}>
-                    <FaRegularCircleXmark
+                    <div
                       title="This record is invalid"
-                      class="ml-1 size-3.5"
+                      class="i-fluent-dismiss-circle-12-regular ml-1"
                     />
                   </Show>
                 </div>
