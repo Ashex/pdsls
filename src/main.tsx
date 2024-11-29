@@ -6,6 +6,7 @@ import {
   redirect,
   RouteSectionProps,
   useLocation,
+  useNavigate,
   useParams,
 } from "@solidjs/router";
 import { agent, loginState, LoginStatus } from "./views/login.jsx";
@@ -46,12 +47,12 @@ const processInput = action(async (formData: FormData) => {
     .replace("/post/", "/app.bsky.feed.post/");
   let did = "";
   try {
-    await resolvePDS(uri.split("/")[0]);
     did =
       !uri.startsWith("did:") ?
         await resolveHandle(uri.split("/")[0])
       : uri.split("/")[0];
     if (!did) throw Error;
+    await resolvePDS(did);
   } catch {
     setNotice("Could not resolve AT URI");
     return;
@@ -103,6 +104,12 @@ const Home: Component = () => {
 };
 
 const Layout: Component<RouteSectionProps<unknown>> = (props) => {
+  navigator.registerProtocolHandler("web+at", "/%s");
+  const pathname = decodeURIComponent(useLocation().pathname);
+  if (pathname.startsWith("/web+at://")) {
+    const navigate = useNavigate();
+    navigate(pathname.replace("web+at://", "at/"));
+  }
   const params = useParams();
   setNotice("");
 

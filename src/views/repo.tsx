@@ -3,7 +3,7 @@ import { CredentialManager, XRPC } from "@atcute/client";
 import { ComAtprotoRepoDescribeRepo } from "@atcute/client/lexicons";
 import { A, query, useParams } from "@solidjs/router";
 import { setNotice, setPDS } from "../main.jsx";
-import { resolvePDS } from "../utils/api.js";
+import { resolveHandle, resolvePDS } from "../utils/api.js";
 
 const RepoView: Component = () => {
   const params = useParams();
@@ -17,10 +17,14 @@ const RepoView: Component = () => {
       params.pds.startsWith("localhost") ?
         `http://${params.pds}`
       : `https://${params.pds}`;
-    if (params.pds === "at") pds = await resolvePDS(params.repo);
+    const did =
+      params.repo.startsWith("did:") ?
+        params.repo
+      : await resolveHandle(params.repo);
+    if (params.pds === "at") pds = await resolvePDS(did);
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     try {
-      const res = await describeRepo(params.repo);
+      const res = await describeRepo(did);
       setNotice("");
       setRepo(res.data);
     } catch (err: any) {

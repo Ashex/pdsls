@@ -15,7 +15,7 @@ import { agent, loginState } from "../views/login.jsx";
 import { Editor } from "../components/editor.jsx";
 import { editor } from "monaco-editor";
 import { setNotice, setPDS, setValidRecord, theme } from "../main.jsx";
-import { didDocCache, resolvePDS } from "../utils/api.js";
+import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
 
 const RecordView: Component = () => {
   const params = useParams();
@@ -53,10 +53,14 @@ const RecordView: Component = () => {
       params.pds.startsWith("localhost") ?
         `http://${params.pds}`
       : `https://${params.pds}`;
-    if (params.pds === "at") pds = await resolvePDS(params.repo);
+    const did =
+      params.repo.startsWith("did:") ?
+        params.repo
+      : await resolveHandle(params.repo);
+    if (params.pds === "at") pds = await resolvePDS(did);
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     try {
-      const res = await getRecord(params.repo, params.collection, params.rkey);
+      const res = await getRecord(did, params.collection, params.rkey);
       setNotice("Validating...");
       setRecord(res.data);
       await authenticate_post_with_doc(

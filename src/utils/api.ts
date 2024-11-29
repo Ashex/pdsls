@@ -33,11 +33,8 @@ const resolveHandle = async (handle: string) => {
   return res.data.did;
 };
 
-const resolvePDS = async (repo: string) => {
+const resolvePDS = async (did: string) => {
   try {
-    let did = repo;
-    if (!repo.startsWith("did:")) did = await resolveHandle(repo);
-    if (!did) throw Error;
     const pds = await getPDS(did);
     setPDS(pds.replace("https://", "").replace("http://", ""));
     return pds;

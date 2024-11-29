@@ -12,6 +12,7 @@ const PdsView: Component = () => {
 
   onMount(async () => {
     setNotice("Loading...");
+    if (params.pds.startsWith("web%2Bat%3A%2F%2F")) return;
     setPDS(params.pds);
     const pds =
       params.pds.startsWith("localhost") ?
