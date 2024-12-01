@@ -46,7 +46,7 @@ const JSONBoolean = ({ data }: { data: boolean }) => {
 };
 
 const JSONNull = () => {
-  return <span class="text-gray-600 dark:text-gray-400">null</span>;
+  return <span class="text-neutral-400 dark:text-neutral-500">null</span>;
 };
 
 const JSONObject = ({
