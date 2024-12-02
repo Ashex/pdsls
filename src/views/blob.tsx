@@ -52,7 +52,7 @@ const BlobView: Component = () => {
   return (
     <div class="flex flex-col items-center">
       <Show when={blobs()}>
-        <div class="flex max-w-full flex-col truncate font-mono">
+        <div class="break-anywhere flex flex-col font-mono">
           <For each={blobs()}>
             {(cid) => (
               <A
