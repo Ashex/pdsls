@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, type Component } from "solid-js";
+import { createSignal, For, onMount, Show, type Component } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { A, query, useParams } from "@solidjs/router";
 import { setNotice, setPDS } from "../main.jsx";
@@ -53,8 +53,8 @@ const BlobView: Component = () => {
     <div class="flex flex-col items-center">
       <Show when={blobs()}>
         <div class="flex flex-col font-mono">
-          {blobs()!.map((cid) => {
-            return (
+          <For each={blobs()}>
+            {(cid) => (
               <A
                 href={`${pds}/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`}
                 target="_blank"
@@ -62,8 +62,8 @@ const BlobView: Component = () => {
               >
                 <span class="text-lightblue-500">{cid}</span>
               </A>
-            );
-          })}
+            )}
+          </For>
         </div>
       </Show>
       <Show when={cursor()}>
