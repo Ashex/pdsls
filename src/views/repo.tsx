@@ -51,6 +51,11 @@ const RepoView: Component = () => {
             </A>
           )}
         </For>
+        <div class="mt-1 font-sans text-lg">
+          <A href="blobs" class="text-lightblue-500 hover:underline">
+            List blobs
+          </A>
+        </div>
       </div>
       <Show when={repo()}>
         <div class="flex flex-col gap-y-1 break-words">
