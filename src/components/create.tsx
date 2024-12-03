@@ -72,7 +72,7 @@ const CreateRecord: Component = () => {
       return;
     }
     setOpenCreate(false);
-    throw redirect(`/at/${res.data.uri.split("at://")[1]}`);
+    throw redirect(res.data.uri.replace("at://", "/at/"));
   });
 
   createEffect(() => {
