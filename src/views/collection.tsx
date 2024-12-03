@@ -54,11 +54,8 @@ const CollectionView: Component = () => {
     "listRecords",
   );
 
-  const getDateFromTID = (rkey: string) =>
-    new Date(
-      TID.parse(rkey).timestamp / 1000 -
-        new Date().getTimezoneOffset() * 60 * 1000,
-    )
+  const getDateFromTimestamp = (timestamp: number) =>
+    new Date(timestamp - new Date().getTimezoneOffset() * 60 * 1000)
       .toISOString()
       .split(".")[0]
       .replace("T", " ");
@@ -82,15 +79,16 @@ const CollectionView: Component = () => {
             )
             .map((record) => {
               const rkey = record.uri.split("/").pop()!;
+              const timestamp = TID.parse(rkey).timestamp / 1000;
               return (
                 <A
                   href={`${rkey}`}
                   class="hover:bg-neutral-300 dark:hover:bg-neutral-700"
                 >
                   <span class="text-lightblue-500">{rkey}</span>
-                  <Show when={TID.validate(rkey)}>
+                  <Show when={TID.validate(rkey) && timestamp <= Date.now()}>
                     <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
-                      {getDateFromTID(rkey)}
+                      {getDateFromTimestamp(timestamp)}
                     </span>
                   </Show>
                 </A>
