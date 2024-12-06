@@ -1,6 +1,6 @@
-import { defineConfig, presetIcons, presetUno } from "unocss";
+import { defineConfig, presetUno } from "unocss";
 
 export default defineConfig({
-  presets: [presetIcons(), presetUno()],
+  presets: [presetUno()],
   rules: [["list-dash", { "list-style-type": "'- '" }]],
 });
