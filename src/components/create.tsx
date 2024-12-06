@@ -28,7 +28,7 @@ const CreateRecord: Component = () => {
         external: {
           uri: "https://pdsls.dev",
           title: "PDSls",
-          description: "Browse Atproto repositories",
+          description: "Browse and manage atproto repositories",
         },
       },
       langs: ["en"],
