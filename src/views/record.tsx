@@ -31,10 +31,7 @@ const RecordView: Component = () => {
   let rpc: XRPC;
 
   let clickEvent = (event: MouseEvent) => {
-    if (modal() && event.target == modal()) {
-      setOpenDelete(false);
-      setOpenEdit(false);
-    }
+    if (modal() && event.target == modal()) setOpenDelete(false);
   };
   let keyEvent = (event: KeyboardEvent) => {
     if (modal() && event.key == "Escape") {

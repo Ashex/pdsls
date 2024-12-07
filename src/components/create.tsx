@@ -36,22 +36,13 @@ const CreateRecord: Component = () => {
     };
   };
 
-  let clickEvent = (event: MouseEvent) => {
-    if (modal() && event.target == modal()) setOpenCreate(false);
-  };
   let keyEvent = (event: KeyboardEvent) => {
     if (modal() && event.key == "Escape") setOpenCreate(false);
   };
 
-  onMount(async () => {
-    window.addEventListener("click", clickEvent);
-    window.addEventListener("keydown", keyEvent);
-  });
+  onMount(async () => window.addEventListener("keydown", keyEvent));
 
-  onCleanup(() => {
-    window.removeEventListener("click", clickEvent);
-    window.removeEventListener("keydown", keyEvent);
-  });
+  onCleanup(() => window.removeEventListener("keydown", keyEvent));
 
   const createRecord = action(async (formData: FormData) => {
     const rpc = new XRPC({ handler: agent });
