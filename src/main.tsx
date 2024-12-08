@@ -214,7 +214,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
           </form>
         </Show>
         <Show when={params.pds}>
-          <div class="break-anywhere mb-3 mt-4 flex flex-col font-mono">
+          <div class="break-anywhere mb-3 mt-4 flex min-w-[20rem] flex-col font-mono">
             <Show when={pds() && params.pds}>
               <div class="flex items-center">
                 <div class="i-tabler-server mr-1 text-sm" />

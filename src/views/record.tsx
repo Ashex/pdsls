@@ -14,7 +14,7 @@ import { authenticate_post_with_doc } from "public-transport";
 import { agent, loginState } from "../views/login.jsx";
 import { Editor } from "../components/editor.jsx";
 import { editor } from "monaco-editor";
-import { setPDS, setValidRecord, theme, validRecord } from "../main.jsx";
+import { setValidRecord, theme, validRecord } from "../main.jsx";
 import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
 
 const RecordView: Component = () => {
@@ -45,16 +45,11 @@ const RecordView: Component = () => {
     window.addEventListener("click", clickEvent);
     window.addEventListener("keydown", keyEvent);
     setValidRecord(undefined);
-    setPDS(params.pds);
-    let pds =
-      params.pds.startsWith("localhost") ?
-        `http://${params.pds}`
-      : `https://${params.pds}`;
     const did =
       params.repo.startsWith("did:") ?
         params.repo
       : await resolveHandle(params.repo);
-    if (params.pds === "at") pds = await resolvePDS(did);
+    const pds = await resolvePDS(did);
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     try {
       const res = await getRecord(did, params.collection, params.rkey);
