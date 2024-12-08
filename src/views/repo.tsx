@@ -1,46 +1,38 @@
-import { createSignal, onMount, For, Show, type Component } from "solid-js";
+import {
+  createSignal,
+  For,
+  Show,
+  type Component,
+  createResource,
+} from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
-import { ComAtprotoRepoDescribeRepo } from "@atcute/client/lexicons";
 import { A, query, useParams } from "@solidjs/router";
-import { setNotice, setPDS } from "../main.jsx";
 import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
 
 const RepoView: Component = () => {
   const params = useParams();
-  const [repo, setRepo] = createSignal<ComAtprotoRepoDescribeRepo.Output>();
   const [didDoc, setDidDoc] = createSignal<any>();
   let rpc: XRPC;
-
-  onMount(async () => {
-    setNotice("Loading...");
-    setPDS(params.pds);
-    let pds =
-      params.pds.startsWith("localhost") ?
-        `http://${params.pds}`
-      : `https://${params.pds}`;
-    const did =
-      params.repo.startsWith("did:") ?
-        params.repo
-      : await resolveHandle(params.repo);
-    if (params.pds === "at") pds = await resolvePDS(did);
-    rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
-    try {
-      const res = await describeRepo(did);
-      setNotice("");
-      setRepo(res.data);
-      setDidDoc(
-        (res.data.didDoc as any).id ? res.data.didDoc : didDocCache[did],
-      );
-    } catch (err: any) {
-      setNotice(err.message);
-    }
-  });
 
   const describeRepo = query(
     (repo: string) =>
       rpc.get("com.atproto.repo.describeRepo", { params: { repo: repo } }),
     "describeRepo",
   );
+
+  const fetchRepo = async () => {
+    const did =
+      params.repo.startsWith("did:") ?
+        params.repo
+      : await resolveHandle(params.repo);
+    const pds = await resolvePDS(did);
+    rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
+    const res = await describeRepo(did);
+    setDidDoc((res.data.didDoc as any).id ? res.data.didDoc : didDocCache[did]);
+    return res.data;
+  };
+
+  const [repo] = createResource(fetchRepo);
 
   return (
     <Show when={repo()}>

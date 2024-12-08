@@ -1,4 +1,10 @@
-import { createSignal, Show, type Component } from "solid-js";
+import {
+  createSignal,
+  ErrorBoundary,
+  Show,
+  Suspense,
+  type Component,
+} from "solid-js";
 import {
   A,
   action,
@@ -269,6 +275,12 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
                       class="i-fluent-dismiss-circle-12-regular ml-1"
                     />
                   </Show>
+                  <Show when={validRecord() === undefined}>
+                    <div
+                      title="Validating record..."
+                      class="i-line-md-loading-twotone-loop ml-1"
+                    />
+                  </Show>
                 </div>
               </Show>
             </div>
@@ -285,7 +297,17 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
         </Show>
         <div class="flex max-w-full flex-col space-y-1">
           <Show keyed when={useLocation().pathname}>
-            {props.children}
+            <ErrorBoundary
+              fallback={(err) => (
+                <div class="break-words">Error: {err.message}</div>
+              )}
+            >
+              <Suspense
+                fallback={<div class="i-line-md-loading-twotone-loop ml-1" />}
+              >
+                {props.children}
+              </Suspense>
+            </ErrorBoundary>
           </Show>
         </div>
       </div>
