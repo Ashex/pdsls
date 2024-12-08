@@ -35,6 +35,7 @@ const resolveHandle = async (handle: string) => {
 
 const resolvePDS = async (did: string) => {
   try {
+    setPDS(undefined);
     const pds = await getPDS(did);
     setPDS(pds.replace("https://", "").replace("http://", ""));
     return pds;
