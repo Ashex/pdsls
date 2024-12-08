@@ -293,7 +293,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
           </div>
         </Show>
         <Show when={notice()}>
-          <div class="mb-3 w-full break-words text-center">{notice()}</div>
+          <div class="my-3 w-full break-words text-center">{notice()}</div>
         </Show>
         <div class="flex max-w-full flex-col space-y-1">
           <Show keyed when={useLocation().pathname}>
