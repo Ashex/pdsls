@@ -5,6 +5,7 @@ import { A, query, useParams } from "@solidjs/router";
 import { resolvePDS } from "../utils/api.js";
 import * as TID from "@atcute/tid";
 import { resolveHandle } from "@atcute/oauth-browser-client";
+import { JSONValue } from "../components/json.jsx";
 
 const CollectionView: Component = () => {
   const params = useParams();
@@ -65,7 +66,8 @@ const CollectionView: Component = () => {
             .filter((rec) =>
               filter() ? JSON.stringify(rec.value).includes(filter()!) : true,
             )
-            .map((record) => {
+            .map((record, index) => {
+              const [hoveringIndex, setHoveringIndex] = createSignal<number>();
               const rkey = record.uri.split("/").pop()!;
               const timestamp =
                 TID.validate(rkey) ?
@@ -75,11 +77,21 @@ const CollectionView: Component = () => {
                 <A
                   href={`${rkey}`}
                   class="hover:bg-neutral-300 dark:hover:bg-neutral-700"
+                  onmouseover={() => setHoveringIndex(index)}
+                  onmouseleave={() => setHoveringIndex(undefined)}
                 >
                   <span class="text-lightblue-500">{rkey}</span>
                   <Show when={timestamp && timestamp <= Date.now()}>
                     <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
                       {getDateFromTimestamp(timestamp!)}
+                    </span>
+                  </Show>
+                  <Show when={hoveringIndex() === index}>
+                    <span class="bg-dark-400 left-50% max-h-xl absolute z-[2] mt-4 block -translate-x-1/2 overflow-hidden rounded-md border p-2 text-xs">
+                      <JSONValue
+                        data={record.value as any}
+                        repo={record.uri.split("/")[2]}
+                      />
                     </span>
                   </Show>
                 </A>

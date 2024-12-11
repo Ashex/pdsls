@@ -71,7 +71,7 @@ const JSONObject = ({
         >
           <span class="shrink-0 text-[#3a94c5] dark:text-cyan-500">
             <span
-              class="group relative flex size-fit cursor-pointer items-center"
+              class="group/clip relative flex size-fit cursor-pointer items-center"
               onmouseleave={() => setClip(false)}
               onclick={() =>
                 navigator.clipboard
@@ -79,11 +79,10 @@ const JSONObject = ({
                   .then(() => setClip(true))
               }
             >
-              <span class="absolute -left-4 size-3">
+              <span class="absolute -left-4 hidden text-[0.625rem] group-hover/clip:block">
                 {clip() ?
-                  <div class="i-bi-clipboard-check-fill hidden text-[0.625rem] group-hover:block" />
-                : <div class="i-bi-clipboard hidden text-[0.625rem] group-hover:block" />
-                }
+                  <div class="i-bi-clipboard-check-fill" />
+                : <div class="i-bi-clipboard" />}
               </span>
               {key}:
             </span>
