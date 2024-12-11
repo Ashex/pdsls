@@ -1,4 +1,10 @@
-import { createResource, createSignal, Show, type Component } from "solid-js";
+import {
+  createEffect,
+  createResource,
+  createSignal,
+  Show,
+  type Component,
+} from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { ComAtprotoRepoListRecords } from "@atcute/client/lexicons";
 import { A, query, useParams } from "@solidjs/router";
@@ -13,7 +19,8 @@ const CollectionView: Component = () => {
   const [records, setRecords] =
     createSignal<ComAtprotoRepoListRecords.Record[]>();
   const [filter, setFilter] = createSignal<string>();
-  const [hoveringIndex, setHoveringIndex] = createSignal<number>();
+  const [hoverRk, setHoverRk] = createSignal<HTMLSpanElement>();
+  const [previewHeight, setPreviewHeight] = createSignal(0);
   let did = params.repo;
   let pds: string;
   let rpc: XRPC;
@@ -50,6 +57,14 @@ const CollectionView: Component = () => {
       .split(".")[0]
       .replace("T", " ");
 
+  createEffect(() => {
+    const preview = hoverRk()?.querySelector(".preview");
+    setPreviewHeight((preview as HTMLSpanElement)?.offsetHeight ?? 0);
+  });
+
+  const isOverflowing = (elem: HTMLElement, height: number) =>
+    elem.offsetTop - window.scrollY + height + 40 > window.innerHeight;
+
   return (
     <div class="flex flex-col items-center">
       <Show when={records() || response()}>
@@ -69,7 +84,6 @@ const CollectionView: Component = () => {
             )
             .map((record, index) => {
               const rkey = record.uri.split("/").pop()!;
-              let previewElem!: HTMLAnchorElement;
               const timestamp =
                 TID.validate(rkey) ?
                   TID.parse(rkey).timestamp / 1000
@@ -77,10 +91,10 @@ const CollectionView: Component = () => {
               return (
                 <A
                   href={`${rkey}`}
-                  ref={previewElem}
+                  id={`rkey-${index}`}
                   class="relative hover:bg-neutral-300 dark:hover:bg-neutral-700"
-                  onmouseover={() => setHoveringIndex(index)}
-                  onmouseleave={() => setHoveringIndex(undefined)}
+                  onmouseover={(e) => setHoverRk(e.currentTarget)}
+                  onmouseleave={() => setHoverRk(undefined)}
                 >
                   <span class="text-lightblue-500">{rkey}</span>
                   <Show when={timestamp && timestamp <= Date.now()}>
@@ -88,14 +102,12 @@ const CollectionView: Component = () => {
                       {getDateFromTimestamp(timestamp!)}
                     </span>
                   </Show>
-                  <Show when={hoveringIndex() === index}>
+                  <Show when={hoverRk()?.id === `rkey-${index}`}>
                     <span
                       classList={{
-                        "bg-dark-400 left-50% max-h-lg pointer-events-none absolute z-[2] mt-4 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
+                        "preview bg-dark-400 left-50% max-h-lg pointer-events-none absolute z-[2] mt-4 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
                           true,
-                        "mb-10 bottom-0":
-                          previewElem.offsetTop - window.scrollY + 520 >
-                          window.innerHeight,
+                        "bottom-10": isOverflowing(hoverRk()!, previewHeight()),
                       }}
                     >
                       <JSONValue
