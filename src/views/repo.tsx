@@ -54,7 +54,7 @@ const RepoView: Component = () => {
         </div>
       </div>
       <Show when={didDoc()}>
-        <div class="flex flex-col gap-y-1 break-words">
+        <div class="flex max-w-full flex-col gap-y-1 break-words">
           <div>
             <span class="font-semibold text-stone-600 dark:text-stone-400">
               DID{" "}

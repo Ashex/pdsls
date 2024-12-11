@@ -35,6 +35,7 @@ export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(
 );
 
 const processInput = action(async (formData: FormData) => {
+  setNotice("");
   const input = formData.get("input")?.toString();
   (document.getElementById("uriForm") as HTMLFormElement).reset();
   if (!input) return;
@@ -213,6 +214,9 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
             </div>
           </form>
         </Show>
+        <Show when={notice()}>
+          <div class="mt-3 w-full break-words text-center">{notice()}</div>
+        </Show>
         <Show when={params.pds}>
           <div class="break-anywhere mb-3 mt-4 flex min-w-[20rem] flex-col font-mono">
             <Show when={pds() && params.pds}>
@@ -292,24 +296,19 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
             </Show>
           </div>
         </Show>
-        <Show when={notice()}>
-          <div class="my-3 w-full break-words text-center">{notice()}</div>
-        </Show>
-        <div class="flex max-w-full flex-col space-y-1">
-          <Show keyed when={useLocation().pathname}>
-            <ErrorBoundary
-              fallback={(err) => (
-                <div class="break-words">Error: {err.message}</div>
-              )}
+        <Show keyed when={useLocation().pathname}>
+          <ErrorBoundary
+            fallback={(err) => (
+              <div class="break-words">Error: {err.message}</div>
+            )}
+          >
+            <Suspense
+              fallback={<div class="i-line-md-loading-twotone-loop ml-1" />}
             >
-              <Suspense
-                fallback={<div class="i-line-md-loading-twotone-loop ml-1" />}
-              >
-                {props.children}
-              </Suspense>
-            </ErrorBoundary>
-          </Show>
-        </div>
+              {props.children}
+            </Suspense>
+          </ErrorBoundary>
+        </Show>
       </div>
     </div>
   );

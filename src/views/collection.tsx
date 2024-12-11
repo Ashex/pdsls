@@ -62,11 +62,11 @@ const CollectionView: Component = () => {
     setPreviewHeight((preview as HTMLSpanElement)?.offsetHeight ?? 0);
   });
 
-  const isOverflowing = (elem: HTMLElement, height: number) =>
-    elem.offsetTop - window.scrollY + height + 40 > window.innerHeight;
+  const isOverflowing = (elem: HTMLElement, previewHeight: number) =>
+    elem.offsetTop - window.scrollY + previewHeight + 40 > window.innerHeight;
 
   return (
-    <div class="flex flex-col items-center">
+    <>
       <Show when={records() || response()}>
         <div class="mb-3 flex w-full justify-center gap-x-2">
           <input
@@ -105,7 +105,7 @@ const CollectionView: Component = () => {
                   <Show when={hoverRk()?.id === `rkey-${index}`}>
                     <span
                       classList={{
-                        "preview bg-dark-400 left-50% max-h-lg pointer-events-none absolute z-[2] mt-4 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
+                        "preview w-fit lg:max-w-lg max-w-sm bg-dark-400 left-50% max-h-lg pointer-events-none absolute z-[2] mt-4 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
                           true,
                         "bottom-10": isOverflowing(hoverRk()!, previewHeight()),
                       }}
@@ -130,7 +130,7 @@ const CollectionView: Component = () => {
           Load More
         </button>
       </Show>
-    </div>
+    </>
   );
 };
 
