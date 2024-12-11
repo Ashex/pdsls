@@ -73,7 +73,7 @@ const processInput = action(async (formData: FormData) => {
 const Home: Component = () => {
   setNotice("");
   return (
-    <div class="mt-3 flex flex-col break-words">
+    <div class="mt-3 flex w-full flex-col break-words">
       <div>
         <span class="font-semibold text-orange-400">PDS URL</span> (https://
         required):
