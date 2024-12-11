@@ -38,32 +38,34 @@ const PdsView: Component = () => {
 
   return (
     <Show when={repos() || response()}>
-      <For each={repos()}>
-        {(repo) => (
-          <A
-            href={`/at/${repo.did}`}
-            classList={{
-              "hover:underline font-mono relative": true,
-              "text-lightblue-500": repo.active,
-              "text-gray-300 dark:text-gray-600": !repo.active,
-            }}
+      <div class="flex flex-col">
+        <For each={repos()}>
+          {(repo) => (
+            <A
+              href={`/at/${repo.did}`}
+              classList={{
+                "hover:underline w-fit font-mono relative": true,
+                "text-lightblue-500": repo.active,
+                "text-gray-300 dark:text-gray-600": !repo.active,
+              }}
+            >
+              <span class="absolute -left-5 font-sans">
+                {!repo.active ? "🪦" : ""}
+              </span>
+              {repo.did}
+            </A>
+          )}
+        </For>
+        <Show when={cursor()}>
+          <button
+            type="button"
+            onclick={() => refetch()}
+            class="dark:bg-dark-700 dark:hover:bg-dark-800 mt-1 rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
           >
-            <span class="absolute -left-5 font-sans">
-              {!repo.active ? "🪦" : ""}
-            </span>
-            {repo.did}
-          </A>
-        )}
-      </For>
-      <Show when={cursor()}>
-        <button
-          type="button"
-          onclick={() => refetch()}
-          class="dark:bg-dark-700 dark:hover:bg-dark-800 mt-1 rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
-        >
-          Load More
-        </button>
-      </Show>
+            Load More
+          </button>
+        </Show>
+      </div>
     </Show>
   );
 };
