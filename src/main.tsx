@@ -52,12 +52,11 @@ const processInput = action(async (formData: FormData) => {
     .replace("https://bsky.app/profile/", "")
     .replace("https://main.bsky.dev/profile/", "")
     .replace("/post/", "/app.bsky.feed.post/");
-  const did =
-    !uri.startsWith("did:") ?
-      await resolveHandle(uri.split("/")[0])
-    : uri.split("/")[0];
+  const uriParts = uri.split("/");
+  const actor = uriParts[0];
+  const did = uri.startsWith("did:") ? actor : await resolveHandle(actor);
   throw redirect(
-    `/at/${did}${uri.split("/").length > 1 ? "/" + uri.split("/").slice(1).join("/") : ""}`,
+    `/at/${did}${uriParts.length > 1 ? `/${uriParts.slice(1).join("/")}` : ""}`,
   );
 });
 
