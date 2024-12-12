@@ -9,6 +9,7 @@ import {
   A,
   action,
   Navigate,
+  Params,
   redirect,
   RouteSectionProps,
   useLocation,
@@ -59,6 +60,88 @@ const processInput = action(async (formData: FormData) => {
     `/at/${did}${uriParts.length > 1 ? `/${uriParts.slice(1).join("/")}` : ""}`,
   );
 });
+
+const NavBar: Component<{ params: Params }> = (props) => {
+  return (
+    <div class="break-anywhere mb-3 mt-4 flex min-w-[20rem] flex-col font-mono">
+      <Show when={pds() && props.params.pds}>
+        <div class="flex items-center">
+          <div class="i-tabler-server mr-1 text-sm" />
+          <A
+            end
+            href={pds()!}
+            inactiveClass="text-lightblue-500 hover:underline"
+          >
+            {pds()}
+          </A>
+        </div>
+      </Show>
+      <div
+        classList={{
+          "flex flex-col flex-wrap md:flex-row": true,
+          "md:mt-1": !!props.params.repo,
+        }}
+      >
+        <Show when={props.params.repo}>
+          <div class="mt-1 flex items-center md:mt-0">
+            <div class="i-atproto-logo mr-1 text-sm" />
+            <A
+              end
+              href={`at/${props.params.repo}`}
+              inactiveClass="text-lightblue-500 hover:underline"
+            >
+              {props.params.repo}
+            </A>
+          </div>
+        </Show>
+        <Show when={props.params.collection}>
+          <div class="mt-1 flex items-center md:mt-0">
+            <div class="i-uil-list-ul mr-1 text-sm md:hidden" />
+            <span class="mx-1 hidden md:inline">/</span>
+            <A
+              end
+              href={`at/${props.params.repo}/${props.params.collection}`}
+              inactiveClass="text-lightblue-500 hover:underline"
+            >
+              {props.params.collection}
+            </A>
+          </div>
+        </Show>
+        <Show when={props.params.rkey}>
+          <div class="mt-1 flex items-center md:mt-0">
+            <div class="i-mdi-code-json mr-1 text-sm md:hidden" />
+            <span class="mx-1 hidden md:inline">/</span>
+            <span class="cursor-pointer">{props.params.rkey}</span>
+            <Show when={validRecord()}>
+              <div
+                title="This record is valid"
+                class="i-fluent-checkmark-circle-12-regular ml-1"
+              />
+            </Show>
+            <Show when={validRecord() === false}>
+              <div
+                title="This record is invalid"
+                class="i-fluent-dismiss-circle-12-regular ml-1"
+              />
+            </Show>
+            <Show when={validRecord() === undefined}>
+              <div
+                title="Validating record..."
+                class="i-line-md-loading-twotone-loop ml-1"
+              />
+            </Show>
+          </div>
+        </Show>
+      </div>
+      <Show when={useLocation().pathname === `/at/${props.params.repo}/blobs`}>
+        <div class="mt-1 flex items-center">
+          <div class="i-lucide-binary mr-1 text-sm" />
+          <span>blobs</span>
+        </div>
+      </Show>
+    </div>
+  );
+};
 
 const Layout: Component<RouteSectionProps<unknown>> = (props) => {
   try {
@@ -167,83 +250,7 @@ const Layout: Component<RouteSectionProps<unknown>> = (props) => {
           </Show>
         </Show>
         <Show when={params.pds}>
-          <div class="break-anywhere mb-3 mt-4 flex min-w-[20rem] flex-col font-mono">
-            <Show when={pds() && params.pds}>
-              <div class="flex items-center">
-                <div class="i-tabler-server mr-1 text-sm" />
-                <A
-                  end
-                  href={pds()!}
-                  inactiveClass="text-lightblue-500 hover:underline"
-                >
-                  {pds()}
-                </A>
-              </div>
-            </Show>
-            <div
-              classList={{
-                "flex flex-col flex-wrap md:flex-row": true,
-                "md:mt-1": !!params.repo,
-              }}
-            >
-              <Show when={params.repo}>
-                <div class="mt-1 flex items-center md:mt-0">
-                  <div class="i-atproto-logo mr-1 text-sm" />
-                  <A
-                    end
-                    href={`at/${params.repo}`}
-                    inactiveClass="text-lightblue-500 hover:underline"
-                  >
-                    {params.repo}
-                  </A>
-                </div>
-              </Show>
-              <Show when={params.collection}>
-                <div class="mt-1 flex items-center md:mt-0">
-                  <div class="i-uil-list-ul mr-1 text-sm md:hidden" />
-                  <span class="mx-1 hidden md:inline">/</span>
-                  <A
-                    end
-                    href={`at/${params.repo}/${params.collection}`}
-                    inactiveClass="text-lightblue-500 hover:underline"
-                  >
-                    {params.collection}
-                  </A>
-                </div>
-              </Show>
-              <Show when={params.rkey}>
-                <div class="mt-1 flex items-center md:mt-0">
-                  <div class="i-mdi-code-json mr-1 text-sm md:hidden" />
-                  <span class="mx-1 hidden md:inline">/</span>
-                  <span class="cursor-pointer">{params.rkey}</span>
-                  <Show when={validRecord()}>
-                    <div
-                      title="This record is valid"
-                      class="i-fluent-checkmark-circle-12-regular ml-1"
-                    />
-                  </Show>
-                  <Show when={validRecord() === false}>
-                    <div
-                      title="This record is invalid"
-                      class="i-fluent-dismiss-circle-12-regular ml-1"
-                    />
-                  </Show>
-                  <Show when={validRecord() === undefined}>
-                    <div
-                      title="Validating record..."
-                      class="i-line-md-loading-twotone-loop ml-1"
-                    />
-                  </Show>
-                </div>
-              </Show>
-            </div>
-            <Show when={useLocation().pathname === `/at/${params.repo}/blobs`}>
-              <div class="mt-1 flex items-center">
-                <div class="i-lucide-binary mr-1 text-sm" />
-                <span>blobs</span>
-              </div>
-            </Show>
-          </div>
+          <NavBar params={params} />
         </Show>
         <Show keyed when={useLocation().pathname}>
           <ErrorBoundary
