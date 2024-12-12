@@ -2,8 +2,8 @@ import { CredentialManager, XRPC } from "@atcute/client";
 import { query } from "@solidjs/router";
 import { setPDS } from "../main";
 
-const didPDSCache: { [key: string]: string } = {};
-const didDocCache: { [key: string]: {} } = {};
+const didPDSCache: Record<string, string> = {};
+const didDocCache: Record<string, any> = {};
 const getPDS = query(async (did: string) => {
   if (did in didPDSCache) return didPDSCache[did];
   const res = await fetch(

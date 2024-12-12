@@ -36,11 +36,11 @@ const CreateRecord: Component = () => {
     };
   };
 
-  let keyEvent = (event: KeyboardEvent) => {
+  const keyEvent = (event: KeyboardEvent) => {
     if (modal() && event.key == "Escape") setOpenCreate(false);
   };
 
-  onMount(async () => window.addEventListener("keydown", keyEvent));
+  onMount(() => window.addEventListener("keydown", keyEvent));
 
   onCleanup(() => window.removeEventListener("keydown", keyEvent));
 

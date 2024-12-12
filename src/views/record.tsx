@@ -31,10 +31,10 @@ const RecordView: Component = () => {
   let model: editor.IModel;
   let rpc: XRPC;
 
-  let clickEvent = (event: MouseEvent) => {
+  const clickEvent = (event: MouseEvent) => {
     if (modal() && event.target == modal()) setOpenDelete(false);
   };
-  let keyEvent = (event: KeyboardEvent) => {
+  const keyEvent = (event: KeyboardEvent) => {
     if (modal() && event.key == "Escape") {
       setOpenDelete(false);
       setOpenEdit(false);
@@ -115,7 +115,7 @@ const RecordView: Component = () => {
         });
       }
       setOpenEdit(false);
-      setTimeout(async () => window.location.reload(), 500);
+      setTimeout(() => window.location.reload(), 500);
     } catch (err: any) {
       setEditNotice(err.message);
     }
