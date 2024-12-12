@@ -38,19 +38,22 @@ const RepoView: Component = () => {
 
   return (
     <Show when={repo()}>
-      <div class="flex w-[20rem] flex-col gap-y-2 break-words">
-        <div class="flex flex-col font-mono">
+      <div class="flex w-[20rem] flex-col gap-2 break-words">
+        <div class="flex flex-col border-b border-neutral-500 pb-2 font-mono">
+          <p class="font-sans font-semibold text-stone-600 dark:text-stone-400">
+            Collections
+          </p>
           <For each={repo()?.collections}>
             {(collection) => (
               <A
                 href={`${collection}`}
-                class="text-lightblue-500 hover:underline"
+                class="text-lightblue-500 break-anywhere w-fit hover:underline"
               >
                 {collection}
               </A>
             )}
           </For>
-          <div class="font-sans text-lg">
+          <div class="font-sans">
             <A href="blobs" class="text-lightblue-500 hover:underline">
               List blobs
             </A>
@@ -61,7 +64,7 @@ const RepoView: Component = () => {
             <div class="flex flex-col gap-y-1">
               <div>
                 <span class="font-semibold text-stone-600 dark:text-stone-400">
-                  DID{" "}
+                  ID{" "}
                 </span>
                 <span>{didDocument().id}</span>
               </div>
