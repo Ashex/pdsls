@@ -2,7 +2,7 @@ import { Component } from "solid-js";
 
 const Home: Component = () => {
   return (
-    <div class="mt-3 flex w-full flex-col break-words">
+    <div class="mt-4 flex w-full flex-col break-words">
       <div class="mb-2">
         <p>
           Browse the public data on{" "}
@@ -20,10 +20,10 @@ const Home: Component = () => {
           <a href="/login" class="text-lightblue-500 hover:underline">
             login
           </a>{" "}
-          to manage the records on your repository.
+          to manage the records in your repository.
         </p>
       </div>
-      <p>The search input accepts:</p>
+      <p>Search inputs allowed:</p>
       <div class="ml-2">
         <div>
           <span class="font-semibold text-orange-400">PDS URL</span> (https://
