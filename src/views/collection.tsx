@@ -165,7 +165,6 @@ const CollectionView: Component = () => {
               classList={{
                 "flex cursor-pointer items-center gap-1 text-sm": true,
                 "hover:after:content-['Delete']": !batchDelete(),
-                "hover:after:content-['Cancel']": batchDelete(),
               }}
               onclick={() => setBatchDelete(!batchDelete())}
             >
