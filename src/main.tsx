@@ -96,7 +96,7 @@ const NavBar: Component<{ params: Params }> = (props) => {
             </div>
             <Show when={!props.params.collection && !props.params.rkey}>
               <div class="mt-1 flex items-center">
-                <div class="i-lucide-binary mr-1 text-sm" />
+                <div class="i-ph-binary-bold mr-1 text-sm" />
                 <A
                   end
                   href={`at/${props.params.repo}/blobs`}
