@@ -98,7 +98,7 @@ const JSONObject = ({
               {key}:
             </span>
           </span>
-          <span classList={{ "ml-4 sm:ml-5": value === Object(value) }}>
+          <span classList={{ "ml-[2ch]": value === Object(value) }}>
             <JSONValue data={value} repo={repo} />
           </span>
         </span>
@@ -140,7 +140,7 @@ const JSONObject = ({
 
 const JSONArray = ({ data, repo }: { data: JSONType[]; repo: string }) => {
   return (
-    <ul class="list-dash ml-4 sm:ml-5">
+    <ul class="list-dash ml-[2ch]">
       {data.map((value, index) => (
         <li
           classList={{
