@@ -1,4 +1,3 @@
-import { A } from "@solidjs/router";
 import VideoPlayer from "./video-player";
 import { createSignal } from "solid-js";
 
@@ -23,13 +22,13 @@ const JSONString = ({ data }: { data: string }) => {
   return (
     <span class="text-stone-800 dark:text-stone-200">
       {data.startsWith("at://") && data.split(" ").length === 1 ?
-        <A class="underline" href={data.replace("at://", "/at/")}>
+        <a class="underline" href={data.replace("at://", "/at/")}>
           {data}
-        </A>
+        </a>
       : data.startsWith("did:") && data.split(" ").length === 1 ?
-        <A class="underline" href={`/at/${data}`}>
+        <a class="underline" href={`/at/${data}`}>
           {data}
-        </A>
+        </a>
       : (
         isURL(data) &&
         ["http:", "https:", "web+at:"].includes(new URL(data).protocol)

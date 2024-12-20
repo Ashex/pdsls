@@ -1,7 +1,7 @@
 import { createSignal, For, Show, createResource } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { ComAtprotoSyncListRepos } from "@atcute/client/lexicons";
-import { A, useParams } from "@solidjs/router";
+import { useParams } from "@solidjs/router";
 import { setPDS } from "../main";
 
 const PdsView = () => {
@@ -38,7 +38,7 @@ const PdsView = () => {
         </p>
         <For each={repos()}>
           {(repo) => (
-            <A
+            <a
               href={`/at/${repo.did}`}
               classList={{
                 "hover:underline w-fit font-mono relative": true,
@@ -50,7 +50,7 @@ const PdsView = () => {
                 {!repo.active ? "🪦" : ""}
               </span>
               {repo.did}
-            </A>
+            </a>
           )}
         </For>
         <Show when={cursor()}>
