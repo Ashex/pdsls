@@ -38,6 +38,7 @@ const CollectionView = () => {
   const [hoverRk, setHoverRk] = createSignal<HTMLSpanElement>();
   const [previewHeight, setPreviewHeight] = createSignal(0);
   const [batchDelete, setBatchDelete] = createSignal(false);
+  const [lastSelected, setLastSelected] = createSignal<number>();
   const [modal, setModal] = createSignal<HTMLDialogElement>();
   const [openDelete, setOpenDelete] = createSignal(false);
   let did = params.repo;
@@ -45,20 +46,20 @@ const CollectionView = () => {
   let rpc: XRPC;
 
   const clickEvent = (event: MouseEvent) => {
-    if (modal() && event.target == modal()) setOpenDelete(false);
+    if (modal() && event.target === modal()) setOpenDelete(false);
   };
-  const keyEvent = (event: KeyboardEvent) => {
-    if (modal() && event.key == "Escape") setOpenDelete(false);
+  const keyDownEvent = (event: KeyboardEvent) => {
+    if (modal() && event.key === "Escape") setOpenDelete(false);
   };
 
   onMount(() => {
     window.addEventListener("click", clickEvent);
-    window.addEventListener("keydown", keyEvent);
+    window.addEventListener("keydown", keyDownEvent);
   });
 
   onCleanup(() => {
     window.removeEventListener("click", clickEvent);
-    window.removeEventListener("keydown", keyEvent);
+    window.removeEventListener("keydown", keyDownEvent);
   });
 
   const listRecords = query(
@@ -136,14 +137,18 @@ const CollectionView = () => {
     window.location.reload();
   });
 
-  createEffect(() => {
-    if (batchDelete())
+  const handleSelectionClick = (e: MouseEvent, index: number) => {
+    if (e.shiftKey && lastSelected() !== undefined)
       setRecords(
-        { from: 0, to: untrack(() => records.length) - 1 },
+        {
+          from: lastSelected()! < index ? lastSelected() : index + 1,
+          to: index > lastSelected()! ? index - 1 : lastSelected(),
+        },
         "toDelete",
-        false,
+        true,
       );
-  });
+    else setLastSelected(index);
+  };
 
   return (
     <Show when={records.length || response()}>
@@ -165,14 +170,23 @@ const CollectionView = () => {
                 "flex cursor-pointer items-center gap-1 text-sm": true,
                 "hover:after:content-['Delete']": !batchDelete(),
               }}
-              onclick={() => setBatchDelete(!batchDelete())}
+              onclick={() => {
+                setRecords(
+                  { from: 0, to: untrack(() => records.length) - 1 },
+                  "toDelete",
+                  false,
+                );
+                setLastSelected(undefined);
+                setBatchDelete(!batchDelete());
+              }}
             >
               <div
                 classList={{
-                  "text-xl text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300":
-                    true,
-                  "i-ic-round-delete-sweep": !batchDelete(),
-                  "i-fluent-dismiss-circle-12-regular": batchDelete(),
+                  "text-xl": true,
+                  "i-ic-round-delete-sweep text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300":
+                    !batchDelete(),
+                  "i-fluent-dismiss-circle-12-regular text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 dark:hover:text-neutral-300":
+                    batchDelete(),
                 }}
               />
             </div>
@@ -201,16 +215,17 @@ const CollectionView = () => {
               <div
                 class="i-mdi-checkbox-multiple-blank-outline cursor-pointer text-xl text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                 title="Unselect All"
-                onclick={() =>
+                onclick={() => {
                   setRecords(
                     { from: 0, to: records.length - 1 },
                     "toDelete",
                     false,
-                  )
-                }
+                  );
+                  setLastSelected(undefined);
+                }}
               />
               <div
-                class="i-fluent-checkmark-circle-12-regular cursor-pointer text-xl text-green-500 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300"
+                class="i-ic-round-delete-sweep cursor-pointer text-xl text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
                 title="Confirm"
                 onclick={() => setOpenDelete(true)}
               />
@@ -266,7 +281,14 @@ const CollectionView = () => {
           )}
         >
           {(record, index) => (
-            <label class="flex items-center gap-1">
+            <label
+              class="flex items-center gap-1"
+              onclick={(e) =>
+                batchDelete() ?
+                  handleSelectionClick(e, index())
+                : navigate(`${record.rkey}`)
+              }
+            >
               <Show when={batchDelete()}>
                 <input
                   type="checkbox"
@@ -277,9 +299,6 @@ const CollectionView = () => {
                 />
               </Show>
               <span
-                onclick={() =>
-                  batchDelete() ? {} : navigate(`${record.rkey}`)
-                }
                 id={`rkey-${index()}`}
                 class="relative cursor-pointer select-none hover:bg-neutral-300 dark:hover:bg-neutral-700"
                 onmouseover={(e) => setHoverRk(e.currentTarget)}
