@@ -73,7 +73,7 @@ const Login = () => {
   );
 };
 
-const LoginStatus: Component = () => {
+const LoginStatus = () => {
   const navigate = useNavigate();
 
   onMount(async () => {
