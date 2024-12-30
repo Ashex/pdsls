@@ -81,11 +81,7 @@ const JSONObject = ({
         >
           <span class="shrink-0 text-[#3a94c5] dark:text-cyan-500">
             <span
-              classList={{
-                "group/clip relative flex size-fit cursor-pointer items-center pl-4":
-                  true,
-                "pl-0": Array.isArray(value),
-              }}
+              class="group/clip relative flex size-fit cursor-pointer items-center"
               onmouseleave={() => setClip(false)}
               onclick={() =>
                 navigator.clipboard
@@ -93,7 +89,7 @@ const JSONObject = ({
                   .then(() => setClip(true))
               }
             >
-              <span class="absolute left-0 hidden text-[0.625rem] group-hover/clip:block">
+              <span class="absolute -left-4 hidden text-[0.625rem] group-hover/clip:block">
                 {clip() ?
                   <div class="i-bi-clipboard-check-fill" />
                 : <div class="i-bi-clipboard" />}
@@ -151,7 +147,7 @@ const JSONArray = ({ data, repo }: { data: JSONType[]; repo: string }) => {
             "mb-2": value === Object(value) && index() !== data.length - 1,
           }}
         >
-          <span classList={{ "ml-[1ch]": value !== Object(value) }}>
+          <span class="ml-[1ch]">
             <JSONValue data={value} repo={repo} />
           </span>
         </span>
