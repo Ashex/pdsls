@@ -166,10 +166,8 @@ const CollectionView = () => {
             }}
           >
             <div
-              classList={{
-                "flex cursor-pointer items-center gap-1 text-sm": true,
-                "hover:after:content-['Delete']": !batchDelete(),
-              }}
+              class="flex cursor-pointer items-center gap-1 text-sm"
+              title={batchDelete() ? "Cancel" : "Delete"}
               onclick={() => {
                 setRecords(
                   { from: 0, to: untrack(() => records.length) - 1 },
