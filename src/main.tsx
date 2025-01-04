@@ -133,7 +133,7 @@ const NavBar = (props: { params: Params }) => {
               <Tooltip
                 text="Invalid record"
                 children={
-                  <div class="i-fluent-dismiss-circle-12-regular ml-1" />
+                  <div class="i-fluent-dismiss-circle-12-regular ml-1 text-red-500 dark:text-red-400" />
                 }
               />
             </Show>

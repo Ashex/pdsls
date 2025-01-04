@@ -58,7 +58,7 @@ const RecordView = () => {
       setValidRecord(true);
     } catch (err: any) {
       if (err.message) setNotice(err.message);
-      else setNotice(`Invalid Record: ${err}`);
+      else setNotice(`Invalid record: ${err}`);
       setValidRecord(false);
     }
   });
