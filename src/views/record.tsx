@@ -335,7 +335,10 @@ const RecordView = () => {
             <Editor
               theme={theme()}
               model={editor.createModel(
-                JSON.stringify(record(), null, 2),
+                JSON.stringify(record(), null, 2).replace(
+                  /[\u007F-\uFFFF]/g,
+                  (chr) => "\\u" + chr.charCodeAt(0).toString(16).substring(-4),
+                ),
                 "json",
               )}
               readOnly={true}
