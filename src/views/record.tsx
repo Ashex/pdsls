@@ -18,6 +18,7 @@ const RecordView = () => {
   const [openEdit, setOpenEdit] = createSignal(false);
   const [notice, setNotice] = createSignal("");
   const [editNotice, setEditNotice] = createSignal("");
+  const [JSONSyntax, setJSONSyntax] = createSignal(false);
   const [externalLink, setExternalLink] = createSignal<
     { label: string; link: string } | undefined
   >();
@@ -201,6 +202,12 @@ const RecordView = () => {
       </Show>
       <Show when={record()}>
         <div class="mb-3 flex w-full justify-center gap-x-2">
+          <button
+            onclick={() => setJSONSyntax(!JSONSyntax())}
+            class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
+          >
+            {JSONSyntax() ? "Markup" : "JSON"}
+          </button>
           <Show when={externalLink()}>
             <a
               class="dark:bg-dark-700 dark:hover:bg-dark-800 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
@@ -318,10 +325,15 @@ const RecordView = () => {
           </Show>
         </div>
         <div class="break-anywhere mt-1 whitespace-pre-wrap pl-3.5 font-mono text-sm sm:text-base">
-          <JSONValue
-            data={record() as any}
-            repo={record()!.uri.split("/")[2]}
-          />
+          <Show when={!JSONSyntax()}>
+            <JSONValue
+              data={record() as any}
+              repo={record()!.uri.split("/")[2]}
+            />
+          </Show>
+          <Show when={JSONSyntax()}>
+            <div>{JSON.stringify(record(), null, 2)}</div>
+          </Show>
         </div>
       </Show>
     </>
