@@ -151,6 +151,24 @@ const CollectionView = () => {
     else setLastSelected(index);
   };
 
+  const selectAll = () =>
+    setRecords(
+      records
+        .map((record, index) =>
+          JSON.stringify(record.record.value).includes(filter() ?? "") ?
+            index
+          : undefined,
+        )
+        .filter((i) => i !== undefined),
+      "toDelete",
+      true,
+    );
+
+  const unselectAll = () => {
+    setRecords({ from: 0, to: records.length - 1 }, "toDelete", false);
+    setLastSelected(undefined);
+  };
+
   return (
     <Show when={records.length || response()}>
       <div
@@ -195,23 +213,7 @@ const CollectionView = () => {
                 children={
                   <button
                     class="i-mdi-checkbox-multiple-marked text-xl text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-                    onclick={() =>
-                      setRecords(
-                        records
-                          .map((record, index) =>
-                            (
-                              JSON.stringify(record.record.value).includes(
-                                filter() ?? "",
-                              )
-                            ) ?
-                              index
-                            : undefined,
-                          )
-                          .filter((i) => i !== undefined),
-                        "toDelete",
-                        true,
-                      )
-                    }
+                    onclick={() => selectAll()}
                   />
                 }
               />
@@ -220,14 +222,7 @@ const CollectionView = () => {
                 children={
                   <button
                     class="i-mdi-checkbox-multiple-blank-outline text-xl text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-                    onclick={() => {
-                      setRecords(
-                        { from: 0, to: records.length - 1 },
-                        "toDelete",
-                        false,
-                      );
-                      setLastSelected(undefined);
-                    }}
+                    onclick={() => unselectAll()}
                   />
                 }
               />
