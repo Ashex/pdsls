@@ -335,7 +335,7 @@ const CollectionView = () => {
           )}
         </For>
       </div>
-      <Show when={cursor()}>
+      <Show when={cursor() && !response.loading}>
         <button
           type="button"
           onclick={() => refetch()}
@@ -343,6 +343,9 @@ const CollectionView = () => {
         >
           Load More
         </button>
+      </Show>
+      <Show when={response.loading}>
+        <div class="i-line-md-loading-twotone-loop mt-2 text-xl"></div>
       </Show>
     </Show>
   );

@@ -32,8 +32,8 @@ const PdsView = () => {
 
   return (
     <Show when={repos() || response()}>
-      <div class="flex flex-col">
-        <p class="font-semibold text-stone-600 dark:text-stone-400">
+      <div class="flex flex-col items-center">
+        <p class="w-full font-semibold text-stone-600 dark:text-stone-400">
           Repositories
         </p>
         <For each={repos()}>
@@ -53,7 +53,7 @@ const PdsView = () => {
             </a>
           )}
         </For>
-        <Show when={cursor()}>
+        <Show when={cursor() && !response.loading}>
           <button
             type="button"
             onclick={() => refetch()}
@@ -61,6 +61,9 @@ const PdsView = () => {
           >
             Load More
           </button>
+        </Show>
+        <Show when={response.loading}>
+          <div class="i-line-md-loading-twotone-loop mt-2 text-xl"></div>
         </Show>
       </div>
     </Show>

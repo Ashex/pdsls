@@ -54,7 +54,7 @@ const BlobView = () => {
           </For>
         </div>
       </Show>
-      <Show when={cursor()}>
+      <Show when={cursor() && !response.loading}>
         <button
           type="button"
           onclick={() => refetch()}
@@ -62,6 +62,9 @@ const BlobView = () => {
         >
           Load More
         </button>
+      </Show>
+      <Show when={response.loading}>
+        <div class="i-line-md-loading-twotone-loop mt-2 text-xl"></div>
       </Show>
     </div>
   );
