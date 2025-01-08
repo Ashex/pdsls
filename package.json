@@ -11,8 +11,8 @@
   "devDependencies": {
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
-    "typescript": "^5.7.2",
-    "unocss": "^0.65.3",
+    "typescript": "^5.7.3",
+    "unocss": "^0.65.4",
     "vite": "^6.0.7",
     "vite-plugin-solid": "^2.11.0",
     "vite-plugin-wasm": "^3.4.1"
@@ -25,7 +25,7 @@
     "hls.js": "^1.5.18",
     "monaco-editor": "^0.52.2",
     "public-transport": "file:pkg/pt.tgz",
-    "solid-js": "^1.9.3"
+    "solid-js": "^1.9.4"
   },
   "packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
 }
