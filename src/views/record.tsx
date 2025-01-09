@@ -195,7 +195,7 @@ const RecordView = () => {
   return (
     <>
       <Show when={record() === undefined && validRecord() !== false}>
-        <div class="i-line-md-loading-twotone-loop ml-1" />
+        <div class="i-line-md-loading-twotone-loop text-xl" />
       </Show>
       <Show when={validRecord() === false}>
         <div class="mb-2 break-words">{notice()}</div>
