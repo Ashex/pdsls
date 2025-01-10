@@ -3,6 +3,7 @@ import { CredentialManager, XRPC } from "@atcute/client";
 import { ComAtprotoSyncListRepos } from "@atcute/client/lexicons";
 import { useParams } from "@solidjs/router";
 import { setPDS } from "../main";
+import Tooltip from "../components/tooltip";
 
 const PdsView = () => {
   const params = useParams();
@@ -41,14 +42,16 @@ const PdsView = () => {
             <a
               href={`/at/${repo.did}`}
               classList={{
-                "hover:underline w-full font-mono relative": true,
+                "hover:underline w-full flex font-mono relative": true,
                 "text-lightblue-500": repo.active,
                 "text-gray-300 dark:text-gray-600": !repo.active,
               }}
             >
-              <span class="absolute -left-5 font-sans">
-                {!repo.active ? "🪦" : ""}
-              </span>
+              <Show when={!repo.active}>
+                <Tooltip text={repo.status ?? "???"}>
+                  <span class="absolute -left-5">🪦</span>
+                </Tooltip>
+              </Show>
               {repo.did}
             </a>
           )}
