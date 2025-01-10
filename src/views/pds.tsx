@@ -44,12 +44,13 @@ const PdsView = () => {
               classList={{
                 "hover:underline w-full flex font-mono relative": true,
                 "text-lightblue-500": repo.active,
-                "text-gray-300 dark:text-gray-600": !repo.active,
+                "text-gray-300 absolute -left-5 dark:text-gray-600":
+                  !repo.active,
               }}
             >
               <Show when={!repo.active}>
                 <Tooltip text={repo.status ?? "???"}>
-                  <span class="absolute -left-5">🪦</span>
+                  <span>🪦</span>
                 </Tooltip>
               </Show>
               {repo.did}
