@@ -195,10 +195,10 @@ const RecordView = () => {
   return (
     <>
       <Show when={record() === undefined && validRecord() !== false}>
-        <div class="i-line-md-loading-twotone-loop text-xl" />
+        <div class="i-line-md-loading-twotone-loop mt-3 text-xl" />
       </Show>
       <Show when={validRecord() === false}>
-        <div class="mb-2 break-words">{notice()}</div>
+        <div class="mb-2 mt-3 break-words">{notice()}</div>
       </Show>
       <Show when={record()}>
         <div class="my-3 flex w-full justify-center gap-x-2">

@@ -275,7 +275,9 @@ const Layout = (props: RouteSectionProps<unknown>) => {
             )}
           >
             <Suspense
-              fallback={<div class="i-line-md-loading-twotone-loop text-xl" />}
+              fallback={
+                <div class="i-line-md-loading-twotone-loop mt-3 text-xl" />
+              }
             >
               {props.children}
             </Suspense>
