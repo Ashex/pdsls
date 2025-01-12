@@ -173,7 +173,7 @@ const CollectionView = () => {
     <Show when={records.length || response()}>
       <div
         classList={{
-          "flex w-screen sticky top-0 py-3 z-5 bg-slate-100 dark:bg-dark-700 items-center justify-center gap-2":
+          "flex w-full sticky top-0 py-3 z-5 bg-slate-100 dark:bg-dark-700 items-center justify-center gap-2":
             true,
           "flex-col md:flex-row": batchDelete(),
         }}
