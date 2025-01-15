@@ -20,7 +20,7 @@ const NavBar = (props: { params: Params }) => {
   onCleanup(() => window.removeEventListener("click", clickEvent));
 
   return (
-    <div class="break-anywhere mt-4 flex min-w-[21rem] flex-col font-mono">
+    <div class="break-anywhere mt-4 flex min-w-[21rem] max-w-full flex-col font-mono">
       <div class="relative flex items-center justify-between">
         <div class="flex basis-full items-center">
           <Show when={pds() && props.params.pds}>
@@ -173,7 +173,7 @@ const NavBar = (props: { params: Params }) => {
             <Tooltip text="CID">
               <div class="i-meteor-icons-cube mr-1 text-sm" />
             </Tooltip>
-            <span>{cid()}</span>
+            <span class="truncate">{cid()}</span>
           </div>
         )}
       </Show>
