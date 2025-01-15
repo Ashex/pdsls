@@ -173,7 +173,9 @@ const NavBar = (props: { params: Params }) => {
             <Tooltip text="CID">
               <div class="i-meteor-icons-cube mr-1 text-sm" />
             </Tooltip>
-            <span class="truncate">{cid()}</span>
+            <span dir="rtl" class="truncate">
+              {cid()}
+            </span>
           </div>
         )}
       </Show>
