@@ -7,7 +7,7 @@ import { authenticate_post_with_doc } from "public-transport";
 import { agent, loginState } from "../views/login.jsx";
 import { Editor } from "../components/editor.jsx";
 import { editor } from "monaco-editor";
-import { setValidRecord, validRecord } from "../components/navbar.jsx";
+import { setCID, setValidRecord, validRecord } from "../components/navbar.jsx";
 import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
 import { theme } from "../main.jsx";
 
@@ -49,6 +49,7 @@ const RecordView = () => {
     try {
       const res = await getRecord(did, params.collection, params.rkey);
       setRecord(res.data);
+      setCID(res.data.cid);
       setExternalLink(checkUri(res.data.uri));
       await authenticate_post_with_doc(
         res.data.uri,
@@ -328,7 +329,7 @@ const RecordView = () => {
         <div class="break-anywhere mt-1 whitespace-pre-wrap pl-3.5 font-mono text-sm sm:text-base">
           <Show when={!JSONSyntax()}>
             <JSONValue
-              data={record() as any}
+              data={record()?.value as any}
               repo={record()!.uri.split("/")[2]}
             />
           </Show>

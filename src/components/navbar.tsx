@@ -3,6 +3,7 @@ import Tooltip from "./tooltip";
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 export const [pds, setPDS] = createSignal<string>();
+export const [cid, setCID] = createSignal<string>();
 export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(
   undefined,
 );
@@ -62,6 +63,16 @@ const NavBar = (props: { params: Params }) => {
                 >
                   Copy AT URI
                 </button>
+              </Show>
+              <Show when={cid()}>
+                {(cid) => (
+                  <button
+                    class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
+                    onclick={() => navigator.clipboard.writeText(cid())}
+                  >
+                    Copy CID
+                  </button>
+                )}
               </Show>
               <Show when={pds()}>
                 {(pds) => (
@@ -156,6 +167,16 @@ const NavBar = (props: { params: Params }) => {
           </div>
         </Show>
       </div>
+      <Show when={props.params.rkey && cid()}>
+        {(cid) => (
+          <div class="mt-1 flex items-center">
+            <Tooltip text="CID">
+              <div class="i-meteor-icons-cube mr-1 text-sm" />
+            </Tooltip>
+            <span>{cid()}</span>
+          </div>
+        )}
+      </Show>
     </div>
   );
 };
