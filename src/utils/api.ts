@@ -1,10 +1,10 @@
 import { CredentialManager, XRPC } from "@atcute/client";
 import { query } from "@solidjs/router";
 import { setPDS } from "../components/navbar";
-import { DidDoc } from "./types";
+import { DidDocument } from "@atcute/client/utils/did";
 
 const didPDSCache: Record<string, string> = {};
-const didDocCache: Record<string, DidDoc> = {};
+const didDocCache: Record<string, DidDocument> = {};
 const getPDS = query(async (did: string) => {
   if (did in didPDSCache) return didPDSCache[did];
   const res = await fetch(
@@ -13,12 +13,13 @@ const getPDS = query(async (did: string) => {
     : "https://plc.directory/" + did,
   );
 
-  return res.json().then((doc: DidDoc) => {
+  return res.json().then((doc: DidDocument) => {
+    if (!doc.service) throw new Error("No PDS found");
     for (const service of doc.service) {
       if (service.id === "#atproto_pds") {
-        didPDSCache[did] = service.serviceEndpoint;
+        didPDSCache[did] = service.serviceEndpoint.toString();
         didDocCache[did] = doc;
-        return service.serviceEndpoint;
+        return service.serviceEndpoint.toString();
       }
     }
   });

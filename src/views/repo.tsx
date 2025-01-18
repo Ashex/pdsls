@@ -2,11 +2,11 @@ import { createSignal, For, Show, createResource } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { A, query, useParams } from "@solidjs/router";
 import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
-import { DidDoc } from "../utils/types.js";
+import { DidDocument } from "@atcute/client/utils/did";
 
 const RepoView = () => {
   const params = useParams();
-  const [didDoc, setDidDoc] = createSignal<DidDoc>();
+  const [didDoc, setDidDoc] = createSignal<DidDocument>();
   let rpc: XRPC;
 
   const describeRepo = query(
@@ -77,10 +77,10 @@ const RepoView = () => {
                         <span>{service.id}</span>
                         <a
                           class="text-lightblue-500 w-fit hover:underline"
-                          href={service.serviceEndpoint}
+                          href={service.serviceEndpoint.toString()}
                           target="_blank"
                         >
-                          {service.serviceEndpoint}
+                          {service.serviceEndpoint.toString()}
                         </a>
                       </li>
                     )}
