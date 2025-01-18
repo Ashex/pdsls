@@ -21,32 +21,38 @@ const JSONString = ({ data }: { data: string }) => {
 
   return (
     <span class="text-stone-800 dark:text-stone-200">
-      {data.startsWith("at://") && data.split(" ").length === 1 ?
-        <a class="underline" href={data.replace("at://", "/at/")}>
-          {data}
-        </a>
-      : (
-        data.startsWith("did:") &&
-        data.split(" ").length === 1 &&
-        data.split(":").length === 3
-      ) ?
-        <a class="underline" href={`/at/${data}`}>
-          {data}
-        </a>
-      : (
-        isURL(data) &&
-        ["http:", "https:", "web+at:"].includes(new URL(data).protocol) &&
-        data.split("\n").length === 1
-      ) ?
-        <a
-          class="underline"
-          href={data}
-          target="_blank"
-          rel="noopener noreferer"
-        >
-          {data}
-        </a>
-      : data}
+      <For each={data.split(/(\s)/)}>
+        {(part) => (
+          <>
+            {part.startsWith("at://") && part.split(" ").length === 1 ?
+              <a class="underline" href={part.replace("at://", "/at/")}>
+                {part}
+              </a>
+            : (
+              part.startsWith("did:") &&
+              part.split(" ").length === 1 &&
+              part.split(":").length === 3
+            ) ?
+              <a class="underline" href={`/at/${part}`}>
+                {part}
+              </a>
+            : (
+              isURL(part) &&
+              ["http:", "https:", "web+at:"].includes(new URL(part).protocol) &&
+              part.split("\n").length === 1
+            ) ?
+              <a
+                class="underline"
+                href={part}
+                target="_blank"
+                rel="noopener noreferer"
+              >
+                {part}
+              </a>
+            : part}
+          </>
+        )}
+      </For>
     </span>
   );
 };
