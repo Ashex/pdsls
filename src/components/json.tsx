@@ -35,7 +35,8 @@ const JSONString = ({ data }: { data: string }) => {
         </a>
       : (
         isURL(data) &&
-        ["http:", "https:", "web+at:"].includes(new URL(data).protocol)
+        ["http:", "https:", "web+at:"].includes(new URL(data).protocol) &&
+        data.split("\n").length === 1
       ) ?
         <a
           class="underline"
