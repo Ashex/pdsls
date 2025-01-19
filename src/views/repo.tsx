@@ -40,7 +40,7 @@ const RepoView = () => {
             {(collection) => (
               <A
                 href={`${collection}`}
-                class="text-lightblue-500 break-anywhere w-fit hover:underline"
+                class="text-lightblue-500 break-anywhere w-full hover:underline"
               >
                 {collection}
               </A>
