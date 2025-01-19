@@ -80,29 +80,30 @@ const AccountManager = () => {
           class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
         >
           <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
-            <h3 class="mb-2 text-lg font-bold">Manage accounts</h3>
-            <For each={sessions()}>
-              {(session) => (
-                <div class="flex items-center gap-x-2">
-                  <button
-                    classList={{
-                      "bg-transparent hover:bg-neutral-500": true,
-                      "text-green-500": session === agent.sub,
-                    }}
-                    onclick={() => resumeSession(session)}
-                  >
-                    {session}
-                  </button>
-                  <button
-                    class="bg-transparent text-red-500 hover:bg-neutral-500"
-                    onclick={() => removeSession(session)}
-                  >
-                    Sign out
-                  </button>
-                </div>
-              )}
-            </For>
-            <div class="my-2">Add new account</div>
+            <h3 class="mb-2 font-bold">Manage accounts</h3>
+            <div class="mb-2 border-b border-neutral-500 pb-2">
+              <For each={sessions()}>
+                {(session) => (
+                  <div class="flex w-full items-center justify-between gap-x-2">
+                    <button
+                      classList={{
+                        "bg-transparent font-mono max-w-[32ch] text-sm truncate hover:bg-neutral-200 dark:hover:bg-neutral-700":
+                          true,
+                        "text-green-500 dark:text-green-400":
+                          session === agent.sub,
+                      }}
+                      onclick={() => resumeSession(session)}
+                    >
+                      {session}
+                    </button>
+                    <button
+                      class="i-basil-cross-solid bg-transparent text-xl text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500"
+                      onclick={() => removeSession(session)}
+                    />
+                  </div>
+                )}
+              </For>
+            </div>
             <Login />
           </div>
         </dialog>

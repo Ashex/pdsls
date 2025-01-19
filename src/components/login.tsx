@@ -47,6 +47,7 @@ const Login = () => {
 
   return (
     <form class="flex flex-col gap-y-1" onsubmit={(e) => e.preventDefault()}>
+      <label for="handle">Add new account</label>
       <div class="flex gap-x-2">
         <input
           type="text"
