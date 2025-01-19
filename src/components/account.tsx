@@ -51,7 +51,7 @@ const AccountManager = () => {
     }
   });
 
-  const resumeSession = async (did: `did:${string}`) => {
+  const resumeSession = (did: `did:${string}`) => {
     localStorage.setItem("lastSignedIn", did);
     window.location.href = "/";
   };
@@ -62,7 +62,7 @@ const AccountManager = () => {
       const session = await getSession(did, { allowStale: true });
       const agent = new OAuthUserAgent(session);
       await agent.signOut();
-    } catch (err) {
+    } catch {
       deleteStoredSession(did);
     }
     setSessions(sessions().filter((session) => session !== did));
