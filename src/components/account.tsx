@@ -79,9 +79,9 @@ const AccountManager = () => {
           ref={setModal}
           class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
         >
-          <div class="dark:bg-dark-400 top-20% absolute rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
+          <div class="dark:bg-dark-400 top-10% absolute rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
             <h3 class="mb-2 font-bold">Manage accounts</h3>
-            <div class="mb-2 max-h-[20rem] overflow-y-auto border-b border-neutral-500 pb-2 md:max-h-[30rem]">
+            <div class="mb-2 max-h-[20rem] overflow-y-auto border-b border-neutral-500 pb-2 md:max-h-[25rem]">
               <For each={sessions()}>
                 {(session) => (
                   <div class="group/select flex w-full items-center justify-between gap-x-2">
