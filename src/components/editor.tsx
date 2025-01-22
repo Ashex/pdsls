@@ -34,9 +34,9 @@ const Editor = (props: {
     <div
       ref={editorDiv}
       classList={{
-        "w-xs sm:w-xl": true,
-        "h-sm sm:h-lg lg:w-[60rem]": !props.readOnly,
-        "h-[42rem] lg:w-[50rem]": props.readOnly,
+        "w-xs sm:w-xl lg:w-[50rem]": true,
+        "h-sm": !props.readOnly,
+        "h-[42rem]": props.readOnly,
       }}
     ></div>
   );
