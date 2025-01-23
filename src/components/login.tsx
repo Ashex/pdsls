@@ -2,6 +2,7 @@ import { createSignal } from "solid-js";
 import {
   configureOAuth,
   createAuthorizationUrl,
+  deleteStoredSession,
   finalizeAuthorization,
   getSession,
   OAuthUserAgent,
@@ -87,6 +88,7 @@ const retrieveSession = async () => {
         try {
           return await getSession(lastSignedIn as At.DID);
         } catch (err) {
+          deleteStoredSession(lastSignedIn as At.DID);
           localStorage.removeItem("lastSignedIn");
           throw err;
         }
