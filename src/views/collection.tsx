@@ -14,7 +14,7 @@ import {
   ComAtprotoRepoApplyWrites,
   ComAtprotoRepoListRecords,
 } from "@atcute/client/lexicons";
-import { action, query, useNavigate, useParams } from "@solidjs/router";
+import { A, action, query, useParams } from "@solidjs/router";
 import { resolvePDS } from "../utils/api.js";
 import * as TID from "@atcute/tid";
 import { resolveHandle } from "@atcute/oauth-browser-client";
@@ -30,14 +30,62 @@ interface AtprotoRecord {
   toDelete: boolean;
 }
 
+const RecordLink = (props: { record: AtprotoRecord; index: number }) => {
+  const [hoverRk, setHoverRk] = createSignal<HTMLSpanElement>();
+  const [previewHeight, setPreviewHeight] = createSignal(0);
+
+  createEffect(() => {
+    const preview = hoverRk()?.querySelector(".preview");
+    setPreviewHeight((preview as HTMLSpanElement)?.offsetHeight ?? 0);
+  });
+
+  const isOverflowing = (elem: HTMLElement, previewHeight: number) =>
+    elem.offsetTop - window.scrollY + previewHeight + 40 > window.innerHeight;
+
+  const getDateFromTimestamp = (timestamp: number) =>
+    new Date(timestamp - new Date().getTimezoneOffset() * 60 * 1000)
+      .toISOString()
+      .split(".")[0]
+      .replace("T", " ");
+
+  return (
+    <span
+      id={`rkey-${props.index}`}
+      class="relative cursor-pointer select-none hover:bg-neutral-300 dark:hover:bg-neutral-700"
+      onmouseover={(e) => setHoverRk(e.currentTarget)}
+      onmouseleave={() => setHoverRk(undefined)}
+    >
+      <span class="text-lightblue-500">{props.record.rkey}</span>
+      <Show
+        when={props.record.timestamp && props.record.timestamp <= Date.now()}
+      >
+        <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
+          {getDateFromTimestamp(props.record.timestamp!)}
+        </span>
+      </Show>
+      <Show when={hoverRk()?.id === `rkey-${props.index}`}>
+        <span
+          classList={{
+            "preview w-max lg:max-w-lg max-w-sm bg-slate-100 dark:bg-dark-500 left-50% border-neutral-400 dark:border-neutral-600 max-h-md pointer-events-none absolute z-25 mt-4 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
+              true,
+            "bottom-10": isOverflowing(hoverRk()!, previewHeight()),
+          }}
+        >
+          <JSONValue
+            data={props.record.record.value as JSONType}
+            repo={props.record.record.uri.split("/")[2]}
+          />
+        </span>
+      </Show>
+    </span>
+  );
+};
+
 const CollectionView = () => {
   const params = useParams();
-  const navigate = useNavigate();
   const [cursor, setCursor] = createSignal<string>();
   const [records, setRecords] = createStore<AtprotoRecord[]>([]);
   const [filter, setFilter] = createSignal<string>();
-  const [hoverRk, setHoverRk] = createSignal<HTMLSpanElement>();
-  const [previewHeight, setPreviewHeight] = createSignal(0);
   const [batchDelete, setBatchDelete] = createSignal(false);
   const [lastSelected, setLastSelected] = createSignal<number>();
   const [modal, setModal] = createSignal<HTMLDialogElement>();
@@ -99,20 +147,6 @@ const CollectionView = () => {
   };
 
   const [response, { refetch }] = createResource(fetchRecords);
-
-  const getDateFromTimestamp = (timestamp: number) =>
-    new Date(timestamp - new Date().getTimezoneOffset() * 60 * 1000)
-      .toISOString()
-      .split(".")[0]
-      .replace("T", " ");
-
-  createEffect(() => {
-    const preview = hoverRk()?.querySelector(".preview");
-    setPreviewHeight((preview as HTMLSpanElement)?.offsetHeight ?? 0);
-  });
-
-  const isOverflowing = (elem: HTMLElement, previewHeight: number) =>
-    elem.offsetTop - window.scrollY + previewHeight + 40 > window.innerHeight;
 
   const deleteRecords = action(async () => {
     const writes = records
@@ -288,51 +322,28 @@ const CollectionView = () => {
           )}
         >
           {(record, index) => (
-            <label
-              class="flex items-center gap-1"
-              onclick={(e) =>
-                batchDelete() ?
-                  handleSelectionClick(e, index())
-                : navigate(`${record.rkey}`)
-              }
-            >
+            <>
               <Show when={batchDelete()}>
-                <input
-                  type="checkbox"
-                  checked={record.toDelete}
-                  onchange={(e) =>
-                    setRecords(index(), "toDelete", e.currentTarget.checked)
-                  }
-                />
+                <label
+                  class="flex items-center gap-1"
+                  onclick={(e) => handleSelectionClick(e, index())}
+                >
+                  <input
+                    type="checkbox"
+                    checked={record.toDelete}
+                    onchange={(e) =>
+                      setRecords(index(), "toDelete", e.currentTarget.checked)
+                    }
+                  />
+                  <RecordLink record={record} index={index()} />
+                </label>
               </Show>
-              <span
-                id={`rkey-${index()}`}
-                class="relative cursor-pointer select-none hover:bg-neutral-300 dark:hover:bg-neutral-700"
-                onmouseover={(e) => setHoverRk(e.currentTarget)}
-                onmouseleave={() => setHoverRk(undefined)}
-              >
-                <span class="text-lightblue-500">{record.rkey}</span>
-                <Show when={record.timestamp && record.timestamp <= Date.now()}>
-                  <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
-                    {getDateFromTimestamp(record.timestamp!)}
-                  </span>
-                </Show>
-                <Show when={hoverRk()?.id === `rkey-${index()}`}>
-                  <span
-                    classList={{
-                      "preview w-max lg:max-w-lg max-w-sm bg-slate-100 dark:bg-dark-500 left-50% border-neutral-400 dark:border-neutral-600 max-h-md pointer-events-none absolute z-25 mt-4 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
-                        true,
-                      "bottom-10": isOverflowing(hoverRk()!, previewHeight()),
-                    }}
-                  >
-                    <JSONValue
-                      data={record.record.value as JSONType}
-                      repo={record.record.uri.split("/")[2]}
-                    />
-                  </span>
-                </Show>
-              </span>
-            </label>
+              <Show when={!batchDelete()}>
+                <A href={`${record.rkey}`}>
+                  <RecordLink record={record} index={index()} />
+                </A>
+              </Show>
+            </>
           )}
         </For>
       </div>
