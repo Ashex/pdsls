@@ -45,12 +45,13 @@ const CreateRecord = () => {
     const validate = formData.get("validate")?.toString();
     let res: XRPCResponse<ComAtprotoRepoCreateRecord.Output>;
     try {
+      const record = JSON.parse(model.getValue());
       res = await rpc.call("com.atproto.repo.createRecord", {
         data: {
           repo: agent.sub,
-          collection: collection!.toString(),
+          collection: collection ? collection.toString() : record.$type,
           rkey: rkey?.toString() ?? undefined,
-          record: JSON.parse(model.getValue()),
+          record: record,
           validate:
             validate === "true" ? true
             : validate === "false" ? false
@@ -94,9 +95,9 @@ const CreateRecord = () => {
                     id="collection"
                     name="collection"
                     type="text"
-                    required
                     spellcheck={false}
-                    value="app.bsky.feed.post"
+                    placeholder="Optional (default: record type)"
+                    size={22}
                     class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
                   />
                 </div>
@@ -110,6 +111,7 @@ const CreateRecord = () => {
                     type="text"
                     spellcheck={false}
                     placeholder="Optional"
+                    size={22}
                     class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
                   />
                 </div>
