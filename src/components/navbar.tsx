@@ -11,25 +11,16 @@ export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(
 const NavBar = (props: { params: Params }) => {
   const [openMenu, setOpenMenu] = createSignal(false);
   const [dropdown, setDropdown] = createSignal<HTMLDivElement>();
-  const [viewportWidth, setViewportWidth] = createSignal(window.innerWidth);
 
   const clickEvent = (event: MouseEvent) => {
     if (openMenu() && event.target !== dropdown()) setOpenMenu(false);
   };
 
-  const resizeEvent = () => setViewportWidth(window.innerWidth);
-
-  onMount(() => {
-    window.addEventListener("click", clickEvent);
-    window.addEventListener("resize", resizeEvent);
-  });
-  onCleanup(() => {
-    window.removeEventListener("click", clickEvent);
-    window.removeEventListener("resize", resizeEvent);
-  });
+  onMount(() => window.addEventListener("click", clickEvent));
+  onCleanup(() => window.removeEventListener("click", clickEvent));
 
   return (
-    <div class="break-anywhere mt-4 flex min-w-[21rem] max-w-full flex-col font-mono">
+    <div class="break-anywhere xs:w-sm mt-4 flex w-[21rem] flex-col font-mono">
       <div class="relative flex items-center justify-between">
         <div class="flex basis-full items-center">
           <Show when={pds() && props.params.pds}>
@@ -97,16 +88,11 @@ const NavBar = (props: { params: Params }) => {
           </div>
         </Show>
       </div>
-      <div
-        classList={{
-          "flex flex-col flex-wrap md:flex-row": true,
-          "md:mt-1": !!props.params.repo,
-        }}
-      >
+      <div class="flex flex-col flex-wrap">
         <Show when={props.params.repo}>
           <div>
-            <div class="mt-1 flex items-center md:mt-0">
-              <Tooltip text={viewportWidth() > 768 ? "AT URI" : "Repository"}>
+            <div class="mt-1 flex items-center">
+              <Tooltip text="Repository">
                 <div class="i-atproto-logo mr-1 text-sm" />
               </Tooltip>
               <A
@@ -132,11 +118,10 @@ const NavBar = (props: { params: Params }) => {
           </div>
         </Show>
         <Show when={props.params.collection}>
-          <div class="mt-1 flex items-center md:mt-0">
+          <div class="mt-1 flex items-center">
             <Tooltip text="Collection">
-              <div class="i-uil-list-ul mr-1 text-sm md:hidden" />
+              <div class="i-uil-list-ul mr-1 text-sm" />
             </Tooltip>
-            <span class="mx-1 hidden md:inline">/</span>
             <A
               end
               href={`at/${props.params.repo}/${props.params.collection}`}
@@ -147,11 +132,10 @@ const NavBar = (props: { params: Params }) => {
           </div>
         </Show>
         <Show when={props.params.rkey}>
-          <div class="mt-1 flex items-center md:mt-0">
+          <div class="mt-1 flex items-center">
             <Tooltip text="Record">
-              <div class="i-mdi-code-json mr-1 text-sm md:hidden" />
+              <div class="i-mdi-code-json mr-1 text-sm" />
             </Tooltip>
-            <span class="mx-1 hidden md:inline">/</span>
             <span class="mr-1 cursor-pointer">{props.params.rkey}</span>
             <Show when={validRecord()}>
               <Tooltip
