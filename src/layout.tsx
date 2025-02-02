@@ -70,14 +70,6 @@ const Layout = (props: RouteSectionProps<unknown>) => {
           </a>
         </div>
         <div class="justify-right flex basis-1/3 items-center gap-x-2">
-          <a
-            href="https://bsky.app/profile/did:plc:b3pn34agqqchkaf75v7h43dk"
-            target="_blank"
-          >
-            <Tooltip text="Bluesky">
-              <div class="i-fa6-brands-bluesky text-xl" />
-            </Tooltip>
-          </a>
           <a href="https://github.com/notjuliet/pdsls" target="_blank">
             <Tooltip text="GitHub">
               <div class="i-bi-github text-xl" />
