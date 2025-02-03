@@ -90,20 +90,23 @@ const RecordView = () => {
     try {
       const editedRecord = JSON.parse(record.toString());
       if (formData.get("recreate")) {
-        await rpc.call("com.atproto.repo.deleteRecord", {
+        await rpc.call("com.atproto.repo.applyWrites", {
           data: {
             repo: params.repo,
-            collection: params.collection,
-            rkey: params.rkey,
-          },
-        });
-        await rpc.call("com.atproto.repo.createRecord", {
-          data: {
-            repo: params.repo,
-            collection: params.collection,
-            rkey: params.rkey,
-            record: editedRecord,
             validate: validate,
+            writes: [
+              {
+                collection: params.collection,
+                rkey: params.rkey,
+                $type: "com.atproto.repo.applyWrites#delete",
+              },
+              {
+                collection: params.collection,
+                rkey: params.rkey,
+                $type: "com.atproto.repo.applyWrites#create",
+                value: editedRecord,
+              },
+            ],
           },
         });
       } else {
