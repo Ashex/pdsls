@@ -205,7 +205,7 @@ const CollectionView = () => {
 
   return (
     <Show when={records.length || response()}>
-      <div class="z-5 dark:bg-dark-700 sticky top-0 flex w-full flex-col items-center justify-center gap-2 bg-slate-100 py-3">
+      <div class="z-5 dark:bg-dark-700 sticky top-0 flex w-full flex-col items-center justify-center gap-2 bg-slate-100 py-4">
         <div
           classList={{
             "flex items-center gap-2": true,
@@ -312,16 +312,16 @@ const CollectionView = () => {
         </div>
         <div class="flex items-center gap-x-2">
           <div>
-            <Show when={records.length > 1}>
-              <Show when={batchDelete()}>
-                <span>{records.filter((rec) => rec.toDelete).length}</span>
-                <span>/</span>
-              </Show>
-              <span>{records.length} records</span>
+            <Show when={batchDelete()}>
+              <span>{records.filter((rec) => rec.toDelete).length}</span>
+              <span>/</span>
             </Show>
+            <span>
+              {records.length} record{records.length > 1 ? "s" : ""}
+            </span>
           </div>
           <Show when={cursor()}>
-            <div class="flex h-[2rem] w-[5.5rem] text-nowrap items-center justify-center">
+            <div class="flex h-[2rem] w-[5.5rem] items-center justify-center text-nowrap">
               <Show when={!response.loading}>
                 <button
                   type="button"
@@ -339,9 +339,6 @@ const CollectionView = () => {
         </div>
       </div>
       <div class="flex flex-col font-mono">
-        <p class="font-sans font-semibold text-stone-600 dark:text-stone-400">
-          Records
-        </p>
         <For
           each={records.filter((rec) =>
             filter() ?
