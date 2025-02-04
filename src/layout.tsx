@@ -1,11 +1,6 @@
 import { createSignal, ErrorBoundary, onMount, Show, Suspense } from "solid-js";
-import {
-  RouteSectionProps,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "@solidjs/router";
-import { loginState, retrieveSession } from "./components/login.jsx";
+import { RouteSectionProps, useLocation, useParams } from "@solidjs/router";
+import { agent, loginState, retrieveSession } from "./components/login.jsx";
 import { CreateRecord } from "./components/create.jsx";
 import Tooltip from "./components/tooltip.jsx";
 import { NavBar } from "./components/navbar.jsx";
@@ -27,14 +22,17 @@ const Layout = (props: RouteSectionProps<unknown>) => {
     navigator.registerProtocolHandler("web+at", "/%s");
     const pathname = decodeURIComponent(useLocation().pathname);
     if (pathname.startsWith("/web+at://")) {
-      const navigate = useNavigate();
-      navigate(pathname.replace("web+at://", "at/"));
+      window.location.href = pathname.replace("web+at://", "at/");
     }
   } catch (err) {
     console.error(err);
   }
   const params = useParams();
-  onMount(async () => await retrieveSession());
+  onMount(async () => {
+    await retrieveSession();
+    if (loginState() && location.pathname === "/")
+      window.location.href = `/at/${agent.sub}`;
+  });
 
   return (
     <div

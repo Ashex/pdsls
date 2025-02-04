@@ -1,5 +1,5 @@
 import { resolveHandle } from "../utils/api.js";
-import { action, Navigate, redirect, useSubmission } from "@solidjs/router";
+import { action, redirect, useSubmission } from "@solidjs/router";
 import Tooltip from "./tooltip.jsx";
 import { Show } from "solid-js";
 import { agent, loginState } from "../components/login.jsx";
@@ -71,9 +71,6 @@ const Search = () => {
               children={
                 <a href={`/at/${agent.sub}`} class="flex items-center">
                   <button class="i-tabler-binary-tree text-xl" />
-                  <Show when={location.pathname === "/"}>
-                    <Navigate href={`/at/${agent.sub}`} />
-                  </Show>
                 </a>
               }
             />
