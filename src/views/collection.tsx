@@ -40,7 +40,7 @@ const RecordLink = (props: { record: AtprotoRecord; index: number }) => {
   });
 
   const isOverflowing = (elem: HTMLElement, previewHeight: number) =>
-    elem.offsetTop - window.scrollY + previewHeight + 40 > window.innerHeight;
+    elem.offsetTop - window.scrollY + previewHeight + 32 > window.innerHeight;
 
   const getDateFromTimestamp = (timestamp: number) =>
     new Date(timestamp - new Date().getTimezoneOffset() * 60 * 1000)
@@ -66,9 +66,9 @@ const RecordLink = (props: { record: AtprotoRecord; index: number }) => {
       <Show when={hoverRk()?.id === `rkey-${props.index}`}>
         <span
           classList={{
-            "preview w-max lg:max-w-lg max-w-sm bg-slate-100 dark:bg-dark-500 left-50% border-neutral-400 dark:border-neutral-600 max-h-md pointer-events-none absolute z-25 mt-4 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
+            "preview w-max lg:max-w-lg max-w-sm bg-slate-100 dark:bg-dark-500 left-50% border-neutral-400 dark:border-neutral-600 max-h-md pointer-events-none absolute z-25 mt-2 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
               true,
-            "bottom-10": isOverflowing(hoverRk()!, previewHeight()),
+            "bottom-8": isOverflowing(hoverRk()!, previewHeight()),
           }}
         >
           <JSONValue
