@@ -15,7 +15,7 @@ import {
   ComAtprotoRepoListRecords,
 } from "@atcute/client/lexicons";
 import { A, action, query, useParams } from "@solidjs/router";
-import { resolvePDS } from "../utils/api.js";
+import { resolveHandle, resolvePDS } from "../utils/api.js";
 import * as TID from "@atcute/tid";
 import { JSONType, JSONValue } from "../components/json.jsx";
 import { agent, loginState } from "../components/login.jsx";
@@ -84,7 +84,7 @@ const CollectionView = () => {
   const [lastSelected, setLastSelected] = createSignal<number>();
   const [modal, setModal] = createSignal<HTMLDialogElement>();
   const [openDelete, setOpenDelete] = createSignal(false);
-  const did = params.repo;
+  let did = params.repo;
   let pds: string;
   let rpc: XRPC;
 
@@ -119,6 +119,7 @@ const CollectionView = () => {
   );
 
   const fetchRecords = async () => {
+    if (!did.startsWith("did:")) did = await resolveHandle(params.repo);
     if (!pds) pds = await resolvePDS(did);
     if (!rpc)
       rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });

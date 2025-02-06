@@ -8,7 +8,7 @@ import { agent, loginState } from "../components/login.jsx";
 import { Editor } from "../components/editor.jsx";
 import { editor } from "monaco-editor";
 import { setCID, setValidRecord, validRecord } from "../components/navbar.jsx";
-import { didDocCache, resolvePDS } from "../utils/api.js";
+import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
 import { theme } from "../layout.jsx";
 
 const RecordView = () => {
@@ -24,6 +24,7 @@ const RecordView = () => {
     { label: string; link: string } | undefined
   >();
   let model: editor.IModel;
+  let did = params.repo;
   let rpc: XRPC;
 
   const clickEvent = (event: MouseEvent) => {
@@ -41,7 +42,7 @@ const RecordView = () => {
     window.addEventListener("keydown", keyEvent);
     setCID(undefined);
     setValidRecord(undefined);
-    const did = params.repo;
+    if (!did.startsWith("did:")) did = await resolveHandle(params.repo);
     const pds = await resolvePDS(did);
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     try {

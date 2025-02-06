@@ -1,13 +1,14 @@
 import { createSignal, For, Show, createResource } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { A, query, useParams } from "@solidjs/router";
-import { didDocCache, resolvePDS } from "../utils/api.js";
+import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
 import { DidDocument } from "@atcute/client/utils/did";
 
 const RepoView = () => {
   const params = useParams();
   const [didDoc, setDidDoc] = createSignal<DidDocument>();
   let rpc: XRPC;
+  let did = params.repo;
 
   const describeRepo = query(
     (repo: string) =>
@@ -16,7 +17,7 @@ const RepoView = () => {
   );
 
   const fetchRepo = async () => {
-    const did = params.repo;
+    if (!did.startsWith("did:")) did = await resolveHandle(params.repo);
     const pds = await resolvePDS(did);
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     const res = await describeRepo(did);
