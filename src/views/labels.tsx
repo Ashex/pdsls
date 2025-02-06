@@ -104,7 +104,13 @@ const LabelView = () => {
                 <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
                   URI
                 </div>
-                {label.uri}
+                <a
+                  href={`/at/${label.uri.replace("at://", "")}`}
+                  target="_blank"
+                  class="underline"
+                >
+                  {label.uri}
+                </a>
               </div>
               <Show when={label.cid}>
                 <div class="flex gap-x-2">
