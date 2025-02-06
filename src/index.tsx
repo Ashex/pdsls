@@ -12,6 +12,7 @@ import { RepoView } from "./views/repo.tsx";
 import { BlobView } from "./views/blob.tsx";
 import { CollectionView } from "./views/collection.tsx";
 import { RecordView } from "./views/record.tsx";
+import { LabelView } from "./views/labels.tsx";
 
 render(
   () => (
@@ -20,6 +21,7 @@ render(
       <Route path="/:pds" component={PdsView} />
       <Route path="/:pds/:repo" component={RepoView} />
       <Route path="/:pds/:repo/blobs" component={BlobView} />
+      <Route path="/:pds/:repo/labels" component={LabelView} />
       <Route path="/:pds/:repo/:collection" component={CollectionView} />
       <Route path="/:pds/:repo/:collection/:rkey" component={RecordView} />
     </Router>

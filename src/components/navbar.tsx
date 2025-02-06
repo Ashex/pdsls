@@ -4,6 +4,7 @@ import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 export const [pds, setPDS] = createSignal<string>();
 export const [cid, setCID] = createSignal<string>();
+export const [isLabeler, setIsLabeler] = createSignal(false);
 export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(
   undefined,
 );
@@ -114,6 +115,24 @@ const NavBar = (props: { params: Params }) => {
                   inactiveClass="text-lightblue-500 w-full hover:underline"
                 >
                   blobs
+                </A>
+              </div>
+            </Show>
+            <Show
+              when={
+                isLabeler() && !props.params.collection && !props.params.rkey
+              }
+            >
+              <div class="mt-1 flex items-center">
+                <Tooltip text="Labels">
+                  <div class="i-mdi-tag-outline mr-1 text-sm" />
+                </Tooltip>
+                <A
+                  end
+                  href={`at/${props.params.repo}/labels`}
+                  inactiveClass="text-lightblue-500 w-full hover:underline"
+                >
+                  labels
                 </A>
               </div>
             </Show>

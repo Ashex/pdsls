@@ -21,6 +21,7 @@ import { JSONType, JSONValue } from "../components/json.jsx";
 import { agent, loginState } from "../components/login.jsx";
 import { createStore } from "solid-js/store";
 import Tooltip from "../components/tooltip.jsx";
+import { getDateFromTimestamp } from "../utils/date.js";
 
 interface AtprotoRecord {
   rkey: string;
@@ -40,12 +41,6 @@ const RecordLink = (props: { record: AtprotoRecord; index: number }) => {
 
   const isOverflowing = (elem: HTMLElement, previewHeight: number) =>
     elem.offsetTop - window.scrollY + previewHeight + 32 > window.innerHeight;
-
-  const getDateFromTimestamp = (timestamp: number) =>
-    new Date(timestamp - new Date().getTimezoneOffset() * 60 * 1000)
-      .toISOString()
-      .split(".")[0]
-      .replace("T", " ");
 
   return (
     <span
