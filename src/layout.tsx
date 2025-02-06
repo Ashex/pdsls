@@ -6,6 +6,7 @@ import Tooltip from "./components/tooltip.jsx";
 import { NavBar } from "./components/navbar.jsx";
 import { Search } from "./components/search.jsx";
 import { AccountManager } from "./components/account.jsx";
+import { resolveHandle } from "./utils/api.js";
 
 export const [theme, setTheme] = createSignal(
   (
@@ -28,7 +29,12 @@ const Layout = (props: RouteSectionProps<unknown>) => {
     console.error(err);
   }
   const params = useParams();
+  const location = useLocation();
   onMount(async () => {
+    if (params.repo && !params.repo.startsWith("did:")) {
+      const did = await resolveHandle(params.repo);
+      window.location.href = location.pathname.replace(params.repo, did);
+    }
     await retrieveSession();
     if (loginState() && location.pathname === "/")
       window.location.href = `/at/${agent.sub}`;
@@ -81,13 +87,13 @@ const Layout = (props: RouteSectionProps<unknown>) => {
         </div>
       </div>
       <div class="mb-5 flex max-w-full flex-col items-center text-pretty md:max-w-screen-md">
-        <Show when={useLocation().pathname !== "/login"}>
+        <Show when={location.pathname !== "/login"}>
           <Search />
         </Show>
         <Show when={params.pds}>
           <NavBar params={params} />
         </Show>
-        <Show keyed when={useLocation().pathname}>
+        <Show keyed when={location.pathname}>
           <ErrorBoundary
             fallback={(err) => (
               <div class="mt-3 break-words">Error: {err.message}</div>
