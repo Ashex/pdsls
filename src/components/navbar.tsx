@@ -105,7 +105,9 @@ const NavBar = (props: { params: Params }) => {
             </div>
             <Show when={!props.params.collection && !props.params.rkey}>
               <div class="mt-1 flex items-center">
-                <div class="i-ph-binary-bold mr-1 text-sm" />
+                <Tooltip text="Blobs">
+                  <div class="i-ph-binary-bold mr-1 text-sm" />
+                </Tooltip>
                 <A
                   end
                   href={`at/${props.params.repo}/blobs`}
