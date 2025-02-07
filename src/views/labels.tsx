@@ -11,6 +11,7 @@ const LabelView = () => {
   const [cursor, setCursor] = createSignal<string>();
   const [labels, setLabels] = createSignal<ComAtprotoLabelDefs.Label[]>([]);
   const [filter, setFilter] = createSignal<string>();
+  const [labelCount, setLabelCount] = createSignal(0);
   const did = params.repo;
   let rpc: XRPC;
 
@@ -50,6 +51,15 @@ const LabelView = () => {
     refetch();
   };
 
+  const filterLabels = () => {
+    console.log("hello");
+    const newFilter = labels().filter((label) =>
+      filter() ? filter() === label.val : true,
+    );
+    setLabelCount(newFilter.length);
+    return newFilter;
+  };
+
   return (
     <>
       <form
@@ -87,7 +97,7 @@ const LabelView = () => {
           </div>
         </div>
       </form>
-      <div class="z-5 dark:bg-dark-700 sticky top-0 flex w-full flex-col items-center justify-center gap-2 bg-slate-100 py-4">
+      <div class="z-5 dark:bg-dark-700 sticky top-0 flex w-full flex-col items-center justify-center gap-3 border-b border-neutral-500 bg-slate-100 py-3">
         <input
           type="text"
           spellcheck={false}
@@ -96,10 +106,10 @@ const LabelView = () => {
           onInput={(e) => setFilter(e.currentTarget.value)}
         />
         <div class="flex items-center gap-x-2">
-          <Show when={labels().length}>
+          <Show when={labelCount() && labels().length}>
             <div>
               <span>
-                {labels().length} label{labels().length > 1 ? "s" : ""}
+                {labelCount()} label{labelCount() > 1 ? "s" : ""}
               </span>
             </div>
           </Show>
@@ -121,68 +131,71 @@ const LabelView = () => {
           </Show>
         </div>
       </div>
-      <div class="break-anywhere flex flex-col gap-2 divide-y divide-neutral-500 whitespace-pre-wrap font-mono">
-        <For
-          each={labels().filter((label) =>
-            filter() ? label.val === filter() : true,
-          )}
-        >
-          {(label) => (
-            <div class="flex justify-between gap-2 pt-2">
-              <div class="flex flex-col gap-x-2">
-                <div class="flex items-center gap-x-2">
-                  <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
-                    URI
-                  </div>
-                  <a
-                    href={`/at/${label.uri.replace("at://", "")}`}
-                    target="_blank"
-                    class="underline"
-                  >
-                    {label.uri}
-                  </a>
-                </div>
-                <Show when={label.cid}>
-                  <div class="flex gap-x-2">
+      <Show when={labels().length}>
+        <div class="break-anywhere flex flex-col gap-2 divide-y divide-neutral-500 whitespace-pre-wrap font-mono">
+          <For each={filterLabels()}>
+            {(label) => (
+              <div class="flex justify-between gap-2 pt-2">
+                <div class="flex flex-col gap-x-2">
+                  <div class="flex items-center gap-x-2">
                     <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
-                      CID
+                      URI
                     </div>
-                    {label.cid}
+                    <a
+                      href={`/at/${label.uri.replace("at://", "")}`}
+                      target="_blank"
+                      class="underline"
+                    >
+                      {label.uri}
+                    </a>
                   </div>
-                </Show>
-                <div class="flex gap-x-2">
-                  <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
-                    Label
-                  </div>
-                  {label.val}
-                </div>
-                <div class="flex gap-x-2">
-                  <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
-                    Created
-                  </div>
-                  {localDateFromTimestamp(new Date(label.cts).getTime())}
-                </div>
-                <Show when={label.exp}>
-                  {(exp) => (
+                  <Show when={label.cid}>
                     <div class="flex gap-x-2">
                       <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
-                        Expires
+                        CID
                       </div>
-                      {localDateFromTimestamp(new Date(exp()).getTime())}
+                      {label.cid}
                     </div>
-                  )}
+                  </Show>
+                  <div class="flex gap-x-2">
+                    <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
+                      Label
+                    </div>
+                    {label.val}
+                  </div>
+                  <div class="flex gap-x-2">
+                    <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
+                      Created
+                    </div>
+                    {localDateFromTimestamp(new Date(label.cts).getTime())}
+                  </div>
+                  <Show when={label.exp}>
+                    {(exp) => (
+                      <div class="flex gap-x-2">
+                        <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
+                          Expires
+                        </div>
+                        {localDateFromTimestamp(new Date(exp()).getTime())}
+                      </div>
+                    )}
+                  </Show>
+                </div>
+                <Show when={label.neg}>
+                  <div class="i-lucide-minus text-lg text-xl text-red-500 dark:text-red-400" />
+                </Show>
+                <Show when={!label.neg}>
+                  <div class="i-lucide-plus text-lg text-green-500 dark:text-green-400" />
                 </Show>
               </div>
-              <Show when={label.neg}>
-                <div class="i-lucide-minus text-lg text-xl text-red-500 dark:text-red-400" />
-              </Show>
-              <Show when={!label.neg}>
-                <div class="i-lucide-plus text-lg text-green-500 dark:text-green-400" />
-              </Show>
-            </div>
-          )}
-        </For>
-      </div>
+            )}
+          </For>
+        </div>
+      </Show>
+      <Show
+        when={!labels().length && !response.loading && searchParams.uriPatterns}
+      >
+        <div class="mt-2">No results</div>
+      </Show>
     </>
   );
 };
