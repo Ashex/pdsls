@@ -10,6 +10,7 @@ const LabelView = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [cursor, setCursor] = createSignal<string>();
   const [labels, setLabels] = createSignal<ComAtprotoLabelDefs.Label[]>([]);
+  const [filter, setFilter] = createSignal<string>();
   const did = params.repo;
   let rpc: XRPC;
 
@@ -51,42 +52,49 @@ const LabelView = () => {
 
   return (
     <>
+      <form
+        class="mt-3 flex flex-col items-center gap-y-1"
+        onsubmit={(e) => e.preventDefault()}
+      >
+        <div class="w-full">
+          <label for="patterns" class="ml-0.5 text-sm">
+            URI Patterns (comma-separated)
+          </label>
+        </div>
+        <div class="flex items-center gap-x-2">
+          <textarea
+            id="patterns"
+            name="patterns"
+            spellcheck={false}
+            rows={3}
+            cols={25}
+            value={searchParams.uriPatterns ?? ""}
+            class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+          />
+          <div class="flex min-w-[3rem] justify-center">
+            <Show when={!response.loading}>
+              <button
+                onclick={() => queryLabels()}
+                type="submit"
+                class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              >
+                Get
+              </button>
+            </Show>
+            <Show when={response.loading}>
+              <div class="i-line-md-loading-twotone-loop text-xl"></div>
+            </Show>
+          </div>
+        </div>
+      </form>
       <div class="z-5 dark:bg-dark-700 sticky top-0 flex w-full flex-col items-center justify-center gap-2 bg-slate-100 py-4">
-        <form
-          class="flex flex-col items-center gap-y-1"
-          onsubmit={(e) => e.preventDefault()}
-        >
-          <div class="w-full">
-            <label for="patterns" class="ml-0.5 text-sm">
-              URI Patterns (comma-separated)
-            </label>
-          </div>
-          <div class="flex items-center gap-x-2">
-            <textarea
-              id="patterns"
-              name="patterns"
-              spellcheck={false}
-              rows={3}
-              cols={25}
-              value={searchParams.uriPatterns ?? ""}
-              class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
-            />
-            <div class="flex min-w-[3rem] justify-center">
-              <Show when={!response.loading}>
-                <button
-                  onclick={() => queryLabels()}
-                  type="submit"
-                  class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                >
-                  Get
-                </button>
-              </Show>
-              <Show when={response.loading}>
-                <div class="i-line-md-loading-twotone-loop text-xl"></div>
-              </Show>
-            </div>
-          </div>
-        </form>
+        <input
+          type="text"
+          spellcheck={false}
+          placeholder="Filter by label"
+          class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+          onInput={(e) => setFilter(e.currentTarget.value)}
+        />
         <div class="flex items-center gap-x-2">
           <Show when={labels().length}>
             <div>
@@ -114,7 +122,11 @@ const LabelView = () => {
         </div>
       </div>
       <div class="break-anywhere flex flex-col gap-2 divide-y divide-neutral-500 whitespace-pre-wrap font-mono">
-        <For each={labels()}>
+        <For
+          each={labels().filter((label) =>
+            filter() ? label.val === filter() : true,
+          )}
+        >
           {(label) => (
             <div class="flex justify-between gap-2 pt-2">
               <div class="flex flex-col gap-x-2">
