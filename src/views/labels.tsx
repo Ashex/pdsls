@@ -44,6 +44,7 @@ const LabelView = () => {
 
   const queryLabels = async () => {
     setLabels([]);
+    setCursor("");
     setSearchParams({
       uriPatterns: (document.getElementById("patterns") as HTMLInputElement)
         .value,
