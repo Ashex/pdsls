@@ -69,7 +69,7 @@ const PdsView = () => {
                   <span>🪦</span>
                 </Tooltip>
               </Show>
-              <span class="hover:underline">{repo.did}</span>
+              <span class="w-full hover:underline">{repo.did}</span>
             </a>
           )}
         </For>
