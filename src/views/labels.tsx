@@ -22,7 +22,9 @@ const LabelView = () => {
   });
 
   const fetchLabels = async () => {
-    const uriPatterns = searchParams.uriPatterns;
+    const uriPatterns = (
+      document.getElementById("patterns") as HTMLInputElement
+    ).value;
     if (!uriPatterns) return;
     const res = await rpc.get("com.atproto.label.queryLabels", {
       params: {
@@ -114,7 +116,7 @@ const LabelView = () => {
       <div class="break-anywhere flex flex-col gap-2 divide-y divide-neutral-500 whitespace-pre-wrap font-mono">
         <For each={labels()}>
           {(label) => (
-            <div class="flex gap-2 pt-2">
+            <div class="flex justify-between gap-2 pt-2">
               <div class="flex flex-col gap-x-2">
                 <div class="flex items-center gap-x-2">
                   <div class="min-w-[5rem] font-semibold text-stone-600 dark:text-stone-400">
