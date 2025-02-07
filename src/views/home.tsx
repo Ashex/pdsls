@@ -22,8 +22,8 @@ const Home = () => {
         <div>
           <span class="font-semibold text-orange-400">PDS URL</span>:
           <div>
-            <a href="/pds.bsky.mom" class="text-lightblue-500 hover:underline">
-              https://pds.bsky.mom
+            <a href="/pds.moe" class="text-lightblue-500 hover:underline">
+              https://pds.moe
             </a>
           </div>
         </div>
@@ -44,10 +44,10 @@ const Home = () => {
           and profiles):
           <div>
             <a
-              href="/at/did:plc:ia76kvnndjutgedggx2ibrem/app.bsky.feed.post/3kenlltlvus2u"
+              href="/at/did:plc:vwzwgnygau7ed7b7wt5ux7y2/app.bsky.feed.post/3khpasmu4ou2l"
               class="text-lightblue-500 hover:underline"
             >
-              https://bsky.app/profile/mary.my.id/post/3kenlltlvus2u
+              https://bsky.app/profile/retr0.id/post/3khpasmu4ou2l
             </a>
           </div>
         </div>
