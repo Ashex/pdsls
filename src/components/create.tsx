@@ -72,6 +72,14 @@ const CreateRecord = () => {
     setCreateNotice("");
   });
 
+  const createModel = () => {
+    if (!model)
+      model = editor.createModel(
+        JSON.stringify(placeholder(new Date().toISOString()), null, 2),
+        "json",
+      );
+  };
+
   return (
     <>
       <Show when={openCreate()}>
@@ -140,7 +148,7 @@ const CreateRecord = () => {
                     onclick={() => setOpenCreate(false)}
                     class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
                   >
-                    Cancel
+                    Close
                   </button>
                   <button
                     type="submit"
@@ -160,10 +168,7 @@ const CreateRecord = () => {
           <button
             class="i-octicon-pencil-16 cursor-pointer text-xl"
             onclick={() => {
-              model = editor.createModel(
-                JSON.stringify(placeholder(new Date().toISOString()), null, 2),
-                "json",
-              );
+              createModel();
               setOpenCreate(true);
             }}
           />
