@@ -18,8 +18,8 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7
       '@atcute/oauth-browser-client':
-        specifier: ^1.0.12
-        version: 1.0.12
+        specifier: ^1.0.13
+        version: 1.0.13
       '@atcute/tid':
         specifier: ^1.0.2
         version: 1.0.2
@@ -40,11 +40,11 @@ importers:
         version: 1.9.4
     devDependencies:
       prettier:
-        specifier: ^3.4.2
-        version: 3.4.2
+        specifier: ^3.5.0
+        version: 3.5.0
       prettier-plugin-tailwindcss:
         specifier: ^0.6.11
-        version: 0.6.11(prettier@3.4.2)
+        version: 0.6.11(prettier@3.5.0)
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -88,8 +88,8 @@ packages:
   '@atcute/multibase@1.1.2':
     resolution: {integrity: sha512-KFX+c7a/u2jSNcRw0rLaUHG/XEKf1A1c8XF5soHnsb1JMCShihf/anfZ1kJ4no/IlIp9HEHV3PQRQO2sWL6ASQ==}
 
-  '@atcute/oauth-browser-client@1.0.12':
-    resolution: {integrity: sha512-U0CsI6dZz52flhtdQbgh310raVSD/gA0tSqIGGfUBYiK0M2vLjUUiHtSNsfZ5baImN2P5GgDdQJis66Je7UeSA==}
+  '@atcute/oauth-browser-client@1.0.13':
+    resolution: {integrity: sha512-JxQKl9Vo1V8poxvR9uKS8bkBv8t53DIH4lCbaih6yn9u7fM62ZC/0x/9KoGWSNqpp3R3U0y/DOQQfdC9Y4GEGQ==}
 
   '@atcute/tid@1.0.2':
     resolution: {integrity: sha512-ahmjroNyeDPJhtuf3+HTJropaH04HmJ8fhntDu73Gpz/RkAF7+nkz6kcP2QTgfvMCgMPAJUdskAAP82GPDTY9w==}
@@ -1077,8 +1077,8 @@ packages:
       prettier-plugin-svelte:
         optional: true
 
-  prettier@3.4.2:
-    resolution: {integrity: sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ==}
+  prettier@3.5.0:
+    resolution: {integrity: sha512-quyMrVt6svPS7CjQ9gKb3GLEX/rl3BCL2oa/QkNcXv4YNVBC9olt3s+H7ukto06q7B1Qz46PbrKLO34PR6vXcA==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -1300,7 +1300,7 @@ snapshots:
     dependencies:
       '@atcute/uint8array': 1.0.1
 
-  '@atcute/oauth-browser-client@1.0.12':
+  '@atcute/oauth-browser-client@1.0.13':
     dependencies:
       '@atcute/client': 2.0.7
 
@@ -2196,11 +2196,11 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  prettier-plugin-tailwindcss@0.6.11(prettier@3.4.2):
+  prettier-plugin-tailwindcss@0.6.11(prettier@3.5.0):
     dependencies:
-      prettier: 3.4.2
+      prettier: 3.5.0
 
-  prettier@3.4.2: {}
+  prettier@3.5.0: {}
 
   public-transport@file:pkg/pt.tgz: {}
 
