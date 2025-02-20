@@ -154,7 +154,7 @@ const CreateRecord = () => {
                     type="submit"
                     class="rounded-lg bg-green-500 px-2.5 py-1.5 text-sm font-bold text-slate-100 hover:bg-green-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-green-600 dark:hover:bg-green-500 dark:focus:ring-slate-300"
                   >
-                    Confirm
+                    Create
                   </button>
                 </div>
               </div>
