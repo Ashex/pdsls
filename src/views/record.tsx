@@ -6,15 +6,26 @@ import { JSONValue } from "../components/json.jsx";
 import { authenticate_post_with_doc } from "public-transport";
 import { agent, loginState } from "../components/login.jsx";
 import { Editor } from "../components/editor.jsx";
+import { Backlinks } from "../components/backlinks.jsx";
 import { editor } from "monaco-editor";
 import { setCID, setValidRecord, validRecord } from "../components/navbar.jsx";
-import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
-import { theme } from "../layout.jsx";
+import {
+  didDocCache,
+  getAllBacklinks,
+  LinkData,
+  resolveHandle,
+  resolvePDS,
+} from "../utils/api.js";
+import { theme } from "../components/settings.jsx";
 import { AtUri, uriTemplates } from "../utils/templates.js";
 
 const RecordView = () => {
   const params = useParams();
   const [record, setRecord] = createSignal<ComAtprotoRepoGetRecord.Output>();
+  const [backlinks, setBacklinks] = createSignal<{
+    links: LinkData;
+    target: string;
+  }>();
   const [modal, setModal] = createSignal<HTMLDialogElement>();
   const [openDelete, setOpenDelete] = createSignal(false);
   const [openEdit, setOpenEdit] = createSignal(false);
@@ -62,6 +73,11 @@ const RecordView = () => {
       if (err.message) setNotice(err.message);
       else setNotice(`Invalid record: ${err}`);
       setValidRecord(false);
+    }
+    if (localStorage.backlinks === "true") {
+      const backlinkTarget = `at://${did}/${params.collection}/${params.rkey}`;
+      const backlinks = await getAllBacklinks(backlinkTarget);
+      setBacklinks({ links: backlinks.links, target: backlinkTarget });
     }
   });
 
@@ -209,7 +225,7 @@ const RecordView = () => {
                         <option value="false">False</option>
                       </select>
                     </div>
-                    <Editor theme={theme()} model={model!} />
+                    <Editor theme={theme().color} model={model!} />
                     <div class="mt-2 flex flex-col gap-2">
                       <div class="text-red-500 dark:text-red-400">
                         {editNotice()}
@@ -290,16 +306,32 @@ const RecordView = () => {
             </button>
           </Show>
         </div>
-        <div class="break-anywhere mt-1 whitespace-pre-wrap pl-3.5 font-mono text-sm sm:text-base">
-          <Show when={!JSONSyntax()}>
+        <Show when={!JSONSyntax()}>
+          <div
+            classList={{
+              "break-anywhere mb-2 mt-1 whitespace-pre-wrap pb-3 font-mono text-sm sm:text-base":
+                true,
+              "border-b border-neutral-500": !!backlinks(),
+            }}
+          >
             <JSONValue
               data={record()?.value as any}
               repo={record()!.uri.split("/")[2]}
             />
+          </div>
+          <Show when={backlinks()}>
+            {(backlinks) => (
+              <Backlinks
+                links={backlinks().links}
+                target={backlinks().target}
+              />
+            )}
           </Show>
-          <Show when={JSONSyntax()}>
+        </Show>
+        <Show when={JSONSyntax()}>
+          <div class="mt-1">
             <Editor
-              theme={theme()}
+              theme={theme().color}
               model={editor.createModel(
                 JSON.stringify(record()?.value, null, 2).replace(
                   /[\u007F-\uFFFF]/g,
@@ -310,8 +342,8 @@ const RecordView = () => {
               )}
               readOnly={true}
             />
-          </Show>
-        </div>
+          </div>
+        </Show>
       </Show>
     </>
   );

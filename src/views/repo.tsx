@@ -1,12 +1,23 @@
 import { createSignal, For, Show, createResource } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { A, query, useParams } from "@solidjs/router";
-import { didDocCache, resolveHandle, resolvePDS } from "../utils/api.js";
+import {
+  didDocCache,
+  getAllBacklinks,
+  LinkData,
+  resolveHandle,
+  resolvePDS,
+} from "../utils/api.js";
 import { DidDocument } from "@atcute/client/utils/did";
+import { Backlinks } from "../components/backlinks.jsx";
 
 const RepoView = () => {
   const params = useParams();
   const [didDoc, setDidDoc] = createSignal<DidDocument>();
+  const [backlinks, setBacklinks] = createSignal<{
+    links: LinkData;
+    target: string;
+  }>();
   let rpc: XRPC;
   let did = params.repo;
 
@@ -22,6 +33,10 @@ const RepoView = () => {
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     const res = await describeRepo(did);
     setDidDoc(didDocCache[did]);
+    if (localStorage.backlinks === "true") {
+      const backlinks = await getAllBacklinks(did);
+      setBacklinks({ links: backlinks.links, target: did });
+    }
     return res.data;
   };
 
@@ -121,6 +136,16 @@ const RepoView = () => {
                   PLC operation logs{" "}
                   <div class="i-tabler-external-link ml-0.5 text-xs" />
                 </a>
+              </Show>
+              <Show when={backlinks()}>
+                {(backlinks) => (
+                  <div class="mt-2 border-t border-neutral-500 pt-2">
+                    <Backlinks
+                      links={backlinks().links}
+                      target={backlinks().target}
+                    />
+                  </div>
+                )}
               </Show>
             </div>
           )}
