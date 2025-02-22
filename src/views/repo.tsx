@@ -34,8 +34,12 @@ const RepoView = () => {
     const res = await describeRepo(did);
     setDidDoc(didDocCache[did]);
     if (localStorage.backlinks === "true") {
-      const backlinks = await getAllBacklinks(did);
-      setBacklinks({ links: backlinks.links, target: did });
+      try {
+        const backlinks = await getAllBacklinks(did);
+        setBacklinks({ links: backlinks.links, target: did });
+      } catch (e) {
+        console.error(e);
+      }
     }
     return res.data;
   };

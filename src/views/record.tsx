@@ -75,9 +75,13 @@ const RecordView = () => {
       setValidRecord(false);
     }
     if (localStorage.backlinks === "true") {
-      const backlinkTarget = `at://${did}/${params.collection}/${params.rkey}`;
-      const backlinks = await getAllBacklinks(backlinkTarget);
-      setBacklinks({ links: backlinks.links, target: backlinkTarget });
+      try {
+        const backlinkTarget = `at://${did}/${params.collection}/${params.rkey}`;
+        const backlinks = await getAllBacklinks(backlinkTarget);
+        setBacklinks({ links: backlinks.links, target: backlinkTarget });
+      } catch (e) {
+        console.error(e);
+      }
     }
   });
 
