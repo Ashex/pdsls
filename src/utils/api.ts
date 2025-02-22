@@ -4,9 +4,6 @@ import { setPDS } from "../components/navbar";
 import { DidDocument } from "@atcute/client/utils/did";
 import { createStore } from "solid-js/store";
 
-localStorage.constellationHost =
-  localStorage.constellationHost || "https://constellation.microcosm.blue";
-
 const didPDSCache: Record<string, string> = {};
 const [labelerCache, setLabelerCache] = createStore<Record<string, string>>({});
 const didDocCache: Record<string, DidDocument> = {};
@@ -69,7 +66,9 @@ const getConstellation = async (
   cursor?: string,
   limit?: number,
 ) => {
-  const url = new URL(localStorage.constellationHost);
+  const url = new URL(
+    localStorage.constellationHost || "https://constellation.microcosm.blue",
+  );
   url.pathname = endpoint;
   url.searchParams.set("target", target);
   if (collection) {
