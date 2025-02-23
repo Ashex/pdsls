@@ -30,7 +30,7 @@ const Backlinks = ({ links, target }: { links: LinkData; target: string }) => {
   const filteredLinks = createMemo(() => linksBySource(links));
 
   return (
-    <div class="flex flex-col pb-2">
+    <div class="break-anywhere flex flex-col pb-2">
       <p class="font-sans font-semibold text-stone-600 dark:text-stone-400">
         Backlinks{" "}
         <a
