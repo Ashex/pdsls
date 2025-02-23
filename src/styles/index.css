@@ -3,6 +3,42 @@ code,
 kbd,
 samp,
 pre {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.string {
+  color: #10b981;
+}
+
+&:where(.dark, .dark *) {
+  .string {
+    color: #9ece6a;
+  }
+}
+
+.number {
+  color: #ca8a04;
+}
+
+&:where(.dark, .dark *) {
+  .number {
+    color: #ff9e64;
+  }
+}
+
+.boolean,
+.null {
+  color: #2ac3de;
+}
+
+.key {
+  color: #0d9488;
+}
+
+&:where(.dark, .dark *) {
+  .key {
+    color: #73daca;
+  }
 }
