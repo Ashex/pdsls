@@ -50,7 +50,7 @@ const CreateRecord = () => {
         data: {
           repo: agent.sub,
           collection: collection ? collection.toString() : record.$type,
-          rkey: rkey?.toString() ?? undefined,
+          rkey: rkey?.toString().length ? rkey?.toString() : undefined,
           record: record,
           validate:
             validate === "true" ? true

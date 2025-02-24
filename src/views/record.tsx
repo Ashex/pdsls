@@ -140,7 +140,7 @@ const RecordView = () => {
         });
       }
       setOpenEdit(false);
-      setTimeout(() => window.location.reload(), 500);
+      window.location.reload();
     } catch (err: any) {
       setEditNotice(err.message);
     }
