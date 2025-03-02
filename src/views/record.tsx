@@ -3,7 +3,6 @@ import { CredentialManager, XRPC } from "@atcute/client";
 import { ComAtprotoRepoGetRecord } from "@atcute/client/lexicons";
 import { action, query, redirect, useParams } from "@solidjs/router";
 import { JSONValue, syntaxHighlight } from "../components/json.jsx";
-import { authenticate_post_with_doc } from "public-transport";
 import { agent, loginState } from "../components/login.jsx";
 import { Editor } from "../components/editor.jsx";
 import { Backlinks } from "../components/backlinks.jsx";
@@ -18,6 +17,7 @@ import {
 } from "../utils/api.js";
 import { theme } from "../components/settings.jsx";
 import { AtUri, uriTemplates } from "../utils/templates.js";
+import { wasmSupported } from "../utils/wasm.js";
 
 export default () => {
   const params = useParams();
@@ -62,13 +62,21 @@ export default () => {
       setRecord(res.data);
       setCID(res.data.cid);
       setExternalLink(checkUri(res.data.uri));
-      await authenticate_post_with_doc(
-        res.data.uri,
-        res.data.cid!,
-        res.data.value,
-        didDocCache[res.data.uri.split("/")[2]],
-      );
-      setValidRecord(true);
+      if (wasmSupported) {
+        const publicTransport = await import("public-transport");
+        await publicTransport.authenticate_post_with_doc(
+          res.data.uri,
+          res.data.cid!,
+          res.data.value,
+          didDocCache[res.data.uri.split("/")[2]],
+        );
+        setValidRecord(true);
+      } else {
+        setNotice(
+          "Unable to validate record due to the browser not supporting WebAssembly.",
+        );
+        setValidRecord(false);
+      }
     } catch (err: any) {
       if (err.message) setNotice(err.message);
       else setNotice(`Invalid record: ${err}`);
