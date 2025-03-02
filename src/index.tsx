@@ -11,10 +11,12 @@ import { PdsView } from "./views/pds.tsx";
 import { RepoView } from "./views/repo.tsx";
 import { BlobView } from "./views/blob.tsx";
 import { CollectionView } from "./views/collection.tsx";
-import { RecordView } from "./views/record.tsx";
 import { LabelView } from "./views/labels.tsx";
 import { JetstreamView } from "./views/jetstream.tsx";
 import { SubscribeReposView } from "./views/subscribeRepos.tsx";
+import { lazy } from "solid-js";
+
+const RecordView = lazy(() => import("./views/record.tsx"));
 
 render(
   () => (

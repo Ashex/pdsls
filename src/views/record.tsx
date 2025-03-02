@@ -19,7 +19,7 @@ import {
 import { theme } from "../components/settings.jsx";
 import { AtUri, uriTemplates } from "../utils/templates.js";
 
-const RecordView = () => {
+export default () => {
   const params = useParams();
   const [record, setRecord] = createSignal<ComAtprotoRepoGetRecord.Output>();
   const [backlinks, setBacklinks] = createSignal<{
@@ -344,5 +344,3 @@ const RecordView = () => {
     </>
   );
 };
-
-export { RecordView };
