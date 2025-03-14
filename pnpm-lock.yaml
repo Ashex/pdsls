@@ -24,17 +24,20 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0
       '@atcute/identity':
-        specifier: ^0.1.0
-        version: 0.1.0
-      '@atcute/identity-resolver':
         specifier: ^0.1.1
-        version: 0.1.1(@atcute/identity@0.1.0)
+        version: 0.1.1
+      '@atcute/identity-resolver':
+        specifier: ^0.1.2
+        version: 0.1.2(@atcute/identity@0.1.1)
       '@atcute/oauth-browser-client':
         specifier: ^1.0.15
         version: 1.0.15
       '@atcute/tid':
         specifier: ^1.0.2
         version: 1.0.2
+      '@atcute/uint8array':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@solidjs/meta':
         specifier: ^0.29.4
         version: 0.29.4(solid-js@1.9.5)
@@ -100,13 +103,13 @@ packages:
   '@atcute/crypto@2.2.0':
     resolution: {integrity: sha512-Q/64Qn1AI8J0ZNy4hPDPpW/3poKf4OWRUxIYceCDI+btEOcIG5YMlhEQeZd6ojnI3oBMXy03sbOktekaBYRK9Q==}
 
-  '@atcute/identity-resolver@0.1.1':
-    resolution: {integrity: sha512-5wIg+X8Cw89Yuiq+VYpnonjL18Zlf8lEblHLhVo20c2n/fBOIrOf53KT/MXxEnqFEYnm2k1F9KAZKK65wOzq9A==}
+  '@atcute/identity-resolver@0.1.2':
+    resolution: {integrity: sha512-fP2VbHD04kVcCdNi/Kszo6jFzqM7Pg3p33oGhfp2zVkwFKaVBlwCaFRWEga/Xvu/IDLwNdASGWnLqoA34SFeSg==}
     peerDependencies:
       '@atcute/identity': ^0.1.0
 
-  '@atcute/identity@0.1.0':
-    resolution: {integrity: sha512-Vz5tYn7+leKr+/31raGsuluEiHKNAL9j9fQcFjEtoDxuYx0F0Munb+CjSPv+W2IDmPntRQYjDqiwMmuxpwVg1w==}
+  '@atcute/identity@0.1.1':
+    resolution: {integrity: sha512-TijKOgvvOfp/QoMAqaiKLn+FnQi5XrxsWLVcVnvr5JoKlgF2yppNvVo0y62XEXZbgDuEMSav1v1tEjC4Hn7MzQ==}
 
   '@atcute/multibase@1.1.2':
     resolution: {integrity: sha512-KFX+c7a/u2jSNcRw0rLaUHG/XEKf1A1c8XF5soHnsb1JMCShihf/anfZ1kJ4no/IlIp9HEHV3PQRQO2sWL6ASQ==}
@@ -1330,13 +1333,13 @@ snapshots:
       '@atcute/uint8array': 1.0.1
       '@noble/secp256k1': 2.2.3
 
-  '@atcute/identity-resolver@0.1.1(@atcute/identity@0.1.0)':
+  '@atcute/identity-resolver@0.1.2(@atcute/identity@0.1.1)':
     dependencies:
-      '@atcute/identity': 0.1.0
+      '@atcute/identity': 0.1.1
       '@atcute/util-fetch': 1.0.0
       '@badrap/valita': 0.4.3
 
-  '@atcute/identity@0.1.0':
+  '@atcute/identity@0.1.1':
     dependencies:
       '@badrap/valita': 0.4.3
 

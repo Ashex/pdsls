@@ -13,6 +13,7 @@ import {
   type DidDocument,
   getAtprotoVerificationMaterial,
 } from "@atcute/identity";
+import { toSha256 } from "@atcute/uint8array";
 
 import { type AddressedAtUri, parseAddressedAtUri } from "./types/at-uri";
 
@@ -109,7 +110,7 @@ export const verifyRecord = async (
   }
 
   // read the car
-  let blockmap: Map<string, Uint8Array>;
+  let blockmap: CAR.BlockMap;
   let commit: CAR.Commit;
 
   try {
@@ -119,7 +120,24 @@ export const verifyRecord = async (
       return { errors };
     }
 
-    blockmap = CAR.collectBlock(iterate());
+    blockmap = new Map();
+    for (const { cid, bytes } of iterate()) {
+      const cidString = CID.toString(cid);
+
+      // Verify that `bytes` matches its associated CID
+      const expectedCid = CID.toString(
+        await CID.create(cid.codec as 85 | 113, bytes),
+      );
+      if (cidString !== expectedCid) {
+        errors.push({
+          message: `cid does not match bytes`,
+          detail: { cid: cidString, expectedCid },
+        });
+      }
+
+      blockmap.set(cidString, bytes);
+    }
+
     if (blockmap.size === 0) {
       errors.push({ message: `car must have at least one block` });
       return { errors };
@@ -148,43 +166,148 @@ export const verifyRecord = async (
     }
   }
 
-  // walk through the car to find the record
-  let found: CID.CidLink | undefined;
-  for (const { key, cid } of CAR.walkMstEntries(blockmap, commit.data)) {
-    const [collection, rkey] = key.split("/");
-
-    if (collection !== uri.collection) {
-      continue;
-    }
-    if (rkey !== uri.rkey) {
-      continue;
-    }
-
-    found = cid;
-    break;
-  }
-
-  if (!found) {
-    errors.push({ message: `could not find record in car` });
-    return { errors };
-  }
-
-  // verify record in car matches provided record
-  {
-    const actual = blockmap.get(found.$link);
-    if (!actual) {
+  // verify the commit is a valid commit
+  try {
+    const found = await dfs(blockmap, commit.data.$link, opts.cid);
+    if (!found.found) {
       errors.push({ message: `could not find record in car` });
-      return { errors };
     }
-
-    const matches =
-      cbor.length === actual.length && cbor.every((v, i) => v === actual[i]);
-
-    if (!matches) {
-      errors.push({ message: `record in car does not match provided record` });
-      return { errors };
-    }
+  } catch (err) {
+    errors.push({ message: `failed to iterate over car`, detail: err });
   }
 
   return { errors };
+};
+
+interface DfsResult {
+  found: boolean;
+  min?: string;
+  max?: string;
+  depth?: number;
+}
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+const dfs = async (
+  blockmap: CAR.BlockMap,
+  from: string | undefined,
+  target: string,
+  visited = new Set<string>(),
+): Promise<DfsResult> => {
+  // If there's no starting point, return empty state
+  if (from == null) {
+    return { found: false };
+  }
+
+  // Check for cycles
+  {
+    if (visited.has(from)) {
+      throw new Error(`cycle detected; cid=${from}`);
+    }
+
+    visited.add(from);
+  }
+
+  // Get the block data
+  let node: CAR.MstNode;
+  {
+    const raw = blockmap.get(from);
+    if (!raw) {
+      return { found: false };
+    }
+
+    const decoded = CBOR.decode(raw);
+    if (!CAR.isMstNode(decoded)) {
+      throw new Error(`invalid mst node; cid=${from}`);
+    }
+
+    node = decoded;
+  }
+
+  // Recursively process the left child
+  const left = await dfs(blockmap, node.l?.$link, target, visited);
+
+  let key = "";
+  let found = left.found;
+  let depth: number | undefined;
+  let firstKey: string | undefined;
+  let lastKey: string | undefined;
+
+  // Process all entries in this node
+  for (const entry of node.e) {
+    if (entry.v.$link === target) {
+      found = true;
+    }
+
+    // Construct the key by truncating and appending
+    key = key.substring(0, entry.p) + decoder.decode(CBOR.fromBytes(entry.k));
+
+    // Calculate depth based on leading zeros in the hash
+    const keyDigest = await toSha256(encoder.encode(key));
+    let zeroCount = 0;
+
+    outerLoop: for (const byte of keyDigest) {
+      for (let bit = 7; bit >= 0; bit--) {
+        if (((byte >> bit) & 1) !== 0) {
+          break outerLoop;
+        }
+        zeroCount++;
+      }
+    }
+
+    const thisDepth = Math.floor(zeroCount / 2);
+
+    // Ensure consistent depth
+    if (depth === undefined) {
+      depth = thisDepth;
+    } else if (depth !== thisDepth) {
+      throw new Error(`node has entries with different depths; cid=${from}`);
+    }
+
+    // Track first and last keys
+    if (lastKey === undefined) {
+      firstKey = key;
+      lastKey = key;
+    }
+
+    // Check key ordering
+    if (lastKey > key) {
+      throw new Error(`entries are out of order; cid=${from}`);
+    }
+
+    // Process right child
+    const right = await dfs(blockmap, entry.t?.$link, target, visited);
+
+    // Check ordering with right subtree
+    if (right.min && right.min < lastKey) {
+      throw new Error(`entries are out of order; cid=${from}`);
+    }
+
+    found ||= right.found;
+
+    // Check depth ordering
+    if (left.depth !== undefined && left.depth >= thisDepth) {
+      throw new Error(`depths are out of order; cid=${from}`);
+    }
+
+    if (right.depth !== undefined && right.depth >= thisDepth) {
+      throw new Error(`depths are out of order; cid=${from}`);
+    }
+
+    // Update last key based on right subtree
+    lastKey = right.max || key;
+  }
+
+  // Check ordering with left subtree
+  if (left.max && firstKey && left.max > firstKey) {
+    throw new Error(`entries are out of order; cid=${from}`);
+  }
+
+  return {
+    found,
+    min: firstKey,
+    max: lastKey,
+    depth,
+  };
 };
