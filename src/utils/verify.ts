@@ -296,7 +296,7 @@ const dfs = async (
     }
 
     // Update last key based on right subtree
-    lastKey = right.max || key;
+    lastKey = right.max ?? key;
   }
 
   // Check ordering with left subtree
