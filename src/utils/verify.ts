@@ -67,8 +67,8 @@ export const verifyRecord = async (
     if (uri.repo !== opts.didDoc.id) {
       errors.push({ message: `repo in at-uri does not match did document` });
     }
-  } catch {
-    errors.push({ message: `provided at-uri is invalid` });
+  } catch (err) {
+    errors.push({ message: `provided at-uri is invalid`, detail: err });
     return { errors };
   }
 
