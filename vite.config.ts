@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
-import wasm from "vite-plugin-wasm";
 import UnoCSS from "unocss/vite";
 import metadata from "./public/client-metadata.json";
 
@@ -10,7 +9,6 @@ const SERVER_PORT = 13213;
 export default defineConfig({
   plugins: [
     UnoCSS(),
-    wasm(),
     solidPlugin(),
     // Injects OAuth-related variables
     {

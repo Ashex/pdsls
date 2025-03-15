@@ -1,13 +1,18 @@
-import { createSignal, onMount, Show, onCleanup, createEffect } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { ComAtprotoRepoGetRecord } from "@atcute/client/lexicons";
+
 import { action, query, redirect, useParams } from "@solidjs/router";
+import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
+
+import { editor } from "monaco-editor";
+
+import { Backlinks } from "../components/backlinks.jsx";
+import { Editor } from "../components/editor.jsx";
 import { JSONValue, syntaxHighlight } from "../components/json.jsx";
 import { agent, loginState } from "../components/login.jsx";
-import { Editor } from "../components/editor.jsx";
-import { Backlinks } from "../components/backlinks.jsx";
-import { editor } from "monaco-editor";
 import { setCID, setValidRecord, validRecord } from "../components/navbar.jsx";
+import { theme } from "../components/settings.jsx";
+
 import {
   didDocCache,
   getAllBacklinks,
@@ -15,9 +20,8 @@ import {
   resolveHandle,
   resolvePDS,
 } from "../utils/api.js";
-import { theme } from "../components/settings.jsx";
 import { AtUri, uriTemplates } from "../utils/templates.js";
-import { wasmSupported } from "../utils/wasm.js";
+import { verifyRecord } from "../utils/verify.js";
 
 export default () => {
   const params = useParams();
@@ -62,19 +66,22 @@ export default () => {
       setRecord(res.data);
       setCID(res.data.cid);
       setExternalLink(checkUri(res.data.uri));
-      if (!wasmSupported) {
-        // @ts-ignore
-        const polywasm = await import("polywasm");
-        globalThis.WebAssembly = polywasm.WebAssembly;
+
+      try {
+        const { errors } = await verifyRecord({
+          rpc: rpc,
+          uri: res.data.uri,
+          cid: res.data.cid!,
+          record: res.data.value,
+          didDoc: didDocCache[res.data.uri.split("/")[2]],
+        });
+
+        console.warn(errors);
+        setValidRecord(errors.length === 0);
+      } catch (err) {
+        console.error(err);
+        setValidRecord(false);
       }
-      const publicTransport = await import("public-transport");
-      await publicTransport.authenticate_post_with_doc(
-        res.data.uri,
-        res.data.cid!,
-        res.data.value,
-        didDocCache[res.data.uri.split("/")[2]],
-      );
-      setValidRecord(true);
     } catch (err: any) {
       if (err.message) setNotice(err.message);
       else setNotice(`Invalid record: ${err}`);
