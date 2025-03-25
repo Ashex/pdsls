@@ -18,20 +18,20 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0
       '@atcute/client':
-        specifier: ^2.0.8
-        version: 2.0.8
+        specifier: ^2.0.9
+        version: 2.0.9
       '@atcute/crypto':
         specifier: ^2.2.0
         version: 2.2.0
       '@atcute/identity':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.1.2
+        version: 0.1.2
       '@atcute/identity-resolver':
         specifier: ^0.1.2
-        version: 0.1.2(@atcute/identity@0.1.1)
+        version: 0.1.2(@atcute/identity@0.1.2)
       '@atcute/oauth-browser-client':
-        specifier: ^1.0.15
-        version: 1.0.15
+        specifier: ^1.0.16
+        version: 1.0.16
       '@atcute/tid':
         specifier: ^1.0.2
         version: 1.0.2
@@ -94,8 +94,8 @@ packages:
   '@atcute/cid@2.2.0':
     resolution: {integrity: sha512-ty+WjGcTfi1JJtcRNz6bsJMqT69lEIl4Ts7vl4U8SBHbxjbb6Tk/pcnQZVClKRYduRoZ1XhS9n5qOSIbIMctDA==}
 
-  '@atcute/client@2.0.8':
-    resolution: {integrity: sha512-OTfiWwjB4mOTlp2InGStvoQ+PIA5lvih9cTYU8BvOhzNcCBUpt4l860MKZExHjvQ9Tt1kjq/ED9zRiUjsAgIxw==}
+  '@atcute/client@2.0.9':
+    resolution: {integrity: sha512-QNDm9gMP6x9LY77ArwY+urQOBtQW74/onEAz42c40JxRm6Rl9K9cU4ROvNKJ+5cpVmEm1sthEWVRmDr5CSZENA==}
 
   '@atcute/crypto@2.2.0':
     resolution: {integrity: sha512-Q/64Qn1AI8J0ZNy4hPDPpW/3poKf4OWRUxIYceCDI+btEOcIG5YMlhEQeZd6ojnI3oBMXy03sbOktekaBYRK9Q==}
@@ -105,14 +105,14 @@ packages:
     peerDependencies:
       '@atcute/identity': ^0.1.0
 
-  '@atcute/identity@0.1.1':
-    resolution: {integrity: sha512-TijKOgvvOfp/QoMAqaiKLn+FnQi5XrxsWLVcVnvr5JoKlgF2yppNvVo0y62XEXZbgDuEMSav1v1tEjC4Hn7MzQ==}
+  '@atcute/identity@0.1.2':
+    resolution: {integrity: sha512-YmRCXm/Z4lnJz4RItnr5e6NiTtQaCRb6xIEuaqRs/6wxKHMVEzFY8ROC24L7MO5qiAgIU6GsbWv67YmSo6Y2tQ==}
 
   '@atcute/multibase@1.1.2':
     resolution: {integrity: sha512-KFX+c7a/u2jSNcRw0rLaUHG/XEKf1A1c8XF5soHnsb1JMCShihf/anfZ1kJ4no/IlIp9HEHV3PQRQO2sWL6ASQ==}
 
-  '@atcute/oauth-browser-client@1.0.15':
-    resolution: {integrity: sha512-ipty/8buSYF7RlLeO0rcVMjwFk0AqHfC/IeR9RPmzX8GfDiG3FooEifg3zcabaLBdnzfh2nfPNinbq1QFGFt7Q==}
+  '@atcute/oauth-browser-client@1.0.16':
+    resolution: {integrity: sha512-BKkA4TPyaLIO+hVxcxZoDfLFUgsd3A47UyzWAbe3BpSoN8Kywy/CqWuAVlqdiUhO1iG+vVqGQhjKy4UxutaU4g==}
 
   '@atcute/tid@1.0.2':
     resolution: {integrity: sha512-ahmjroNyeDPJhtuf3+HTJropaH04HmJ8fhntDu73Gpz/RkAF7+nkz6kcP2QTgfvMCgMPAJUdskAAP82GPDTY9w==}
@@ -1321,7 +1321,7 @@ snapshots:
       '@atcute/multibase': 1.1.2
       '@atcute/uint8array': 1.0.1
 
-  '@atcute/client@2.0.8': {}
+  '@atcute/client@2.0.9': {}
 
   '@atcute/crypto@2.2.0':
     dependencies:
@@ -1329,13 +1329,13 @@ snapshots:
       '@atcute/uint8array': 1.0.1
       '@noble/secp256k1': 2.2.3
 
-  '@atcute/identity-resolver@0.1.2(@atcute/identity@0.1.1)':
+  '@atcute/identity-resolver@0.1.2(@atcute/identity@0.1.2)':
     dependencies:
-      '@atcute/identity': 0.1.1
+      '@atcute/identity': 0.1.2
       '@atcute/util-fetch': 1.0.1
       '@badrap/valita': 0.4.3
 
-  '@atcute/identity@0.1.1':
+  '@atcute/identity@0.1.2':
     dependencies:
       '@badrap/valita': 0.4.3
 
@@ -1343,9 +1343,11 @@ snapshots:
     dependencies:
       '@atcute/uint8array': 1.0.1
 
-  '@atcute/oauth-browser-client@1.0.15':
+  '@atcute/oauth-browser-client@1.0.16':
     dependencies:
-      '@atcute/client': 2.0.8
+      '@atcute/client': 2.0.9
+      '@atcute/multibase': 1.1.2
+      '@atcute/uint8array': 1.0.1
 
   '@atcute/tid@1.0.2': {}
 
