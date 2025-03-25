@@ -55,8 +55,7 @@ const Home = () => {
           can be enabled in the settings.
         </p>
       </div>
-      <p>Examples:</p>
-      <div class="ml-2">
+      <div>
         <div>
           <span class="font-semibold text-orange-400">PDS</span>
           <div>
