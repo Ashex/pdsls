@@ -14,7 +14,7 @@ import {
   ComAtprotoRepoApplyWrites,
   ComAtprotoRepoListRecords,
 } from "@atcute/client/lexicons";
-import { A, action, query, useParams } from "@solidjs/router";
+import { A, query, useParams } from "@solidjs/router";
 import { resolveHandle, resolvePDS } from "../utils/api.js";
 import * as TID from "@atcute/tid";
 import { JSONType, JSONValue } from "../components/json.jsx";
@@ -142,7 +142,7 @@ const CollectionView = () => {
 
   const [response, { refetch }] = createResource(fetchRecords);
 
-  const deleteRecords = action(async () => {
+  const deleteRecords = async () => {
     const writes = records
       .filter((record) => record.toDelete)
       .map((record): Brand.Union<ComAtprotoRepoApplyWrites.Delete> => {
@@ -164,7 +164,7 @@ const CollectionView = () => {
       });
     }
     window.location.reload();
-  });
+  };
 
   const handleSelectionClick = (e: MouseEvent, index: number) => {
     if (e.shiftKey && lastSelected() !== undefined)
@@ -274,22 +274,21 @@ const CollectionView = () => {
                         Delete {records.filter((rec) => rec.toDelete).length}{" "}
                         records?
                       </h3>
-                      <form action={deleteRecords} method="post">
-                        <div class="mt-2 inline-flex gap-2">
-                          <button
-                            onclick={() => setOpenDelete(false)}
-                            class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg border border-neutral-500 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="submit"
-                            class="rounded-lg bg-red-500 px-2.5 py-1.5 text-sm font-bold text-slate-100 hover:bg-red-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </form>
+                      <div class="mt-2 inline-flex gap-2">
+                        <button
+                          onclick={() => setOpenDelete(false)}
+                          class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg border border-neutral-500 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onclick={() => deleteRecords()}
+                          class="rounded-lg bg-red-500 px-2.5 py-1.5 text-sm font-bold text-slate-100 hover:bg-red-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </dialog>
                 </Show>
