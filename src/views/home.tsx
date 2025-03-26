@@ -17,32 +17,14 @@ const Home = () => {
         </p>
         <p>Login to manage records in your repository.</p>
         <p>
-          <a
-            href="https://github.com/bluesky-social/jetstream"
-            class="text-lightblue-500 hover:underline"
-            target="_blank"
-          >
-            Jetstream
-          </a>{" "}
-          viewer is available{" "}
           <A href="/jetstream" class="text-lightblue-500 hover:underline">
-            here
-          </A>
-          .
-        </p>
-        <p>
-          <A
-            href="https://atproto.com/specs/sync#firehose"
-            class="text-lightblue-500 hover:underline"
-            target="_blank"
-          >
-            Firehose
+            Jetstream
           </A>{" "}
-          streaming can be found{" "}
+          and{" "}
           <A href="/firehose" class="text-lightblue-500 hover:underline">
-            here
-          </A>
-          .
+            firehose
+          </A>{" "}
+          support.
         </p>
         <p>
           <A
