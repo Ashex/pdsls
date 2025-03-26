@@ -19,6 +19,7 @@ const RepoView = () => {
     target: string;
   }>();
   let rpc: XRPC;
+  let pds: string;
   let did = params.repo;
 
   const describeRepo = query(
@@ -29,7 +30,7 @@ const RepoView = () => {
 
   const fetchRepo = async () => {
     if (!did.startsWith("did:")) did = await resolveHandle(params.repo);
-    const pds = await resolvePDS(did);
+    pds = await resolvePDS(did);
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     const res = await describeRepo(did);
     setDidDoc(didDocCache[did] as DidDocument);
@@ -141,6 +142,12 @@ const RepoView = () => {
                   <div class="i-tabler-external-link ml-0.5 text-xs" />
                 </a>
               </Show>
+              <a
+                href={`${pds}/xrpc/com.atproto.sync.getRepo?did=${did}`}
+                class="text-lightblue-500 flex w-fit items-center hover:underline"
+              >
+                Export repo
+              </a>
               <Show when={backlinks()}>
                 {(backlinks) => (
                   <div class="mt-2 border-t border-neutral-500 pt-2">
