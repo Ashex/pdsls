@@ -104,7 +104,6 @@ const StreamView = () => {
             time: commit.time,
             rev: commit.rev,
             since: commit.since,
-            tooBig: commit.tooBig,
             op: op,
           };
           setRecords(records().concat(record).slice(-LIMIT));
