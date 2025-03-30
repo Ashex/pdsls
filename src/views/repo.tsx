@@ -13,6 +13,7 @@ import { Backlinks } from "../components/backlinks.jsx";
 
 const RepoView = () => {
   const params = useParams();
+  const [downloading, setDownloading] = createSignal(false);
   const [didDoc, setDidDoc] = createSignal<DidDocument>();
   const [backlinks, setBacklinks] = createSignal<{
     links: LinkData;
@@ -49,6 +50,7 @@ const RepoView = () => {
 
   const downloadRepo = async () => {
     try {
+      setDownloading(true);
       const response = await fetch(
         `${pds}/xrpc/com.atproto.sync.getRepo?did=${did}`,
       );
@@ -69,6 +71,7 @@ const RepoView = () => {
     } catch (error) {
       console.error("Download failed:", error);
     }
+    setDownloading(false);
   };
 
   return (
@@ -166,12 +169,17 @@ const RepoView = () => {
                   <div class="i-tabler-external-link ml-0.5 text-xs" />
                 </a>
               </Show>
-              <button
-                onclick={() => downloadRepo()}
-                class="text-lightblue-500 flex w-fit items-center hover:underline"
-              >
-                Export repo
-              </button>
+              <div class="flex items-center gap-1">
+                <button
+                  onclick={() => downloadRepo()}
+                  class="text-lightblue-500 flex w-fit items-center hover:underline"
+                >
+                  Export repo
+                </button>
+                <Show when={downloading()}>
+                  <div class="i-line-md-loading-twotone-loop" />
+                </Show>
+              </div>
               <Show when={backlinks()}>
                 {(backlinks) => (
                   <div class="mt-2 border-t border-neutral-500 pt-2">
