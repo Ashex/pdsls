@@ -47,6 +47,30 @@ const RepoView = () => {
 
   const [repo] = createResource(fetchRepo);
 
+  const downloadRepo = async () => {
+    try {
+      const response = await fetch(
+        `${pds}/xrpc/com.atproto.sync.getRepo?did=${did}`,
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${did}-${new Date().toISOString()}.car`;
+      document.body.appendChild(a);
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+
   return (
     <Show when={repo()}>
       <div class="mt-3 flex w-[21rem] flex-col gap-2 break-words">
@@ -142,12 +166,12 @@ const RepoView = () => {
                   <div class="i-tabler-external-link ml-0.5 text-xs" />
                 </a>
               </Show>
-              <a
-                href={`${pds}/xrpc/com.atproto.sync.getRepo?did=${did}`}
+              <button
+                onclick={() => downloadRepo()}
                 class="text-lightblue-500 flex w-fit items-center hover:underline"
               >
                 Export repo
-              </a>
+              </button>
               <Show when={backlinks()}>
                 {(backlinks) => (
                   <div class="mt-2 border-t border-neutral-500 pt-2">
