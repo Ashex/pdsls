@@ -114,19 +114,19 @@ export const verifyRecord = async (
   let commit: CAR.Commit;
 
   try {
-    const { roots, iterate } = CAR.readCar(car);
-    if (roots.length !== 1) {
+    const reader = CAR.readCar(car);
+    if (reader.header.data.roots.length !== 1) {
       errors.push({ message: `car must have exactly one root` });
       return { errors };
     }
 
     blockmap = new Map();
-    for (const { cid, bytes } of iterate()) {
-      const cidString = CID.toString(cid);
+    for (const entry of reader.iterate()) {
+      const cidString = CID.toString(entry.cid);
 
       // Verify that `bytes` matches its associated CID
       const expectedCid = CID.toString(
-        await CID.create(cid.codec as 85 | 113, bytes),
+        await CID.create(entry.cid.codec as 85 | 113, entry.bytes),
       );
       if (cidString !== expectedCid) {
         errors.push({
@@ -135,7 +135,7 @@ export const verifyRecord = async (
         });
       }
 
-      blockmap.set(cidString, bytes);
+      blockmap.set(cidString, entry);
     }
 
     if (blockmap.size === 0) {
@@ -143,7 +143,7 @@ export const verifyRecord = async (
       return { errors };
     }
 
-    commit = CAR.readBlock(blockmap, roots[0], CAR.isCommit);
+    commit = CAR.readBlock(blockmap, reader.header.data.roots[0], CAR.isCommit);
   } catch (err) {
     errors.push({ message: `failed to read car`, detail: err });
     return { errors };
@@ -212,12 +212,12 @@ const dfs = async (
   // Get the block data
   let node: CAR.MstNode;
   {
-    const raw = blockmap.get(from);
-    if (!raw) {
+    const entry = blockmap.get(from);
+    if (!entry) {
       return { found: false };
     }
 
-    const decoded = CBOR.decode(raw);
+    const decoded = CBOR.decode(entry.bytes);
     if (!CAR.isMstNode(decoded)) {
       throw new Error(`invalid mst node; cid=${from}`);
     }

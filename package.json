@@ -12,12 +12,12 @@
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "typescript": "^5.8.2",
-    "unocss": "66.1.0-beta.3",
+    "unocss": "66.1.0-beta.8",
     "vite": "^6.2.4",
     "vite-plugin-solid": "^2.11.6"
   },
   "dependencies": {
-    "@atcute/car": "^2.1.0",
+    "@atcute/car": "^3.0.1",
     "@atcute/cbor": "^2.2.0",
     "@atcute/cid": "^2.2.0",
     "@atcute/client": "^2.0.9",
