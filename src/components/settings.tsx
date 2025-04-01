@@ -27,15 +27,31 @@ const Settings = () => {
   const keyEvent = (event: KeyboardEvent) => {
     if (modal() && event.key == "Escape") setOpenSettings(false);
   };
+  const themeEvent = () => {
+    if (!theme().system) return;
+    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme(
+      isDark ?
+        { color: "dark", system: theme().system }
+      : { color: "light", system: theme().system },
+    );
+    document.documentElement.classList.toggle("dark", isDark);
+  };
 
   onMount(() => {
     window.addEventListener("keydown", keyEvent);
     window.addEventListener("click", clickEvent);
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", themeEvent);
   });
 
   onCleanup(() => {
     window.removeEventListener("keydown", keyEvent);
     window.removeEventListener("click", clickEvent);
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .removeEventListener("change", themeEvent);
   });
 
   createEffect(() => {
@@ -72,8 +88,7 @@ const Settings = () => {
               <button
                 classList={{
                   "basis-1/3 p-2": true,
-                  "hover:bg-slate-200 dark:hover:bg-dark-200":
-                    !theme().system,
+                  "hover:bg-slate-200 dark:hover:bg-dark-200": !theme().system,
                   "bg-neutral-500 text-slate-100": theme().system,
                 }}
                 onclick={() =>
