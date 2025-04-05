@@ -6,11 +6,7 @@ const Home = () => {
       <div class="mb-2">
         <p>
           Browse the public data on{" "}
-          <a
-            class="text-lightblue-500 hover:underline"
-            href="https://atproto.com"
-            target="_blank"
-          >
+          <a class="text-lightblue-500 hover:underline" href="https://atproto.com" target="_blank">
             AT Protocol
           </a>
           .
@@ -41,10 +37,7 @@ const Home = () => {
         <div>
           <span class="font-semibold text-orange-400">PDS</span>
           <div>
-            <A
-              href="/pyramid-activation.today"
-              class="text-lightblue-500 hover:underline"
-            >
+            <A href="/pyramid-activation.today" class="text-lightblue-500 hover:underline">
               https://pyramid-activation.today
             </A>
           </div>

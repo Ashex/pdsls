@@ -14,9 +14,7 @@ const StreamView = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [parameters, setParameters] = createSignal<Parameter[]>([]);
   const streamType =
-    useLocation().pathname === "/firehose" ?
-      StreamType.FIREHOSE
-    : StreamType.JETSTREAM;
+    useLocation().pathname === "/firehose" ? StreamType.FIREHOSE : StreamType.JETSTREAM;
 
   const [records, setRecords] = createSignal<Array<any>>([]);
   const [connected, setConnected] = createSignal(false);
@@ -37,8 +35,7 @@ const StreamView = () => {
     let url = "";
     if (streamType === StreamType.JETSTREAM) {
       url =
-        formData.get("instance")?.toString() ??
-        "wss://jetstream1.us-east.bsky.network/subscribe";
+        formData.get("instance")?.toString() ?? "wss://jetstream1.us-east.bsky.network/subscribe";
       url = url.concat("?");
     } else {
       url = formData.get("instance")?.toString() ?? "wss://bsky.network";
@@ -46,8 +43,7 @@ const StreamView = () => {
 
     const collections = formData.get("collections")?.toString().split(",");
     collections?.forEach((collection) => {
-      if (collection.length)
-        url = url.concat(`wantedCollections=${collection}&`);
+      if (collection.length) url = url.concat(`wantedCollections=${collection}&`);
     });
 
     const dids = formData.get("dids")?.toString().split(",");
@@ -131,16 +127,12 @@ const StreamView = () => {
 
   onMount(async () => {
     const formData = new FormData();
-    if (searchParams.instance)
-      formData.append("instance", searchParams.instance.toString());
+    if (searchParams.instance) formData.append("instance", searchParams.instance.toString());
     if (searchParams.collections)
       formData.append("collections", searchParams.collections.toString());
-    if (searchParams.dids)
-      formData.append("dids", searchParams.dids.toString());
-    if (searchParams.cursor)
-      formData.append("cursor", searchParams.cursor.toString());
-    if (searchParams.allEvents)
-      formData.append("allEvents", searchParams.allEvents.toString());
+    if (searchParams.dids) formData.append("dids", searchParams.dids.toString());
+    if (searchParams.cursor) formData.append("cursor", searchParams.cursor.toString());
+    if (searchParams.allEvents) formData.append("allEvents", searchParams.allEvents.toString());
     if (searchParams.instance) connectSocket(formData);
   });
 
@@ -149,18 +141,10 @@ const StreamView = () => {
   return (
     <div class="mt-4 flex flex-col items-center gap-y-3">
       <div class="flex divide-x-2 text-lg font-bold">
-        <A
-          class="pr-2"
-          inactiveClass="text-lightblue-500 hover:underline"
-          href="/jetstream"
-        >
+        <A class="pr-2" inactiveClass="text-lightblue-500 hover:underline" href="/jetstream">
           Jetstream
         </A>
-        <A
-          class="pl-2"
-          inactiveClass="text-lightblue-500 hover:underline"
-          href="/firehose"
-        >
+        <A class="pl-2" inactiveClass="text-lightblue-500 hover:underline" href="/firehose">
           Firehose
         </A>
       </div>

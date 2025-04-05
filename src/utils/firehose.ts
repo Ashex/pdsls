@@ -196,9 +196,7 @@ export class Firehose extends EventEmitter {
     return this;
   }
 
-  private parseMessage(
-    data: ArrayBuffer,
-  ): ParsedCommit | { $type: string; seq?: number } {
+  private parseMessage(data: ArrayBuffer): ParsedCommit | { $type: string; seq?: number } {
     const [header, remainder] = decodeFirst(new Uint8Array(data));
     const [body, remainder2] = decodeFirst(remainder);
     if (remainder2.length > 0) {

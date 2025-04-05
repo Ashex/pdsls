@@ -4,8 +4,7 @@ import Tooltip from "./tooltip.jsx";
 const getInitialTheme = () => {
   const isDarkMode =
     localStorage.theme === "dark" ||
-    (!("theme" in localStorage) &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+    (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
   return {
     color: isDarkMode ? "dark" : "light",
     system: !("theme" in localStorage),
@@ -13,9 +12,7 @@ const getInitialTheme = () => {
 };
 
 export const [theme, setTheme] = createSignal(getInitialTheme());
-const [backlinksEnabled, setBacklinksEnabled] = createSignal(
-  localStorage.backlinks === "true",
-);
+const [backlinksEnabled, setBacklinksEnabled] = createSignal(localStorage.backlinks === "true");
 
 const Settings = () => {
   const [modal, setModal] = createSignal<HTMLDialogElement>();
@@ -41,17 +38,13 @@ const Settings = () => {
   onMount(() => {
     window.addEventListener("keydown", keyEvent);
     window.addEventListener("click", clickEvent);
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", themeEvent);
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeEvent);
   });
 
   onCleanup(() => {
     window.removeEventListener("keydown", keyEvent);
     window.removeEventListener("click", clickEvent);
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .removeEventListener("change", themeEvent);
+    window.matchMedia("(prefers-color-scheme: dark)").removeEventListener("change", themeEvent);
   });
 
   createEffect(() => {
@@ -61,10 +54,7 @@ const Settings = () => {
 
   const updateTheme = (newTheme: { color: string; system: boolean }) => {
     setTheme(newTheme);
-    document.documentElement.classList.toggle(
-      "dark",
-      newTheme.color === "dark",
-    );
+    document.documentElement.classList.toggle("dark", newTheme.color === "dark");
     if (newTheme.system) {
       localStorage.removeItem("theme");
     } else {
@@ -80,9 +70,7 @@ const Settings = () => {
           class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
         >
           <div class="dark:bg-dark-400 top-10% absolute rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
-            <h3 class="mb-2 border-b border-neutral-500 pb-2 text-xl font-bold">
-              Settings
-            </h3>
+            <h3 class="mb-2 border-b border-neutral-500 pb-2 text-xl font-bold">Settings</h3>
             <h4 class="mb-1 font-semibold">Theme</h4>
             <div class="w-xs flex divide-x divide-neutral-500 overflow-hidden rounded-lg border border-neutral-500">
               <button
@@ -94,12 +82,7 @@ const Settings = () => {
                 onclick={() =>
                   updateTheme({
                     color:
-                      (
-                        window.matchMedia("(prefers-color-scheme: dark)")
-                          .matches
-                      ) ?
-                        "dark"
-                      : "light",
+                      window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
                     system: true,
                   })
                 }
@@ -111,8 +94,7 @@ const Settings = () => {
                   "basis-1/3 p-2": true,
                   "hover:bg-slate-200 dark:hover:bg-dark-200":
                     theme().color !== "light" || theme().system,
-                  "bg-neutral-500 text-slate-100":
-                    theme().color === "light" && !theme().system,
+                  "bg-neutral-500 text-slate-100": theme().color === "light" && !theme().system,
                 }}
                 onclick={() => updateTheme({ color: "light", system: false })}
               >
@@ -161,15 +143,10 @@ const Settings = () => {
                   name="constellation"
                   type="text"
                   spellcheck={false}
-                  value={
-                    localStorage.constellationHost ||
-                    "https://constellation.microcosm.blue"
-                  }
+                  value={localStorage.constellationHost || "https://constellation.microcosm.blue"}
                   disabled={!backlinksEnabled()}
                   class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300 disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-500 dark:disabled:border-gray-700 dark:disabled:bg-gray-800/20"
-                  onInput={(e) =>
-                    (localStorage.constellationHost = e.currentTarget.value)
-                  }
+                  onInput={(e) => (localStorage.constellationHost = e.currentTarget.value)}
                 />
               </div>
             </div>

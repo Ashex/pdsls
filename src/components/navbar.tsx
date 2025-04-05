@@ -6,9 +6,7 @@ import { labelerCache } from "../utils/api";
 export const [pds, setPDS] = createSignal<string>();
 export const [cid, setCID] = createSignal<string>();
 export const [isLabeler, setIsLabeler] = createSignal(false);
-export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(
-  undefined,
-);
+export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(undefined);
 
 const NavBar = (props: { params: Params }) => {
   const [openMenu, setOpenMenu] = createSignal(false);
@@ -29,11 +27,7 @@ const NavBar = (props: { params: Params }) => {
             <Tooltip text="PDS">
               <div class="i-tabler-server mr-1 shrink-0" />
             </Tooltip>
-            <A
-              end
-              href={pds()!}
-              inactiveClass="text-lightblue-500 w-full hover:underline"
-            >
+            <A end href={pds()!} inactiveClass="text-lightblue-500 w-full hover:underline">
               {pds()}
             </A>
           </Show>
@@ -49,9 +43,7 @@ const NavBar = (props: { params: Params }) => {
               <Show when={props.params.repo}>
                 <button
                   class="p-0.75 flex items-center rounded hover:bg-neutral-200 dark:hover:bg-neutral-600"
-                  onclick={() =>
-                    navigator.clipboard.writeText(props.params.repo)
-                  }
+                  onclick={() => navigator.clipboard.writeText(props.params.repo)}
                 >
                   Copy DID
                 </button>
@@ -121,9 +113,7 @@ const NavBar = (props: { params: Params }) => {
             </Show>
             <Show
               when={
-                props.params.repo in labelerCache &&
-                !props.params.collection &&
-                !props.params.rkey
+                props.params.repo in labelerCache && !props.params.collection && !props.params.rkey
               }
             >
               <div class="mt-1 flex items-center">

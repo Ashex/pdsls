@@ -137,9 +137,7 @@ const CreateRecord = () => {
               </div>
               <Editor theme={theme().color} model={model!} />
               <div class="flex flex-col gap-x-2">
-                <div class="text-red-500 dark:text-red-400">
-                  {createNotice()}
-                </div>
+                <div class="text-red-500 dark:text-red-400">{createNotice()}</div>
                 <div class="flex items-center justify-end gap-2">
                   <button
                     onclick={() => setOpenCreate(false)}

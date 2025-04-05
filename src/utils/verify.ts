@@ -4,15 +4,8 @@ import { At } from "@atcute/client/lexicons";
 import * as CAR from "@atcute/car";
 import * as CBOR from "@atcute/cbor";
 import * as CID from "@atcute/cid";
-import {
-  type FoundPublicKey,
-  getPublicKeyFromDidController,
-  verifySig,
-} from "@atcute/crypto";
-import {
-  type DidDocument,
-  getAtprotoVerificationMaterial,
-} from "@atcute/identity";
+import { type FoundPublicKey, getPublicKeyFromDidController, verifySig } from "@atcute/crypto";
+import { type DidDocument, getAtprotoVerificationMaterial } from "@atcute/identity";
 import { toSha256 } from "@atcute/uint8array";
 
 import { type AddressedAtUri, parseAddressedAtUri } from "./types/at-uri";
@@ -34,9 +27,7 @@ export interface VerifyOptions {
   didDoc: DidDocument;
 }
 
-export const verifyRecord = async (
-  opts: VerifyOptions,
-): Promise<VerifyResult> => {
+export const verifyRecord = async (opts: VerifyOptions): Promise<VerifyResult> => {
   const errors: VerifyError[] = [];
 
   // verify cid can be parsed
@@ -125,9 +116,7 @@ export const verifyRecord = async (
       const cidString = CID.toString(entry.cid);
 
       // Verify that `bytes` matches its associated CID
-      const expectedCid = CID.toString(
-        await CID.create(entry.cid.codec as 85 | 113, entry.bytes),
-      );
+      const expectedCid = CID.toString(await CID.create(entry.cid.codec as 85 | 113, entry.bytes));
       if (cidString !== expectedCid) {
         errors.push({
           message: `cid does not match bytes`,

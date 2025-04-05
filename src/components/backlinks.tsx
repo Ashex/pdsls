@@ -45,14 +45,9 @@ const Backlinks = ({ links, target }: { links: LinkData; target: string }) => {
         {({ collection, path, matchesFilter, counts }) => (
           <div class="mt-2 font-mono text-sm sm:text-base">
             <p classList={{ "text-stone-400": matchesFilter }}>
-              <span title="Collection containing linking records">
-                {collection}
-              </span>
+              <span title="Collection containing linking records">{collection}</span>
               <span class="text-cyan-500">@</span>
-              <span title="Record path where the link is found">
-                {path.slice(1)}
-              </span>
-              :
+              <span title="Record path where the link is found">{path.slice(1)}</span>:
             </p>
             <div class="pl-2.5 font-sans">
               <p>
@@ -78,11 +73,7 @@ const Backlinks = ({ links, target }: { links: LinkData; target: string }) => {
                   href="#"
                   title="Show linking DIDs"
                   onclick={() =>
-                    (
-                      show()?.collection === collection &&
-                      show()?.path === path &&
-                      show()?.showDids
-                    ) ?
+                    show()?.collection === collection && show()?.path === path && show()?.showDids ?
                       setShow(null)
                     : setShow({ collection, path, showDids: true })
                   }
@@ -91,33 +82,17 @@ const Backlinks = ({ links, target }: { links: LinkData; target: string }) => {
                   {counts.distinct_dids < 2 ? "" : "s"}
                 </a>
               </p>
-              <Show
-                when={
-                  show()?.collection === collection && show()?.path === path
-                }
-              >
+              <Show when={show()?.collection === collection && show()?.path === path}>
                 <Show when={show()?.showDids}>
                   {/* putting this in the `dids` prop directly failed to re-render. idk how to solidjs. */}
                   <p class="w-full font-semibold text-stone-600 dark:text-stone-400">
                     Distinct identities
                   </p>
-                  <BacklinkItems
-                    target={target}
-                    collection={collection}
-                    path={path}
-                    dids={true}
-                  />
+                  <BacklinkItems target={target} collection={collection} path={path} dids={true} />
                 </Show>
                 <Show when={!show()?.showDids}>
-                  <p class="w-full font-semibold text-stone-600 dark:text-stone-400">
-                    Records
-                  </p>
-                  <BacklinkItems
-                    target={target}
-                    collection={collection}
-                    path={path}
-                    dids={false}
-                  />
+                  <p class="w-full font-semibold text-stone-600 dark:text-stone-400">Records</p>
+                  <BacklinkItems target={target} collection={collection} path={path} dids={false} />
                 </Show>
               </Show>
             </div>

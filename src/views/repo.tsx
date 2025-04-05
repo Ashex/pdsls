@@ -1,13 +1,7 @@
 import { createSignal, For, Show, createResource } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import { A, query, useParams } from "@solidjs/router";
-import {
-  didDocCache,
-  getAllBacklinks,
-  LinkData,
-  resolveHandle,
-  resolvePDS,
-} from "../utils/api.js";
+import { didDocCache, getAllBacklinks, LinkData, resolveHandle, resolvePDS } from "../utils/api.js";
 import { DidDocument } from "@atcute/client/utils/did";
 import { Backlinks } from "../components/backlinks.jsx";
 
@@ -24,8 +18,7 @@ const RepoView = () => {
   let did = params.repo;
 
   const describeRepo = query(
-    (repo: string) =>
-      rpc.get("com.atproto.repo.describeRepo", { params: { repo: repo } }),
+    (repo: string) => rpc.get("com.atproto.repo.describeRepo", { params: { repo: repo } }),
     "describeRepo",
   );
 
@@ -51,9 +44,7 @@ const RepoView = () => {
   const downloadRepo = async () => {
     try {
       setDownloading(true);
-      const response = await fetch(
-        `${pds}/xrpc/com.atproto.sync.getRepo?did=${did}`,
-      );
+      const response = await fetch(`${pds}/xrpc/com.atproto.sync.getRepo?did=${did}`);
       if (!response.ok) {
         throw new Error(`HTTP error status: ${response.status}`);
       }
@@ -78,9 +69,7 @@ const RepoView = () => {
     <Show when={repo()}>
       <div class="mt-3 flex w-[21rem] flex-col gap-2 break-words">
         <div class="flex flex-col border-b border-neutral-500 pb-2 font-mono">
-          <p class="font-sans font-semibold text-stone-600 dark:text-stone-400">
-            Collections
-          </p>
+          <p class="font-sans font-semibold text-stone-600 dark:text-stone-400">Collections</p>
           <For each={repo()?.collections}>
             {(collection) => (
               <A
@@ -96,25 +85,17 @@ const RepoView = () => {
           {(didDocument) => (
             <div class="flex flex-col gap-y-1">
               <div>
-                <span class="font-semibold text-stone-600 dark:text-stone-400">
-                  ID{" "}
-                </span>
+                <span class="font-semibold text-stone-600 dark:text-stone-400">ID </span>
                 <span>{didDocument().id}</span>
               </div>
               <div>
-                <p class="font-semibold text-stone-600 dark:text-stone-400">
-                  Identities
-                </p>
+                <p class="font-semibold text-stone-600 dark:text-stone-400">Identities</p>
                 <ul class="ml-3">
-                  <For each={didDocument().alsoKnownAs}>
-                    {(alias) => <li>{alias}</li>}
-                  </For>
+                  <For each={didDocument().alsoKnownAs}>{(alias) => <li>{alias}</li>}</For>
                 </ul>
               </div>
               <div>
-                <p class="font-semibold text-stone-600 dark:text-stone-400">
-                  Services
-                </p>
+                <p class="font-semibold text-stone-600 dark:text-stone-400">Services</p>
                 <ul class="ml-3">
                   <For each={didDocument().service}>
                     {(service) => (
@@ -133,9 +114,7 @@ const RepoView = () => {
                 </ul>
               </div>
               <div>
-                <p class="font-semibold text-stone-600 dark:text-stone-400">
-                  Verification methods
-                </p>
+                <p class="font-semibold text-stone-600 dark:text-stone-400">Verification methods</p>
                 <ul class="ml-3">
                   <For each={didDocument().verificationMethod}>
                     {(verif) => (
@@ -156,8 +135,7 @@ const RepoView = () => {
                 }
                 target="_blank"
               >
-                DID document{" "}
-                <div class="i-tabler-external-link ml-0.5 text-xs" />
+                DID document <div class="i-tabler-external-link ml-0.5 text-xs" />
               </a>
               <Show when={repo()?.did.startsWith("did:plc")}>
                 <a
@@ -165,8 +143,7 @@ const RepoView = () => {
                   href={`https://boat.kelinci.net/plc-oplogs?q=${repo()?.did}`}
                   target="_blank"
                 >
-                  PLC operation logs{" "}
-                  <div class="i-tabler-external-link ml-0.5 text-xs" />
+                  PLC operation logs <div class="i-tabler-external-link ml-0.5 text-xs" />
                 </a>
               </Show>
               <div class="flex items-center gap-1">
@@ -183,10 +160,7 @@ const RepoView = () => {
               <Show when={backlinks()}>
                 {(backlinks) => (
                   <div class="mt-2 border-t border-neutral-500 pt-2">
-                    <Backlinks
-                      links={backlinks().links}
-                      target={backlinks().target}
-                    />
+                    <Backlinks links={backlinks().links} target={backlinks().target} />
                   </div>
                 )}
               </Show>

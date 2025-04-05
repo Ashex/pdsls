@@ -13,9 +13,7 @@ const processInput = action(async (formData: FormData) => {
     !input.startsWith("https://main.bsky.dev/") &&
     (input.startsWith("https://") || input.startsWith("http://"))
   )
-    throw redirect(
-      `/${input.replace("https://", "").replace("http://", "").replace("/", "")}`,
-    );
+    throw redirect(`/${input.replace("https://", "").replace("http://", "").replace("/", "")}`);
 
   const uri = input
     .replace("at://", "")
@@ -30,9 +28,7 @@ const processInput = action(async (formData: FormData) => {
   } catch {
     throw redirect(`/${actor}`);
   }
-  throw redirect(
-    `/at://${did}${uriParts.length > 1 ? `/${uriParts.slice(1).join("/")}` : ""}`,
-  );
+  throw redirect(`/at://${did}${uriParts.length > 1 ? `/${uriParts.slice(1).join("/")}` : ""}`);
 });
 
 const Search = () => {
@@ -77,9 +73,7 @@ const Search = () => {
           </Show>
         </div>
       </form>
-      <Show when={submission.error}>
-        {(err) => <div class="mt-3">{err().message}</div>}
-      </Show>
+      <Show when={submission.error}>{(err) => <div class="mt-3">{err().message}</div>}</Show>
     </>
   );
 };

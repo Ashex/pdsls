@@ -7,16 +7,12 @@
     <meta property="og:title" content="PDSls" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://pdsls.dev" />
-    <meta
-      property="og:description"
-      content="Browse and manage atproto repositories"
-    />
+    <meta property="og:description" content="Browse and manage atproto repositories" />
     <title>PDSls</title>
     <script>
       if (
         localStorage.theme === "dark" ||
-        (!("theme" in localStorage) &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches)
+        (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
       )
         document.documentElement.classList.add("dark");
       else document.documentElement.classList.remove("dark");

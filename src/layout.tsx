@@ -28,15 +28,11 @@ const Layout = (props: RouteSectionProps<unknown>) => {
       window.location.href = location.pathname.replace(params.repo, did);
     }
     await retrieveSession();
-    if (loginState() && location.pathname === "/")
-      window.location.href = `/at://${agent.sub}`;
+    if (loginState() && location.pathname === "/") window.location.href = `/at://${agent.sub}`;
   });
 
   return (
-    <div
-      id="main"
-      class="m-5 flex flex-col items-center text-slate-900 dark:text-slate-100"
-    >
+    <div id="main" class="m-5 flex flex-col items-center text-slate-900 dark:text-slate-100">
       <Show when={location.pathname !== "/"}>
         <MetaProvider>
           <Meta name="robots" content="noindex, nofollow" />
@@ -69,12 +65,7 @@ const Layout = (props: RouteSectionProps<unknown>) => {
         </div>
       </div>
       <div class="mb-5 flex max-w-full flex-col items-center text-pretty md:max-w-screen-md">
-        <Show
-          when={
-            location.pathname !== "/jetstream" &&
-            location.pathname !== "/firehose"
-          }
-        >
+        <Show when={location.pathname !== "/jetstream" && location.pathname !== "/firehose"}>
           <Search />
         </Show>
         <Show when={params.pds}>
@@ -82,15 +73,9 @@ const Layout = (props: RouteSectionProps<unknown>) => {
         </Show>
         <Show keyed when={location.pathname}>
           <ErrorBoundary
-            fallback={(err) => (
-              <div class="mt-3 break-words">Error: {err.message}</div>
-            )}
+            fallback={(err) => <div class="mt-3 break-words">Error: {err.message}</div>}
           >
-            <Suspense
-              fallback={
-                <div class="i-line-md-loading-twotone-loop mt-3 text-xl" />
-              }
-            >
+            <Suspense fallback={<div class="i-line-md-loading-twotone-loop mt-3 text-xl" />}>
               {props.children}
             </Suspense>
           </ErrorBoundary>

@@ -1,17 +1,6 @@
-import {
-  createSignal,
-  onMount,
-  Show,
-  onCleanup,
-  createEffect,
-  For,
-} from "solid-js";
+import { createSignal, onMount, Show, onCleanup, createEffect, For } from "solid-js";
 import Tooltip from "./tooltip.jsx";
-import {
-  deleteStoredSession,
-  getSession,
-  OAuthUserAgent,
-} from "@atcute/oauth-browser-client";
+import { deleteStoredSession, getSession, OAuthUserAgent } from "@atcute/oauth-browser-client";
 import { agent, Login, setLoginState } from "./login.jsx";
 import { At } from "@atcute/client/lexicons";
 
@@ -89,8 +78,7 @@ const AccountManager = () => {
                       classList={{
                         "basis-full text-left font-mono max-w-[32ch] text-sm truncate group-hover/select:bg-slate-300 dark:group-hover/select:bg-neutral-700":
                           true,
-                        "text-green-500 dark:text-green-400":
-                          session === agent?.sub,
+                        "text-green-500 dark:text-green-400": session === agent?.sub,
                       }}
                       onclick={() => resumeSession(session)}
                     >

@@ -50,9 +50,7 @@ const RecordLink = (props: { record: AtprotoRecord; index: number }) => {
       onmouseleave={() => setHoverRk(undefined)}
     >
       <span class="text-lightblue-500">{props.record.rkey}</span>
-      <Show
-        when={props.record.timestamp && props.record.timestamp <= Date.now()}
-      >
+      <Show when={props.record.timestamp && props.record.timestamp <= Date.now()}>
         <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
           {localDateFromTimestamp(props.record.timestamp!)}
         </span>
@@ -121,8 +119,7 @@ const CollectionView = () => {
   const fetchRecords = async () => {
     if (!did.startsWith("did:")) did = await resolveHandle(params.repo);
     if (!pds) pds = await resolvePDS(did);
-    if (!rpc)
-      rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
+    if (!rpc) rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     const res = await listRecords(did, params.collection, cursor());
     setCursor(res.data.records.length < 100 ? undefined : res.data.cursor);
     const tmpRecords: AtprotoRecord[] = [];
@@ -131,8 +128,7 @@ const CollectionView = () => {
       tmpRecords.push({
         rkey: rkey,
         record: record,
-        timestamp:
-          TID.validate(rkey) ? TID.parse(rkey).timestamp / 1000 : undefined,
+        timestamp: TID.validate(rkey) ? TID.parse(rkey).timestamp / 1000 : undefined,
         toDelete: false,
       });
     });
@@ -183,9 +179,7 @@ const CollectionView = () => {
     setRecords(
       records
         .map((record, index) =>
-          JSON.stringify(record.record.value).includes(filter() ?? "") ?
-            index
-          : undefined,
+          JSON.stringify(record.record.value).includes(filter() ?? "") ? index : undefined,
         )
         .filter((i) => i !== undefined),
       "toDelete",
@@ -271,8 +265,7 @@ const CollectionView = () => {
                   >
                     <div class="dark:bg-dark-400 rounded-md border border-neutral-500 bg-slate-100 p-3 text-slate-900 dark:text-slate-100">
                       <h3 class="text-lg font-bold">
-                        Delete {records.filter((rec) => rec.toDelete).length}{" "}
-                        records?
+                        Delete {records.filter((rec) => rec.toDelete).length} records?
                       </h3>
                       <div class="mt-2 inline-flex gap-2">
                         <button
@@ -334,9 +327,7 @@ const CollectionView = () => {
       <div class="flex flex-col font-mono">
         <For
           each={records.filter((rec) =>
-            filter() ?
-              JSON.stringify(rec.record.value).includes(filter()!)
-            : true,
+            filter() ? JSON.stringify(rec.record.value).includes(filter()!) : true,
           )}
         >
           {(record, index) => (
@@ -349,9 +340,7 @@ const CollectionView = () => {
                   <input
                     type="checkbox"
                     checked={record.toDelete}
-                    onchange={(e) =>
-                      setRecords(index(), "toDelete", e.currentTarget.checked)
-                    }
+                    onchange={(e) => setRecords(index(), "toDelete", e.currentTarget.checked)}
                   />
                   <RecordLink record={record} index={index()} />
                 </label>

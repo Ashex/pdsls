@@ -11,10 +11,7 @@ interface AtBlob {
 }
 
 export const syntaxHighlight = (json: string) => {
-  json = json
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  json = json.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   return json.replace(
     /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
@@ -70,12 +67,7 @@ const JSONString = ({ data }: { data: string }) => {
               ["http:", "https:", "web+at:"].includes(new URL(part).protocol) &&
               part.split("\n").length === 1
             ) ?
-              <a
-                class="underline"
-                href={part}
-                target="_blank"
-                rel="noopener noreferer"
-              >
+              <a class="underline" href={part} target="_blank" rel="noopener noreferer">
                 {part}
               </a>
             : part}
@@ -91,24 +83,14 @@ const JSONNumber = ({ data }: { data: number }) => {
 };
 
 const JSONBoolean = ({ data }: { data: boolean }) => {
-  return (
-    <span class="text-[#f57d26] dark:text-orange-300">
-      {data ? "true" : "false"}
-    </span>
-  );
+  return <span class="text-[#f57d26] dark:text-orange-300">{data ? "true" : "false"}</span>;
 };
 
 const JSONNull = () => {
   return <span class="text-neutral-400 dark:text-neutral-500">null</span>;
 };
 
-const JSONObject = ({
-  data,
-  repo,
-}: {
-  data: { [x: string]: JSONType };
-  repo: string;
-}) => {
+const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: string }) => {
   const [clip, setClip] = createSignal(false);
   const rawObj = (
     <For each={Object.entries(data)}>
@@ -214,10 +196,4 @@ export const JSONValue = ({ data, repo }: { data: JSONType; repo: string }) => {
   return <JSONObject data={data} repo={repo} />;
 };
 
-export type JSONType =
-  | string
-  | number
-  | boolean
-  | null
-  | { [x: string]: JSONType }
-  | JSONType[];
+export type JSONType = string | number | boolean | null | { [x: string]: JSONType } | JSONType[];

@@ -25,8 +25,7 @@ const BlobView = () => {
   const fetchBlobs = async (): Promise<string[]> => {
     if (!did.startsWith("did:")) did = await resolveHandle(params.repo);
     if (!pds) pds = await resolvePDS(did);
-    if (!rpc)
-      rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
+    if (!rpc) rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     const res = await listBlobs(did, cursor());
     setCursor(res.data.cids.length < 1000 ? undefined : res.data.cursor);
     setBlobs(blobs()?.concat(res.data.cids) ?? res.data.cids);

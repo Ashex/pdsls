@@ -24,9 +24,7 @@ const LabelView = () => {
   });
 
   const fetchLabels = async () => {
-    const uriPatterns = (
-      document.getElementById("patterns") as HTMLInputElement
-    ).value;
+    const uriPatterns = (document.getElementById("patterns") as HTMLInputElement).value;
     if (!uriPatterns) return;
     const res = await rpc.get("com.atproto.label.queryLabels", {
       params: {
@@ -46,26 +44,20 @@ const LabelView = () => {
     setLabels([]);
     setCursor("");
     setSearchParams({
-      uriPatterns: (document.getElementById("patterns") as HTMLInputElement)
-        .value,
+      uriPatterns: (document.getElementById("patterns") as HTMLInputElement).value,
     });
     refetch();
   };
 
   const filterLabels = () => {
-    const newFilter = labels().filter((label) =>
-      filter() ? filter() === label.val : true,
-    );
+    const newFilter = labels().filter((label) => (filter() ? filter() === label.val : true));
     setLabelCount(newFilter.length);
     return newFilter;
   };
 
   return (
     <>
-      <form
-        class="mt-3 flex flex-col items-center gap-y-1"
-        onsubmit={(e) => e.preventDefault()}
-      >
+      <form class="mt-3 flex flex-col items-center gap-y-1" onsubmit={(e) => e.preventDefault()}>
         <div class="w-full">
           <label for="patterns" class="ml-0.5 text-sm">
             URI Patterns (comma-separated)
@@ -191,9 +183,7 @@ const LabelView = () => {
           </For>
         </div>
       </Show>
-      <Show
-        when={!labels().length && !response.loading && searchParams.uriPatterns}
-      >
+      <Show when={!labels().length && !response.loading && searchParams.uriPatterns}>
         <div class="mt-2">No results</div>
       </Show>
     </>

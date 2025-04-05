@@ -11,10 +11,7 @@ const PdsView = () => {
   const [version, setVersion] = createSignal<string>();
   const [cursor, setCursor] = createSignal<string>();
   setPDS(params.pds);
-  const pds =
-    params.pds.startsWith("localhost") ?
-      `http://${params.pds}`
-    : `https://${params.pds}`;
+  const pds = params.pds.startsWith("localhost") ? `http://${params.pds}` : `https://${params.pds}`;
   const rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
 
   const listRepos = async (cursor: string | undefined) =>
@@ -44,15 +41,11 @@ const PdsView = () => {
       <div class="mt-3 flex flex-col">
         <Show when={version()}>
           <div class="flex max-w-[21rem] gap-1">
-            <span class="font-semibold text-stone-600 dark:text-stone-400">
-              Version
-            </span>
+            <span class="font-semibold text-stone-600 dark:text-stone-400">Version</span>
             <span class="break-anywhere">{version()}</span>
           </div>
         </Show>
-        <p class="w-full font-semibold text-stone-600 dark:text-stone-400">
-          Repositories
-        </p>
+        <p class="w-full font-semibold text-stone-600 dark:text-stone-400">Repositories</p>
         <For each={repos()}>
           {(repo) => (
             <A
@@ -60,8 +53,7 @@ const PdsView = () => {
               classList={{
                 "w-full flex font-mono relative": true,
                 "text-lightblue-500": repo.active,
-                "text-gray-300 absolute -left-5 dark:text-gray-600":
-                  !repo.active,
+                "text-gray-300 absolute -left-5 dark:text-gray-600": !repo.active,
               }}
             >
               <Show when={!repo.active}>

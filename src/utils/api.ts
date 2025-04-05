@@ -90,19 +90,15 @@ const getConstellation = async (
   cursor?: string,
   limit?: number,
 ) => {
-  const url = new URL(
-    localStorage.constellationHost || "https://constellation.microcosm.blue",
-  );
+  const url = new URL(localStorage.constellationHost || "https://constellation.microcosm.blue");
   url.pathname = endpoint;
   url.searchParams.set("target", target);
   if (collection) {
-    if (!path)
-      throw new Error("collection and path must either both be set or neither");
+    if (!path) throw new Error("collection and path must either both be set or neither");
     url.searchParams.set("collection", collection);
     url.searchParams.set("path", path);
   } else {
-    if (path)
-      throw new Error("collection and path must either both be set or neither");
+    if (path) throw new Error("collection and path must either both be set or neither");
   }
   if (limit) url.searchParams.set("limit", `${limit}`);
   if (cursor) url.searchParams.set("cursor", `${cursor}`);
@@ -111,8 +107,7 @@ const getConstellation = async (
   return await res.json();
 };
 
-const getAllBacklinks = (target: string) =>
-  getConstellation("/links/all", target);
+const getAllBacklinks = (target: string) => getConstellation("/links/all", target);
 
 const getRecordBacklinks = (
   target: string,
@@ -128,15 +123,7 @@ const getDidBacklinks = (
   path: string,
   cursor?: string,
   limit?: number,
-) =>
-  getConstellation(
-    "/links/distinct-dids",
-    target,
-    collection,
-    path,
-    cursor,
-    limit || 100,
-  );
+) => getConstellation("/links/distinct-dids", target, collection, path, cursor, limit || 100);
 
 export {
   didDocCache,

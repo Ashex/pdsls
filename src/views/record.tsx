@@ -13,13 +13,7 @@ import { agent, loginState } from "../components/login.jsx";
 import { setCID, setValidRecord, validRecord } from "../components/navbar.jsx";
 import { theme } from "../components/settings.jsx";
 
-import {
-  didDocCache,
-  getAllBacklinks,
-  LinkData,
-  resolveHandle,
-  resolvePDS,
-} from "../utils/api.js";
+import { didDocCache, getAllBacklinks, LinkData, resolveHandle, resolvePDS } from "../utils/api.js";
 import { AtUri, uriTemplates } from "../utils/templates.js";
 import { verifyRecord } from "../utils/verify.js";
 
@@ -79,9 +73,7 @@ export default () => {
 
         if (errors.length > 0) {
           console.warn(errors);
-          setNotice(
-            `Invalid record: ${errors.map((e) => e.message).join("\n")}`,
-          );
+          setNotice(`Invalid record: ${errors.map((e) => e.message).join("\n")}`);
         }
         setValidRecord(errors.length === 0);
       } catch (err) {
@@ -203,9 +195,7 @@ export default () => {
         <div class="i-line-md-loading-twotone-loop mt-3 text-xl" />
       </Show>
       <Show when={validRecord() === false}>
-        <div class="w-20rem mb-2 mt-3 break-words text-red-500 dark:text-red-400">
-          {notice()}
-        </div>
+        <div class="w-20rem mb-2 mt-3 break-words text-red-500 dark:text-red-400">{notice()}</div>
       </Show>
       <Show when={record()}>
         <div class="my-4 flex w-full justify-center gap-x-2">
@@ -221,13 +211,10 @@ export default () => {
               target="_blank"
               href={externalLink()?.link}
             >
-              {externalLink()?.label}{" "}
-              <div class="i-tabler-external-link text-sm" />
+              {externalLink()?.label} <div class="i-tabler-external-link text-sm" />
             </a>
           </Show>
-          <Show
-            when={loginState() && agent.sub === record()?.uri.split("/")[2]}
-          >
+          <Show when={loginState() && agent.sub === record()?.uri.split("/")[2]}>
             <Show when={openEdit()}>
               <dialog
                 ref={setModal}
@@ -252,17 +239,10 @@ export default () => {
                     </div>
                     <Editor theme={theme().color} model={model!} />
                     <div class="mt-2 flex flex-col gap-2">
-                      <div class="text-red-500 dark:text-red-400">
-                        {editNotice()}
-                      </div>
+                      <div class="text-red-500 dark:text-red-400">{editNotice()}</div>
                       <div class="flex items-center justify-end gap-2">
                         <div class="flex items-center gap-1">
-                          <input
-                            id="recreate"
-                            class="size-4"
-                            name="recreate"
-                            type="checkbox"
-                          />
+                          <input id="recreate" class="size-4" name="recreate" type="checkbox" />
                           <label for="recreate" class="select-none">
                             Recreate record
                           </label>
@@ -288,10 +268,7 @@ export default () => {
             </Show>
             <button
               onclick={() => {
-                model = editor.createModel(
-                  JSON.stringify(record()?.value, null, 2),
-                  "json",
-                );
+                model = editor.createModel(JSON.stringify(record()?.value, null, 2), "json");
                 setOpenEdit(true);
               }}
               class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
@@ -335,33 +312,26 @@ export default () => {
         </div>
         <div
           classList={{
-            "break-anywhere mb-2 whitespace-pre-wrap pb-3 font-mono text-sm sm:text-base":
-              true,
+            "break-anywhere mb-2 whitespace-pre-wrap pb-3 font-mono text-sm sm:text-base": true,
             "border-b border-neutral-500": !!backlinks(),
           }}
         >
           <Show when={!JSONSyntax()}>
-            <JSONValue
-              data={record()?.value as any}
-              repo={record()!.uri.split("/")[2]}
-            />
+            <JSONValue data={record()?.value as any} repo={record()!.uri.split("/")[2]} />
           </Show>
           <Show when={JSONSyntax()}>
             <span
               innerHTML={syntaxHighlight(
                 JSON.stringify(record()?.value, null, 2).replace(
                   /[\u007F-\uFFFF]/g,
-                  (chr) =>
-                    "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4),
+                  (chr) => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4),
                 ),
               )}
             ></span>
           </Show>
         </div>
         <Show when={backlinks()}>
-          {(backlinks) => (
-            <Backlinks links={backlinks().links} target={backlinks().target} />
-          )}
+          {(backlinks) => <Backlinks links={backlinks().links} target={backlinks().target} />}
         </Show>
       </Show>
     </>

@@ -16,19 +16,13 @@ const ATURI_RE =
 
 const isDid = (input: unknown): input is Did => {
   return (
-    typeof input === "string" &&
-    input.length >= 7 &&
-    input.length <= 2048 &&
-    DID_RE.test(input)
+    typeof input === "string" && input.length >= 7 && input.length <= 2048 && DID_RE.test(input)
   );
 };
 
 const isNsid = (input: unknown): input is Nsid => {
   return (
-    typeof input === "string" &&
-    input.length >= 5 &&
-    input.length <= 317 &&
-    NSID_RE.test(input)
+    typeof input === "string" && input.length >= 5 && input.length <= 317 && NSID_RE.test(input)
   );
 };
 
