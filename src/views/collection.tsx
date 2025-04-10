@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import { CredentialManager, XRPC } from "@atcute/client";
 import {
+  At,
   Brand,
   ComAtprotoRepoApplyWrites,
   ComAtprotoRepoListRecords,
@@ -107,8 +108,8 @@ const CollectionView = () => {
     (did: string, collection: string, cursor: string | undefined) =>
       rpc.get("com.atproto.repo.listRecords", {
         params: {
-          repo: did,
-          collection: collection,
+          repo: did as At.Identifier,
+          collection: collection as `${string}.${string}.${string}`,
           limit: 100,
           cursor: cursor,
         },
@@ -144,7 +145,7 @@ const CollectionView = () => {
       .map((record): Brand.Union<ComAtprotoRepoApplyWrites.Delete> => {
         return {
           $type: "com.atproto.repo.applyWrites#delete",
-          collection: params.collection,
+          collection: params.collection as `${string}.${string}.${string}`,
           rkey: record.rkey,
         };
       });

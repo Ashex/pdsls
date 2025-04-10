@@ -86,9 +86,9 @@ const retrieveSession = async () => {
 
       if (lastSignedIn) {
         try {
-          return await getSession(lastSignedIn as At.DID);
+          return await getSession(lastSignedIn as At.Did);
         } catch (err) {
-          deleteStoredSession(lastSignedIn as At.DID);
+          deleteStoredSession(lastSignedIn as At.Did);
           localStorage.removeItem("lastSignedIn");
           throw err;
         }

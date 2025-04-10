@@ -7,7 +7,7 @@ import { At } from "@atcute/client/lexicons";
 const AccountManager = () => {
   const [modal, setModal] = createSignal<HTMLDialogElement>();
   const [openManager, setOpenManager] = createSignal(false);
-  const [sessions, setSessions] = createSignal<At.DID[]>([]);
+  const [sessions, setSessions] = createSignal<At.Did[]>([]);
 
   const clickEvent = (event: MouseEvent) => {
     if (modal() && event.target == modal()) setOpenManager(false);
@@ -35,7 +35,7 @@ const AccountManager = () => {
     if (openManager()) {
       const storedSessions = localStorage.getItem("atcute-oauth:sessions");
       if (storedSessions) {
-        setSessions(Object.keys(JSON.parse(storedSessions)) as At.DID[]);
+        setSessions(Object.keys(JSON.parse(storedSessions)) as At.Did[]);
       }
     }
   });
@@ -45,7 +45,7 @@ const AccountManager = () => {
     window.location.href = "/";
   };
 
-  const removeSession = async (did: At.DID) => {
+  const removeSession = async (did: At.Did) => {
     const currentSession = agent?.sub;
     try {
       const session = await getSession(did, { allowStale: true });

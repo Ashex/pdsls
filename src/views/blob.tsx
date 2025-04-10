@@ -14,7 +14,7 @@ const BlobView = () => {
     (did: string, cursor: string | undefined) =>
       rpc.get("com.atproto.sync.listBlobs", {
         params: {
-          did: did as `did:${string}`,
+          did: did as `did:${string}:${string}`,
           limit: 1000,
           cursor: cursor,
         },

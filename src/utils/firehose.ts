@@ -291,7 +291,7 @@ export interface ParsedCommit {
   /** The repo this event comes from. */
   repo: string;
   /** Repo commit object CID. */
-  commit: At.CIDLink;
+  commit: At.CidLink;
   /** The rev of the emitted commit. Note that this information is also in the commit object included in blocks, unless this is a tooBig event. */
   rev: string;
   /** The rev of the last emitted commit from this repo (if any). */
@@ -301,7 +301,7 @@ export interface ParsedCommit {
   /** List of repo mutation operations in this commit (eg, records created, updated, or deleted). */
   ops: Array<RepoOp>;
   /** List of new blobs (by CID) referenced by records in this commit. */
-  blobs: At.CIDLink[];
+  blobs: At.CidLink[];
   /** Timestamp of when this message was originally broadcast. */
   time: string;
 }
@@ -320,8 +320,8 @@ function parseHeader(header: any): { t: string; op: 1 | -1 } {
   return { t: header.t, op: header.op };
 }
 
-function readCar(buffer: Uint8Array): Map<At.CID, unknown> {
-  const records = new Map<At.CID, unknown>();
+function readCar(buffer: Uint8Array): Map<At.Cid, unknown> {
+  const records = new Map<At.Cid, unknown>();
   for (const { cid, bytes } of createCarIterator(buffer).iterate()) {
     records.set(toCidLink(cid).$link, decode(bytes));
   }

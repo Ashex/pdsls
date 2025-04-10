@@ -1,5 +1,5 @@
 import { CredentialManager, XRPC } from "@atcute/client";
-import { ComAtprotoRepoGetRecord } from "@atcute/client/lexicons";
+import { At, ComAtprotoRepoGetRecord } from "@atcute/client/lexicons";
 
 import { query, useParams } from "@solidjs/router";
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
@@ -104,7 +104,11 @@ export default () => {
   const getRecord = query(
     (repo: string, collection: string, rkey: string) =>
       rpc.get("com.atproto.repo.getRecord", {
-        params: { repo: repo, collection: collection, rkey: rkey },
+        params: {
+          repo: repo as At.Identifier,
+          collection: collection as `${string}.${string}.${string}`,
+          rkey: rkey,
+        },
       }),
     "getRecord",
   );
@@ -122,16 +126,16 @@ export default () => {
       if (formData.get("recreate")) {
         await rpc.call("com.atproto.repo.applyWrites", {
           data: {
-            repo: params.repo,
+            repo: params.repo as At.Identifier,
             validate: validate,
             writes: [
               {
-                collection: params.collection,
+                collection: params.collection as `${string}.${string}.${string}`,
                 rkey: params.rkey,
                 $type: "com.atproto.repo.applyWrites#delete",
               },
               {
-                collection: params.collection,
+                collection: params.collection as `${string}.${string}.${string}`,
                 rkey: params.rkey,
                 $type: "com.atproto.repo.applyWrites#create",
                 value: editedRecord,
@@ -142,8 +146,8 @@ export default () => {
       } else {
         await rpc.call("com.atproto.repo.putRecord", {
           data: {
-            repo: params.repo,
-            collection: params.collection,
+            repo: params.repo as At.Identifier,
+            collection: params.collection as `${string}.${string}.${string}`,
             rkey: params.rkey,
             record: editedRecord,
             validate: validate,
@@ -161,8 +165,8 @@ export default () => {
     rpc = new XRPC({ handler: agent });
     await rpc.call("com.atproto.repo.deleteRecord", {
       data: {
-        repo: params.repo,
-        collection: params.collection,
+        repo: params.repo as At.Identifier,
+        collection: params.collection as `${string}.${string}.${string}`,
         rkey: params.rkey,
       },
     });

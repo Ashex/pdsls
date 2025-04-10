@@ -29,7 +29,7 @@ const LabelView = () => {
     const res = await rpc.get("com.atproto.label.queryLabels", {
       params: {
         uriPatterns: uriPatterns.toString().trim().split(","),
-        sources: [did as `did:${string}`],
+        sources: [did as `did:${string}:${string}`],
         cursor: cursor(),
       },
     });

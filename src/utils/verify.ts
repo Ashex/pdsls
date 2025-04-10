@@ -88,7 +88,7 @@ export const verifyRecord = async (opts: VerifyOptions): Promise<VerifyResult> =
   try {
     const { data } = await opts.rpc.get("com.atproto.sync.getRecord", {
       params: {
-        did: opts.didDoc.id as At.DID,
+        did: opts.didDoc.id as At.Did,
         collection: uri.collection,
         rkey: uri.rkey,
       },
