@@ -151,7 +151,7 @@ const RepoView = () => {
               <div class="flex items-center gap-1">
                 <button
                   onclick={() => downloadRepo()}
-                  class="text-lightblue-500 flex w-fit items-center hover:underline"
+                  class="text-lightblue-500 flex w-fit items-center bg-transparent hover:underline"
                 >
                   Export repo
                 </button>
