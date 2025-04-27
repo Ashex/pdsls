@@ -37,7 +37,7 @@ const RepoView = () => {
         const authority = `${nsid[0]}.${nsid[1]}`;
         collections[authority] = {
           nsids: (collections[authority]?.nsids ?? []).concat(nsid.slice(2).join(".")),
-          hidden: (collections[authority]?.nsids ?? []).length > 4,
+          hidden: (collections[authority]?.nsids ?? []).length + 1 > 4,
         };
       }
     });
