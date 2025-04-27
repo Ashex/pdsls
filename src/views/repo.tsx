@@ -14,6 +14,7 @@ const RepoView = () => {
     links: LinkData;
     target: string;
   }>();
+  const [nsids, setNsids] = createSignal<Record<string, { hidden: boolean; nsids: string[] }>>();
   let rpc: XRPC;
   let pds: string;
   let did = params.repo;
@@ -29,6 +30,19 @@ const RepoView = () => {
     pds = await resolvePDS(did);
     rpc = new XRPC({ handler: new CredentialManager({ service: pds }) });
     const res = await describeRepo(did);
+    const collections: Record<string, { hidden: boolean; nsids: string[] }> = {};
+    res.data.collections.forEach((c) => {
+      const nsid = c.split(".");
+      if (nsid.length > 2) {
+        const authority = `${nsid[0]}.${nsid[1]}`;
+        collections[authority] = {
+          nsids: (collections[authority]?.nsids ?? []).concat(nsid.slice(2).join(".")),
+          hidden: (collections[authority]?.nsids ?? []).length > 4,
+        };
+      }
+    });
+    console.log(collections);
+    setNsids(collections);
     setDidDoc(didDocCache[did] as DidDocument);
     if (localStorage.backlinks === "true") {
       try {
@@ -67,19 +81,55 @@ const RepoView = () => {
     setDownloading(false);
   };
 
+  const toggleCollection = (authority: string) => {
+    setNsids({
+      ...nsids(),
+      [authority]: { ...nsids()![authority], hidden: !nsids()![authority].hidden },
+    });
+  };
+
   return (
     <Show when={repo()}>
       <div class="mt-3 flex w-[21rem] flex-col gap-2 break-words">
         <div class="flex flex-col border-b border-neutral-500 pb-2 font-mono">
           <p class="font-sans font-semibold text-stone-600 dark:text-stone-400">Collections</p>
-          <For each={repo()?.collections}>
-            {(collection) => (
-              <A
-                href={`/at://${did}/${collection}`}
-                class="text-lightblue-500 break-anywhere w-full hover:underline"
-              >
-                {collection}
-              </A>
+          <For each={Object.keys(nsids() ?? {})}>
+            {(authority) => (
+              <div class="grid grid-cols-[min-content_1fr] items-center">
+                <Show when={nsids()?.[authority].hidden}>
+                  <button
+                    class="i-ant-design-plus-square-outlined mr-1"
+                    onclick={() => toggleCollection(authority)}
+                  />
+                </Show>
+                <Show when={!nsids()?.[authority].hidden}>
+                  <button
+                    class="i-ant-design-minus-square-outlined mr-1"
+                    onclick={() => toggleCollection(authority)}
+                  />
+                </Show>
+                <button
+                  class="break-anywhere bg-transparent text-left"
+                  onclick={() => toggleCollection(authority)}
+                >
+                  {authority}
+                </button>
+                <Show when={!nsids()?.[authority].hidden}>
+                  <div></div>
+                  <div class="ml-2 flex flex-col">
+                    <For each={nsids()?.[authority].nsids}>
+                      {(nsid) => (
+                        <A
+                          href={`/at://${did}/${authority}.${nsid}`}
+                          class="text-lightblue-500 break-anywhere hover:underline"
+                        >
+                          {authority}.{nsid}
+                        </A>
+                      )}
+                    </For>
+                  </div>
+                </Show>
+              </div>
             )}
           </For>
         </div>
