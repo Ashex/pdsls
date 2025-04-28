@@ -18,7 +18,7 @@ const processInput = action(async (formData: FormData) => {
 
   const uri = input
     .replace("at://", "")
-    .replace("https://deer.social/", "https://bsky.app/")
+    .replace("https://deer.social/profile/", "")
     .replace("https://bsky.app/profile/", "")
     .replace("https://main.bsky.dev/profile/", "")
     .replace("/post/", "/app.bsky.feed.post/");

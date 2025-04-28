@@ -41,7 +41,6 @@ const RepoView = () => {
         };
       }
     });
-    console.log(collections);
     setNsids(collections);
     setDidDoc(didDocCache[did] as DidDocument);
     if (localStorage.backlinks === "true") {
