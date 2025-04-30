@@ -100,7 +100,8 @@ const RepoView = () => {
 
     const updatedNsids = { ...nsids() };
     Object.keys(updatedNsids).forEach((authority) => {
-      updatedNsids[authority].hidden = newState;
+      const updatedNsid = updatedNsids[authority];
+      updatedNsid.nsids.length > 1 ? (updatedNsid.hidden = newState) : (updatedNsid.hidden = false);
     });
 
     setNsids(updatedNsids);
