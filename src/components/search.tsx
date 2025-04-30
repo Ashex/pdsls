@@ -49,7 +49,7 @@ const Search = () => {
             PDS URL or AT URI
           </label>
         </div>
-        <div class="flex items-center gap-x-2">
+        <div class="flex items-center gap-1">
           <input
             type="text"
             id="input"
@@ -57,12 +57,7 @@ const Search = () => {
             spellcheck={false}
             class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
           />
-          <button
-            type="submit"
-            class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-gray-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300"
-          >
-            Go
-          </button>
+          <button type="submit" class="i-mynaui-arrow-right-square text-2xl" />
           <Show when={loginState()}>
             <Tooltip
               text="Repository"
