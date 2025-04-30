@@ -39,7 +39,7 @@ const RepoView = () => {
         const authority = `${nsid[0]}.${nsid[1]}`;
         collections[authority] = {
           nsids: (collections[authority]?.nsids ?? []).concat(nsid.slice(2).join(".")),
-          hidden: (collections[authority]?.nsids ?? []).length + 1 > 4,
+          hidden: false,
         };
       }
     });
@@ -120,45 +120,49 @@ const RepoView = () => {
               </button>
             </Tooltip>
           </div>
-          <For each={Object.keys(nsids() ?? {})}>
-            {(authority) => (
-              <div class="grid grid-cols-[min-content_1fr] items-center">
-                <Show when={nsids()?.[authority].hidden}>
-                  <button
-                    class="i-fluent-add-square-20-regular mr-1"
-                    onclick={() => toggleCollection(authority)}
-                  />
-                </Show>
-                <Show when={!nsids()?.[authority].hidden}>
-                  <button
-                    class="i-fluent-subtract-square-20-regular mr-1"
-                    onclick={() => toggleCollection(authority)}
-                  />
-                </Show>
-                <button
-                  class="break-anywhere bg-transparent text-left"
-                  onclick={() => toggleCollection(authority)}
-                >
-                  {authority}
-                </button>
-                <Show when={!nsids()?.[authority].hidden}>
-                  <div></div>
-                  <div class="ml-2 flex flex-col">
-                    <For each={nsids()?.[authority].nsids}>
-                      {(nsid) => (
-                        <A
-                          href={`/at://${did}/${authority}.${nsid}`}
-                          class="text-lightblue-500 break-anywhere hover:underline"
-                        >
-                          {authority}.{nsid}
-                        </A>
-                      )}
-                    </For>
-                  </div>
-                </Show>
-              </div>
-            )}
-          </For>
+          <div class="grid grid-cols-[min-content_1fr] items-center">
+            <For each={Object.keys(nsids() ?? {})}>
+              {(authority) => (
+                <>
+                  <Show when={(nsids()?.[authority].nsids ?? []).length > 1}>
+                    <Show when={nsids()?.[authority].hidden}>
+                      <button
+                        class="i-fluent-add-square-20-regular mr-1"
+                        onclick={() => toggleCollection(authority)}
+                      />
+                    </Show>
+                    <Show when={!nsids()?.[authority].hidden}>
+                      <button
+                        class="i-fluent-subtract-square-20-regular mr-1"
+                        onclick={() => toggleCollection(authority)}
+                      />
+                    </Show>
+                    <button
+                      class="break-anywhere bg-transparent text-left"
+                      onclick={() => toggleCollection(authority)}
+                    >
+                      {authority}
+                    </button>
+                  </Show>
+                  <Show when={!nsids()?.[authority].hidden}>
+                    <div></div>
+                    <div class="flex flex-col">
+                      <For each={nsids()?.[authority].nsids}>
+                        {(nsid) => (
+                          <A
+                            href={`/at://${did}/${authority}.${nsid}`}
+                            class="text-lightblue-500 break-anywhere hover:underline"
+                          >
+                            {authority}.{nsid}
+                          </A>
+                        )}
+                      </For>
+                    </div>
+                  </Show>
+                </>
+              )}
+            </For>
+          </div>
         </div>
         <Show when={didDoc()}>
           {(didDocument) => (
