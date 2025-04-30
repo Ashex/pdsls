@@ -41,7 +41,7 @@ const Layout = (props: RouteSectionProps<unknown>) => {
       <div class="mb-2 flex w-[21rem] items-center">
         <div class="flex basis-1/3 gap-x-2">
           <A href="/jetstream">
-            <Tooltip text="Jetstream">
+            <Tooltip text="Relay">
               <div class="i-ic-outline-cell-tower text-xl" />
             </Tooltip>
           </A>
