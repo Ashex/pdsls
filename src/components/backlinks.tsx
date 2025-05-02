@@ -47,7 +47,7 @@ const Backlinks = ({ links, target }: { links: LinkData; target: string }) => {
             <p classList={{ "text-stone-400": matchesFilter }}>
               <span title="Collection containing linking records">{collection}</span>
               <span class="text-cyan-500">@</span>
-              <span title="Record path where the link is found">{path.slice(1)}</span>:
+              <span title="Record path where the link is found">{path.slice(1)}</span>
             </p>
             <div class="pl-2.5 font-sans">
               <p>
