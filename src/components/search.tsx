@@ -1,48 +1,50 @@
 import { resolveHandle } from "../utils/api.js";
-import { A, action, redirect, useSubmission } from "@solidjs/router";
+import { A } from "@solidjs/router";
 import Tooltip from "./tooltip.jsx";
-import { Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { agent, loginState } from "../components/login.jsx";
 
-const processInput = action(async (formData: FormData) => {
-  const input = formData.get("input")?.toString().trim();
-  (document.getElementById("uriForm") as HTMLFormElement).reset();
-  if (!input) return new Error("Empty input");
-  if (
-    !input.startsWith("https://bsky.app/") &&
-    !input.startsWith("https://main.bsky.dev/") &&
-    !input.startsWith("https://deer.social/") &&
-    (input.startsWith("https://") || input.startsWith("http://"))
-  )
-    throw redirect(`/${input.replace("https://", "").replace("http://", "").replace("/", "")}`);
-
-  const uri = input
-    .replace("at://", "")
-    .replace("https://deer.social/profile/", "")
-    .replace("https://bsky.app/profile/", "")
-    .replace("https://main.bsky.dev/profile/", "")
-    .replace("/post/", "/app.bsky.feed.post/");
-  const uriParts = uri.split("/");
-  const actor = uriParts[0];
-  let did: string;
-  try {
-    did = uri.startsWith("did:") ? actor : await resolveHandle(actor);
-  } catch {
-    throw redirect(`/${actor}`);
-  }
-  throw redirect(`/at://${did}${uriParts.length > 1 ? `/${uriParts.slice(1).join("/")}` : ""}`);
-});
-
 const Search = () => {
-  const submission = useSubmission(processInput);
+  let searchInput!: HTMLInputElement;
+  const [loading, setLoading] = createSignal(false);
+
+  const processInput = async (input: string) => {
+    (document.getElementById("uriForm") as HTMLFormElement).reset();
+    if (!input.trim().length) return;
+    if (
+      !input.startsWith("https://bsky.app/") &&
+      !input.startsWith("https://deer.social/") &&
+      (input.startsWith("https://") || input.startsWith("http://"))
+    ) {
+      window.location.href = `/${input.replace("https://", "").replace("http://", "").replace("/", "")}`;
+      return;
+    }
+
+    const uri = input
+      .replace("at://", "")
+      .replace("https://deer.social/profile/", "")
+      .replace("https://bsky.app/profile/", "")
+      .replace("/post/", "/app.bsky.feed.post/");
+    const uriParts = uri.split("/");
+    const actor = uriParts[0];
+    let did = "";
+    try {
+      setLoading(true);
+      did = uri.startsWith("did:") ? actor : await resolveHandle(actor);
+      setLoading(false);
+    } catch {
+      window.location.href = `/${actor}`;
+      return;
+    }
+    window.location.href = `/at://${did}${uriParts.length > 1 ? `/${uriParts.slice(1).join("/")}` : ""}`;
+  };
 
   return (
     <>
       <form
         class="flex flex-col items-center gap-y-1"
         id="uriForm"
-        method="post"
-        action={processInput}
+        onsubmit={(e) => e.preventDefault()}
       >
         <div class="w-full">
           <label for="input" class="ml-0.5 text-sm">
@@ -53,11 +55,22 @@ const Search = () => {
           <input
             type="text"
             id="input"
-            name="input"
+            ref={searchInput}
             spellcheck={false}
             class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
           />
-          <button type="submit" class="i-mynaui-arrow-right-square text-2xl" />
+          <div class="flex min-w-[2rem] justify-center">
+            <Show when={loading()}>
+              <div class="i-line-md-loading-twotone-loop text-xl" />
+            </Show>
+            <Show when={!loading()}>
+              <button
+                type="submit"
+                onclick={() => processInput(searchInput.value)}
+                class="i-mynaui-arrow-right-square text-2xl"
+              />
+            </Show>
+          </div>
           <Show when={loginState()}>
             <Tooltip
               text="Repository"
@@ -70,7 +83,6 @@ const Search = () => {
           </Show>
         </div>
       </form>
-      <Show when={submission.error}>{(err) => <div class="mt-3">{err().message}</div>}</Show>
     </>
   );
 };
