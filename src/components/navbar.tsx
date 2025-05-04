@@ -8,6 +8,12 @@ export const [cid, setCID] = createSignal<string>();
 export const [isLabeler, setIsLabeler] = createSignal(false);
 export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(undefined);
 
+const swapIcons = (repo: string) => {
+  if (repo === "did:plc:vwzwgnygau7ed7b7wt5ux7y2") return "i-hugeicons-nintendo-switch";
+  if (repo === "did:plc:tndeaffsojahb3tzjut27gi5") return "i-lucide-bone";
+  return "i-lucide-arrow-right-left";
+};
+
 const NavBar = (props: { params: Params }) => {
   const [openMenu, setOpenMenu] = createSignal(false);
   const [dropdown, setDropdown] = createSignal<HTMLDivElement>();
@@ -97,7 +103,7 @@ const NavBar = (props: { params: Params }) => {
       <div class="flex flex-col flex-wrap">
         <Show when={props.params.repo}>
           <div>
-            <div class="mt-1 relative flex items-center justify-between">
+            <div class="relative mt-1 flex items-center justify-between">
               <div class="flex items-center">
                 <Tooltip text="Repository">
                   <div class="i-atproto-logo mr-1" />
@@ -112,13 +118,7 @@ const NavBar = (props: { params: Params }) => {
               </div>
               <Tooltip text={showHandle() ? "Show DID" : "Show Handle"}>
                 <button
-                  classList={{
-                    "ml-1 shrink-0 text-lg": true,
-                    "i-hugeicons-nintendo-switch":
-                      props.params.repo === "did:plc:vwzwgnygau7ed7b7wt5ux7y2",
-                    "i-lucide-arrow-right-left":
-                      props.params.repo !== "did:plc:vwzwgnygau7ed7b7wt5ux7y2",
-                  }}
+                  class={"ml-1 shrink-0 text-lg " + swapIcons(props.params.repo)}
                   onclick={() => setShowHandle(!showHandle())}
                 />
               </Tooltip>
@@ -178,17 +178,12 @@ const NavBar = (props: { params: Params }) => {
             </Tooltip>
             <span class="mr-1 cursor-pointer">{props.params.rkey}</span>
             <Show when={validRecord()}>
-              <Tooltip
-                text="Valid record"
-                children={<div class="i-lucide-check-circle" />}
-              />
+              <Tooltip text="Valid record" children={<div class="i-lucide-check-circle" />} />
             </Show>
             <Show when={validRecord() === false}>
               <Tooltip
                 text="Invalid record"
-                children={
-                  <div class="i-lucide-dismiss-circle text-red-500 dark:text-red-400" />
-                }
+                children={<div class="i-lucide-dismiss-circle text-red-500 dark:text-red-400" />}
               />
             </Show>
             <Show when={validRecord() === undefined}>
