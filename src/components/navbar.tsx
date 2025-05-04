@@ -1,7 +1,7 @@
 import { A, Params } from "@solidjs/router";
 import Tooltip from "./tooltip";
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
-import { labelerCache } from "../utils/api";
+import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { didDocCache, labelerCache } from "../utils/api";
 
 export const [pds, setPDS] = createSignal<string>();
 export const [cid, setCID] = createSignal<string>();
@@ -11,6 +11,8 @@ export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(u
 const NavBar = (props: { params: Params }) => {
   const [openMenu, setOpenMenu] = createSignal(false);
   const [dropdown, setDropdown] = createSignal<HTMLDivElement>();
+  const [showHandle, setShowHandle] = createSignal(false);
+  const [handle, setHandle] = createSignal(props.params.repo);
 
   const clickEvent = (event: MouseEvent) => {
     if (openMenu() && event.target !== dropdown()) setOpenMenu(false);
@@ -18,6 +20,16 @@ const NavBar = (props: { params: Params }) => {
 
   onMount(() => window.addEventListener("click", clickEvent));
   onCleanup(() => window.removeEventListener("click", clickEvent));
+
+  createEffect(() => {
+    if (pds() !== undefined) {
+      setHandle(
+        didDocCache[props.params.repo]?.alsoKnownAs
+          ?.filter((alias) => alias.startsWith("at://"))[0]
+          .split("at://")[1] ?? props.params.repo,
+      );
+    }
+  });
 
   return (
     <div class="break-anywhere mt-4 flex w-[21rem] flex-col font-mono text-sm">
@@ -85,17 +97,31 @@ const NavBar = (props: { params: Params }) => {
       <div class="flex flex-col flex-wrap">
         <Show when={props.params.repo}>
           <div>
-            <div class="mt-1 flex items-center">
-              <Tooltip text="Repository">
-                <div class="i-atproto-logo mr-1" />
+            <div class="relative flex items-center justify-between">
+              <div class="mt-1 flex items-center">
+                <Tooltip text="Repository">
+                  <div class="i-atproto-logo mr-1" />
+                </Tooltip>
+                <A
+                  end
+                  href={`/at://${props.params.repo}`}
+                  inactiveClass="text-lightblue-500 w-full hover:underline"
+                >
+                  {showHandle() ? handle() : props.params.repo}
+                </A>
+              </div>
+              <Tooltip text={showHandle() ? "Show DID" : "Show Handle"}>
+                <button
+                  classList={{
+                    "ml-1 shrink-0 text-lg": true,
+                    "i-hugeicons-nintendo-switch":
+                      props.params.repo === "did:plc:vwzwgnygau7ed7b7wt5ux7y2",
+                    "i-stash-arrows-switch-solid":
+                      props.params.repo !== "did:plc:vwzwgnygau7ed7b7wt5ux7y2",
+                  }}
+                  onclick={() => setShowHandle(!showHandle())}
+                />
               </Tooltip>
-              <A
-                end
-                href={`/at://${props.params.repo}`}
-                inactiveClass="text-lightblue-500 w-full hover:underline"
-              >
-                {props.params.repo}
-              </A>
             </div>
             <Show when={!props.params.collection && !props.params.rkey}>
               <div class="mt-1 flex items-center">
