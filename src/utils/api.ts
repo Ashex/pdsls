@@ -70,6 +70,7 @@ const validateHandle = async (handle: string, did: string) => {
   if (!isHandle(handle)) return false;
 
   const handleResolver = new CompositeHandleResolver({
+    strategy: "dns-first",
     methods: {
       dns: new DohJsonHandleResolver({ dohUrl: "https://mozilla.cloudflare-dns.com/dns-query" }),
       http: new WellKnownHandleResolver(),
