@@ -2,8 +2,8 @@ import { A } from "@solidjs/router";
 
 const Home = () => {
   return (
-    <div class="w-21rem mt-4 flex flex-col break-words">
-      <div class="mb-2">
+    <div class="w-22rem mt-4 flex flex-col gap-2 break-words">
+      <div>
         <p>
           Browse the public data on{" "}
           <a class="text-lightblue-500 hover:underline" href="https://atproto.com" target="_blank">
@@ -34,36 +34,50 @@ const Home = () => {
         </p>
       </div>
       <div>
+        <span class="font-semibold">Examples</span>
         <div>
-          <span class="font-semibold text-orange-400">PDS</span>
-          <div>
-            <A href="/pyramid-activation.today" class="text-lightblue-500 hover:underline">
-              https://pyramid-activation.today
-            </A>
-          </div>
+          <A href="/pyramid-activation.today" class="text-lightblue-500 hover:underline">
+            https://pyramid-activation.today
+          </A>
         </div>
         <div>
-          <span class="font-semibold text-orange-400">Repository</span>
-          <div>
-            <A
-              href="/at://did:plc:vwzwgnygau7ed7b7wt5ux7y2"
-              class="text-lightblue-500 hover:underline"
-            >
-              at://did:plc:vwzwgnygau7ed7b7wt5ux7y2
-            </A>
-          </div>
+          <A
+            href="/at://did:plc:vwzwgnygau7ed7b7wt5ux7y2"
+            class="text-lightblue-500 hover:underline"
+          >
+            at://did:plc:vwzwgnygau7ed7b7wt5ux7y2
+          </A>
         </div>
         <div>
-          <span class="font-semibold text-orange-400">Record</span>
-          <div>
-            <A
-              href="/at://did:plc:oisofpd7lj26yvgiivf3lxsi/app.bsky.feed.post/3l2zpbbhuvw2h"
-              class="text-lightblue-500 hover:underline"
-            >
-              at://did:plc:oisofpd7lj26yvgiivf3lxsi/app.bsky.feed.post/3l2zpbbhuvw2h
-            </A>
-          </div>
+          <A
+            href="/at://did:plc:oisofpd7lj26yvgiivf3lxsi/app.bsky.feed.post/3l2zpbbhuvw2h"
+            class="text-lightblue-500 hover:underline"
+          >
+            at://hailey.at/app.bsky.feed.post/3l2zpbbhuvw2h
+          </A>
         </div>
+      </div>
+      <div>
+        <p>
+          <span class="font-semibold">GitHub</span>:{" "}
+          <A
+            href="https://github.com/notjuliet/pdsls"
+            target="_blank"
+            class="text-lightblue-500 hover:underline"
+          >
+            notjuliet/pdsls
+          </A>
+        </p>
+        <p>
+          <span class="font-semibold">Tangled</span>:{" "}
+          <A
+            href="https://tangled.sh/@juli.ee/pdsls"
+            target="_blank"
+            class="text-lightblue-500 hover:underline"
+          >
+            @juli.ee/pdsls
+          </A>
+        </p>
       </div>
     </div>
   );

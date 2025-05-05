@@ -46,9 +46,6 @@ const Layout = (props: RouteSectionProps<unknown>) => {
             </Tooltip>
           </A>
           <AccountManager />
-          <Show when={loginState()}>
-            <CreateRecord />
-          </Show>
         </div>
         <div class="basis-1/3 text-center font-mono text-xl font-bold">
           <A href="/" class="hover:underline">
@@ -56,11 +53,9 @@ const Layout = (props: RouteSectionProps<unknown>) => {
           </A>
         </div>
         <div class="justify-right flex basis-1/3 items-center gap-x-2">
-          <a href="https://github.com/notjuliet/pdsls" target="_blank">
-            <Tooltip text="GitHub">
-              <div class="i-bi-github text-xl" />
-            </Tooltip>
-          </a>
+          <Show when={loginState()}>
+            <CreateRecord />
+          </Show>
           <Settings />
         </div>
       </div>
