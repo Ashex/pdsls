@@ -2,6 +2,7 @@ import { A, Params } from "@solidjs/router";
 import Tooltip from "./tooltip";
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { didDocCache, labelerCache } from "../utils/api";
+import { setShowHandle, showHandle } from "./settings";
 
 export const [pds, setPDS] = createSignal<string>();
 export const [cid, setCID] = createSignal<string>();
@@ -19,7 +20,6 @@ const swapIcons: Record<string, string> = {
 const NavBar = (props: { params: Params }) => {
   const [openMenu, setOpenMenu] = createSignal(false);
   const [dropdown, setDropdown] = createSignal<HTMLDivElement>();
-  const [showHandle, setShowHandle] = createSignal(false);
   const [handle, setHandle] = createSignal(props.params.repo);
 
   const clickEvent = (event: MouseEvent) => {

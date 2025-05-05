@@ -12,6 +12,7 @@ const getInitialTheme = () => {
 };
 
 export const [theme, setTheme] = createSignal(getInitialTheme());
+export const [showHandle, setShowHandle] = createSignal(localStorage.showHandle === "true");
 const [backlinksEnabled, setBacklinksEnabled] = createSignal(localStorage.backlinks === "true");
 
 const Settings = () => {
@@ -148,6 +149,23 @@ const Settings = () => {
                   class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300 disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-500 dark:disabled:border-gray-700 dark:disabled:bg-gray-800/20"
                   onInput={(e) => (localStorage.constellationHost = e.currentTarget.value)}
                 />
+              </div>
+              <div class="mt-4 flex flex-col gap-1 border-t border-neutral-500 pt-2">
+                <div class="flex items-center gap-1">
+                  <input
+                    id="showHandle"
+                    class="size-4"
+                    type="checkbox"
+                    checked={localStorage.showHandle === "true"}
+                    onChange={(e) => {
+                      localStorage.showHandle = e.currentTarget.checked;
+                      setShowHandle(e.currentTarget.checked);
+                    }}
+                  />
+                  <label for="showHandle" class="select-none font-semibold">
+                    Default to showing handle
+                  </label>
+                </div>
               </div>
             </div>
           </div>
