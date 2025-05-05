@@ -32,13 +32,15 @@ const NavBar = (props: { params: Params }) => {
 
   createEffect(async () => {
     if (pds() !== undefined) {
-      setValidHandle(undefined);
-      setHandle(
+      const hdl =
         didDocCache[props.params.repo]?.alsoKnownAs
           ?.filter((alias) => alias.startsWith("at://"))[0]
-          .split("at://")[1] ?? props.params.repo,
-      );
-      setValidHandle(await validateHandle(handle(), props.params.repo));
+          .split("at://")[1] ?? props.params.repo;
+      if (hdl !== handle()) {
+        setValidHandle(undefined);
+        setHandle(hdl);
+        setValidHandle(await validateHandle(hdl, props.params.repo));
+      }
     }
   });
 
@@ -122,23 +124,24 @@ const NavBar = (props: { params: Params }) => {
                   {showHandle() ? handle() : props.params.repo}
                 </A>
                 <Show when={showHandle()}>
-                  <Show when={validHandle()}>
-                    <Tooltip text="Valid handle" children={<div class="i-lucide-check-circle" />} />
-                  </Show>
-                  <Show when={validHandle() === false}>
-                    <Tooltip
-                      text="Invalid handle"
-                      children={
-                        <div class="i-lucide-dismiss-circle text-red-500 dark:text-red-400" />
-                      }
-                    />
-                  </Show>
-                  <Show when={validHandle() === undefined}>
-                    <Tooltip
-                      text="Validating"
-                      children={<div class="i-line-md-loading-twotone-loop" />}
-                    />
-                  </Show>
+                  <Tooltip
+                    text={
+                      validHandle() === true ? "Valid handle"
+                      : validHandle() === undefined ?
+                        "Validating"
+                      : "Invalid handle"
+                    }
+                    children={
+                      <div
+                        classList={{
+                          "i-lucide-check-circle": validHandle() === true,
+                          "i-lucide-dismiss-circle text-red-500 dark:text-red-400":
+                            validHandle() === false,
+                          "i-line-md-loading-twotone-loop": validHandle() === undefined,
+                        }}
+                      />
+                    }
+                  />
                 </Show>
               </div>
               <Tooltip text={showHandle() ? "Show DID" : "Show Handle"}>
