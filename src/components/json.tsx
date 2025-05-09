@@ -10,6 +10,11 @@ interface AtBlob {
   mimeType: string;
 }
 
+const ATURI_RE =
+  /^at:\/\/([a-zA-Z0-9._:%-]+)(?:\/([a-zA-Z0-9-.]+)(?:\/([a-zA-Z0-9._~:@!$&%')(*+,;=-]+))?)?(?:#(\/[a-zA-Z0-9._~:@!$&%')(*+,;=\-[\]/\\]*))?$/;
+
+const DID_RE = /^did:[a-z]+:[a-zA-Z0-9._:%-]*[a-zA-Z0-9._-]$/;
+
 export const syntaxHighlight = (json: string) => {
   json = json.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -50,15 +55,11 @@ const JSONString = ({ data }: { data: string }) => {
       <For each={data.split(/(\s)/)}>
         {(part) => (
           <>
-            {part.startsWith("at://") && part.split(" ").length === 1 ?
+            {ATURI_RE.test(part) ?
               <A class="underline" href={`/${part}`}>
                 {part}
               </A>
-            : (
-              part.startsWith("did:") &&
-              part.split(" ").length === 1 &&
-              part.split(":").length === 3
-            ) ?
+            : DID_RE.test(part) ?
               <A class="underline" href={`/at://${part}`}>
                 {part}
               </A>
