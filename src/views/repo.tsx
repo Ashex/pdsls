@@ -250,7 +250,7 @@ const RepoView = () => {
                   PLC operation logs <div class="i-lucide-external-link ml-0.5 text-xs" />
                 </a>
               </Show>
-              <Show when={error()?.length === 0}>
+              <Show when={error()?.length === 0 || error() === undefined}>
                 <div class="flex items-center gap-1">
                   <button
                     onclick={() => downloadRepo()}
