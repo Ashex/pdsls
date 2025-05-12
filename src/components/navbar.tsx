@@ -22,7 +22,7 @@ const swapIcons: Record<string, string> = {
   "did:plc:6v6jqsy7swpzuu53rmzaybjy": "i-lucide-fish",
   "did:plc:hx53snho72xoj7zqt5uice4u": "i-lucide-lab-flower-rose-single",
   "did:plc:wzsilnxf24ehtmmc3gssy5bu": "i-lucide-music-2",
-  "did:plc:b3pn34agqqchkaf75v7h43dk": "i-lucide-lab-fox",
+  "did:plc:b3pn34agqqchkaf75v7h43dk": "i-lucide-lab-fox-face-tail",
   "did:plc:bnqkww7bjxaacajzvu5gswdf": "i-lucide-gem",
   "did:plc:veryepic2bagxnblv63a2hac": "i-arcticons-tetris",
 };
@@ -149,8 +149,8 @@ const NavBar = (props: { params: Params }) => {
                     children={
                       <div
                         classList={{
-                          "i-lucide-check-circle": validHandle() === true,
-                          "i-lucide-dismiss-circle text-red-500 dark:text-red-400":
+                          "i-lucide-circle-check text-xs": validHandle() === true,
+                          "i-lucide-circle-x text-xs text-red-500 dark:text-red-400":
                             validHandle() === false,
                           "i-line-md-loading-twotone-loop": validHandle() === undefined,
                         }}
@@ -163,7 +163,7 @@ const NavBar = (props: { params: Params }) => {
                 <button
                   class={
                     "ml-1 shrink-0 text-lg " +
-                    (swapIcons[props.params.repo] ?? "i-lucide-arrow-right-left")
+                    (swapIcons[props.params.repo] ?? "i-lucide-arrow-left-right")
                   }
                   onclick={() => setShowHandle(!showHandle())}
                 />
@@ -224,12 +224,15 @@ const NavBar = (props: { params: Params }) => {
             </Tooltip>
             <span class="mr-1">{props.params.rkey}</span>
             <Show when={validRecord()}>
-              <Tooltip text="Valid record" children={<div class="i-lucide-check-circle" />} />
+              <Tooltip
+                text="Valid record"
+                children={<div class="i-lucide-circle-check text-xs" />}
+              />
             </Show>
             <Show when={validRecord() === false}>
               <Tooltip
                 text="Invalid record"
-                children={<div class="i-lucide-dismiss-circle text-red-500 dark:text-red-400" />}
+                children={<div class="i-lucide-circle-x text-xs text-red-500 dark:text-red-400" />}
               />
             </Show>
             <Show when={validRecord() === undefined}>

@@ -67,7 +67,7 @@ const Search = () => {
               <button
                 type="submit"
                 onclick={() => processInput(searchInput.value)}
-                class="i-lucide-arrow-right-square text-2xl"
+                class="i-lucide-square-arrow-right text-2xl"
               />
             </Show>
           </div>
@@ -76,7 +76,7 @@ const Search = () => {
               text="Repository"
               children={
                 <A href={`/at://${agent.sub}`} class="flex items-center">
-                  <button class="i-lucide-git-fork text-xl" />
+                  <button class="i-lucide-git-fork-custom text-xl" />
                 </A>
               }
             />

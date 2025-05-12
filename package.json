@@ -9,6 +9,8 @@
     "serve": "vite preview"
   },
   "devDependencies": {
+    "@iconify-json/lucide": "^1.2.42",
+    "@iconify-json/lucide-lab": "^1.2.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "typescript": "^5.8.3",

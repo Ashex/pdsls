@@ -137,8 +137,8 @@ const RepoView = () => {
               <Tooltip text={allCollapsed() ? "Expand all" : "Collapse all"}>
                 <button class="bg-transparent" onclick={toggleAllCollections}>
                   {allCollapsed() ?
-                    <div class="i-lucide-plus-copy text-xl" />
-                  : <div class="i-lucide-minus-copy text-xl" />}
+                    <div class="i-lucide-copy-plus" />
+                  : <div class="i-lucide-copy-minus" />}
                 </button>
               </Tooltip>
             </div>
@@ -148,13 +148,13 @@ const RepoView = () => {
                   <>
                     <Show when={nsids()?.[authority].hidden}>
                       <button
-                        class="i-lucide-plus-square mr-1"
+                        class="i-lucide-plus-square mr-1 text-sm"
                         onclick={() => toggleCollection(authority)}
                       />
                     </Show>
                     <Show when={!nsids()?.[authority].hidden}>
                       <button
-                        class="i-lucide-minus-square mr-1"
+                        class="i-lucide-minus-square mr-1 text-sm"
                         onclick={() => toggleCollection(authority)}
                       />
                     </Show>
@@ -239,7 +239,7 @@ const RepoView = () => {
                 }
                 target="_blank"
               >
-                DID document <div class="i-lucide-external-link ml-0.5 text-xs" />
+                DID document <div class="i-lucide-external-link ml-0.5 text-[0.65rem]" />
               </a>
               <Show when={did.startsWith("did:plc")}>
                 <a
@@ -247,7 +247,7 @@ const RepoView = () => {
                   href={`https://boat.kelinci.net/plc-oplogs?q=${did}`}
                   target="_blank"
                 >
-                  PLC operation logs <div class="i-lucide-external-link ml-0.5 text-xs" />
+                  PLC operation logs <div class="i-lucide-external-link ml-0.5 text-[0.65rem]" />
                 </a>
               </Show>
               <Show when={error()?.length === 0 || error() === undefined}>

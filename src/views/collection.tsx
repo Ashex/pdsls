@@ -214,10 +214,10 @@ const CollectionView = () => {
                 children={
                   <button
                     classList={{
-                      "flex items-center text-xl": true,
-                      "i-lucide-trash text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300":
+                      "flex items-center": true,
+                      "i-lucide-trash-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300":
                         !batchDelete(),
-                      "i-lucide-dismiss-circle text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 dark:hover:text-neutral-300":
+                      "i-lucide-circle-x text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 dark:hover:text-neutral-300":
                         batchDelete(),
                     }}
                     onclick={() => {
@@ -237,7 +237,7 @@ const CollectionView = () => {
                   text="Select All"
                   children={
                     <button
-                      class="i-lucide-copy-check text-xl text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                      class="i-lucide-copy-check text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                       onclick={() => selectAll()}
                     />
                   }
@@ -246,7 +246,7 @@ const CollectionView = () => {
                   text="Unselect All"
                   children={
                     <button
-                      class="i-lucide-copy text-xl text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                      class="i-lucide-copy text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                       onclick={() => unselectAll()}
                     />
                   }
@@ -255,7 +255,7 @@ const CollectionView = () => {
                   text="Confirm"
                   children={
                     <button
-                      class="i-lucide-trash text-xl text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                      class="i-lucide-trash-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
                       onclick={() => setOpenDelete(true)}
                     />
                   }

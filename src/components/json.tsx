@@ -156,7 +156,7 @@ const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: str
               class="size-fit"
             >
               <Tooltip text="Blob link">
-                <div class="i-lucide-external-link" />
+                <div class="i-lucide-external-link text-sm" />
               </Tooltip>
             </a>
           </Show>
