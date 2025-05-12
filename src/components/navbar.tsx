@@ -32,6 +32,7 @@ const NavBar = (props: { params: Params }) => {
   const [dropdown, setDropdown] = createSignal<HTMLDivElement>();
   const [handle, setHandle] = createSignal(props.params.repo);
   const [validHandle, setValidHandle] = createSignal<boolean | undefined>(undefined);
+  const [fullCid, setFullCid] = createSignal(false);
 
   const clickEvent = (event: MouseEvent) => {
     if (openMenu() && event.target !== dropdown()) setOpenMenu(false);
@@ -39,6 +40,10 @@ const NavBar = (props: { params: Params }) => {
 
   onMount(() => window.addEventListener("click", clickEvent));
   onCleanup(() => window.removeEventListener("click", clickEvent));
+
+  createEffect(() => {
+    if (cid() !== undefined) setFullCid(false);
+  });
 
   createEffect(async () => {
     if (pds() !== undefined) {
@@ -242,9 +247,13 @@ const NavBar = (props: { params: Params }) => {
             <Tooltip text="CID">
               <div class="i-lucide-box mr-1" />
             </Tooltip>
-            <span dir="rtl" class="truncate">
+            <button
+              dir="rtl"
+              classList={{ "bg-transparent static": true, truncate: !fullCid() }}
+              onclick={() => setFullCid(!fullCid())}
+            >
               {cid()}
-            </span>
+            </button>
           </div>
         )}
       </Show>
