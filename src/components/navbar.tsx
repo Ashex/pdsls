@@ -55,7 +55,7 @@ const NavBar = (props: { params: Params }) => {
       if (hdl !== handle()) {
         setValidHandle(undefined);
         setHandle(hdl);
-        setValidHandle(await validateHandle(hdl as Handle, props.params.repos as Did));
+        setValidHandle(await validateHandle(hdl as Handle, props.params.repo as Did));
       }
     }
   });

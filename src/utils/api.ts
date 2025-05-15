@@ -82,7 +82,8 @@ const validateHandle = async (handle: Handle, did: Did) => {
   let resolvedDid: string;
   try {
     resolvedDid = await handleResolver.resolve(handle);
-  } catch {
+  } catch (err) {
+    console.error(err);
     return false;
   }
   if (resolvedDid !== did) return false;
