@@ -2,12 +2,12 @@ import { createSignal, onMount, Show, onCleanup, createEffect, For } from "solid
 import Tooltip from "./tooltip.jsx";
 import { deleteStoredSession, getSession, OAuthUserAgent } from "@atcute/oauth-browser-client";
 import { agent, Login, setLoginState } from "./login.jsx";
-import { At } from "@atcute/client/lexicons";
+import { Did } from "@atcute/lexicons";
 
 const AccountManager = () => {
   const [modal, setModal] = createSignal<HTMLDialogElement>();
   const [openManager, setOpenManager] = createSignal(false);
-  const [sessions, setSessions] = createSignal<At.Did[]>([]);
+  const [sessions, setSessions] = createSignal<Did[]>([]);
 
   const clickEvent = (event: MouseEvent) => {
     if (modal() && event.target == modal()) setOpenManager(false);
@@ -35,7 +35,7 @@ const AccountManager = () => {
     if (openManager()) {
       const storedSessions = localStorage.getItem("atcute-oauth:sessions");
       if (storedSessions) {
-        setSessions(Object.keys(JSON.parse(storedSessions)) as At.Did[]);
+        setSessions(Object.keys(JSON.parse(storedSessions)) as Did[]);
       }
     }
   });
@@ -45,7 +45,7 @@ const AccountManager = () => {
     window.location.href = "/";
   };
 
-  const removeSession = async (did: At.Did) => {
+  const removeSession = async (did: Did) => {
     const currentSession = agent?.sub;
     try {
       const session = await getSession(did, { allowStale: true });

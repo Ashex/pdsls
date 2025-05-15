@@ -9,12 +9,6 @@ import {
   untrack,
 } from "solid-js";
 import { CredentialManager, Client } from "@atcute/client";
-import {
-  At,
-  Brand,
-  ComAtprotoRepoApplyWrites,
-  ComAtprotoRepoListRecords,
-} from "@atcute/client/lexicons";
 import { A, query, useParams } from "@solidjs/router";
 import { resolvePDS } from "../utils/api.js";
 import * as TID from "@atcute/tid";
@@ -23,10 +17,12 @@ import { agent, loginState } from "../components/login.jsx";
 import { createStore } from "solid-js/store";
 import Tooltip from "../components/tooltip.jsx";
 import { localDateFromTimestamp } from "../utils/date.js";
+import { $type, ActorIdentifier, InferXRPCBodyOutput } from "@atcute/lexicons";
+import { ComAtprotoRepoApplyWrites, ComAtprotoRepoGetRecord } from "@atcute/atproto";
 
 interface AtprotoRecord {
   rkey: string;
-  record: ComAtprotoRepoListRecords.Record;
+  record: InferXRPCBodyOutput<ComAtprotoRepoGetRecord.mainSchema["output"]>;
   timestamp: number | undefined;
   toDelete: boolean;
 }
@@ -110,7 +106,7 @@ const CollectionView = () => {
     (did: string, collection: string, cursor: string | undefined) =>
       rpc.get("com.atproto.repo.listRecords", {
         params: {
-          repo: did as At.Identifier,
+          repo: did as ActorIdentifier,
           collection: collection as `${string}.${string}.${string}`,
           limit: LIMIT,
           cursor: cursor,
@@ -144,7 +140,7 @@ const CollectionView = () => {
   const deleteRecords = async () => {
     const writes = records
       .filter((record) => record.toDelete)
-      .map((record): Brand.Union<ComAtprotoRepoApplyWrites.Delete> => {
+      .map((record): $type.enforce<ComAtprotoRepoApplyWrites.Delete> => {
         return {
           $type: "com.atproto.repo.applyWrites#delete",
           collection: params.collection as `${string}.${string}.${string}`,

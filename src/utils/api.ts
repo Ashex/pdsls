@@ -1,12 +1,12 @@
 import { query } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
+import "@atcute/atproto";
 import {
   type DidDocument,
   getLabelerEndpoint,
   getPdsEndpoint,
   isAtprotoDid,
-  isHandle,
 } from "@atcute/identity";
 import {
   AtprotoWebDidDocumentResolver,
@@ -17,6 +17,8 @@ import {
   WellKnownHandleResolver,
   XrpcHandleResolver,
 } from "@atcute/identity-resolver";
+import { Did, Handle } from "@atcute/lexicons";
+import { isHandle } from "@atcute/lexicons/syntax";
 
 import { setPDS } from "../components/navbar";
 
@@ -58,7 +60,7 @@ const getPDS = query(async (did: string) => {
   return (didPDSCache[did] = pds);
 }, "getPDS");
 
-const resolveHandle = async (handle: string) => {
+const resolveHandle = async (handle: Handle) => {
   if (!isHandle(handle)) {
     throw new Error("Not a valid handle");
   }
@@ -66,7 +68,7 @@ const resolveHandle = async (handle: string) => {
   return await handleResolver.resolve(handle);
 };
 
-const validateHandle = async (handle: string, did: string) => {
+const validateHandle = async (handle: Handle, did: Did) => {
   if (!isHandle(handle)) return false;
 
   const handleResolver = new CompositeHandleResolver({

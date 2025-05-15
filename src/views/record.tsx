@@ -1,5 +1,4 @@
 import { CredentialManager, Client } from "@atcute/client";
-import { At, ComAtprotoRepoGetRecord } from "@atcute/client/lexicons";
 
 import { query, useParams } from "@solidjs/router";
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
@@ -16,10 +15,13 @@ import { theme } from "../components/settings.jsx";
 import { didDocCache, getAllBacklinks, LinkData, resolvePDS } from "../utils/api.js";
 import { AtUri, uriTemplates } from "../utils/templates.js";
 import { verifyRecord } from "../utils/verify.js";
+import { ActorIdentifier, InferXRPCBodyOutput } from "@atcute/lexicons";
+import { ComAtprotoRepoGetRecord } from "@atcute/atproto";
 
 export default () => {
   const params = useParams();
-  const [record, setRecord] = createSignal<ComAtprotoRepoGetRecord.Output>();
+  const [record, setRecord] =
+    createSignal<InferXRPCBodyOutput<ComAtprotoRepoGetRecord.mainSchema["output"]>>();
   const [backlinks, setBacklinks] = createSignal<{
     links: LinkData;
     target: string;
@@ -103,7 +105,7 @@ export default () => {
     (repo: string, collection: string, rkey: string) =>
       rpc.get("com.atproto.repo.getRecord", {
         params: {
-          repo: repo as At.Identifier,
+          repo: repo as ActorIdentifier,
           collection: collection as `${string}.${string}.${string}`,
           rkey: rkey,
         },
@@ -124,7 +126,7 @@ export default () => {
       if (formData.get("recreate")) {
         await rpc.post("com.atproto.repo.applyWrites", {
           input: {
-            repo: params.repo as At.Identifier,
+            repo: params.repo as ActorIdentifier,
             validate: validate,
             writes: [
               {
@@ -144,7 +146,7 @@ export default () => {
       } else {
         await rpc.post("com.atproto.repo.putRecord", {
           input: {
-            repo: params.repo as At.Identifier,
+            repo: params.repo as ActorIdentifier,
             collection: params.collection as `${string}.${string}.${string}`,
             rkey: params.rkey,
             record: editedRecord,
@@ -163,7 +165,7 @@ export default () => {
     rpc = new Client({ handler: agent });
     await rpc.post("com.atproto.repo.deleteRecord", {
       input: {
-        repo: params.repo as At.Identifier,
+        repo: params.repo as ActorIdentifier,
         collection: params.collection as `${string}.${string}.${string}`,
         rkey: params.rkey,
       },

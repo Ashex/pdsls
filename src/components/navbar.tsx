@@ -3,6 +3,7 @@ import Tooltip from "./tooltip";
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { didDocCache, labelerCache, validateHandle } from "../utils/api";
 import { setShowHandle, showHandle } from "./settings";
+import { Did, Handle } from "@atcute/lexicons";
 
 export const [pds, setPDS] = createSignal<string>();
 export const [cid, setCID] = createSignal<string>();
@@ -54,7 +55,7 @@ const NavBar = (props: { params: Params }) => {
       if (hdl !== handle()) {
         setValidHandle(undefined);
         setHandle(hdl);
-        setValidHandle(await validateHandle(hdl, props.params.repo));
+        setValidHandle(await validateHandle(hdl as Handle, props.params.repos as Did));
       }
     }
   });

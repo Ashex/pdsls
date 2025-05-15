@@ -1,11 +1,11 @@
 import { Client } from "@atcute/client";
-import { At } from "@atcute/client/lexicons";
 
 import * as CAR from "@atcute/car";
 import * as CBOR from "@atcute/cbor";
 import * as CID from "@atcute/cid";
 import { type FoundPublicKey, getPublicKeyFromDidController, verifySig } from "@atcute/crypto";
 import { type DidDocument, getAtprotoVerificationMaterial } from "@atcute/identity";
+import { Did } from "@atcute/lexicons";
 import { toSha256 } from "@atcute/uint8array";
 
 import { type AddressedAtUri, parseAddressedAtUri } from "./types/at-uri";
@@ -87,7 +87,7 @@ export const verifyRecord = async (opts: VerifyOptions): Promise<VerifyResult> =
   let car: Uint8Array;
   const { ok, data } = await opts.rpc.get("com.atproto.sync.getRecord", {
     params: {
-      did: opts.didDoc.id as At.Did,
+      did: opts.didDoc.id as Did,
       collection: uri.collection,
       rkey: uri.rkey,
     },

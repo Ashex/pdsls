@@ -2,10 +2,10 @@ import { createSignal, For, Show, createResource } from "solid-js";
 import { Client, CredentialManager } from "@atcute/client";
 import { A, query, useParams } from "@solidjs/router";
 import { didDocCache, getAllBacklinks, LinkData, resolvePDS } from "../utils/api.js";
-import { DidDocument } from "@atcute/client/utils/did";
 import { Backlinks } from "../components/backlinks.jsx";
-import { At } from "@atcute/client/lexicons";
 import Tooltip from "../components/tooltip.jsx";
+import { ActorIdentifier } from "@atcute/lexicons";
+import { DidDocument } from "@atcute/identity";
 
 const RepoView = () => {
   const params = useParams();
@@ -24,7 +24,7 @@ const RepoView = () => {
 
   const describeRepo = query(
     (repo: string) =>
-      rpc.get("com.atproto.repo.describeRepo", { params: { repo: repo as At.Identifier } }),
+      rpc.get("com.atproto.repo.describeRepo", { params: { repo: repo as ActorIdentifier } }),
     "describeRepo",
   );
 

@@ -2,8 +2,8 @@ import { createResource, createSignal, For, onMount, Show } from "solid-js";
 import { Client, CredentialManager } from "@atcute/client";
 import { A, useParams, useSearchParams } from "@solidjs/router";
 import { labelerCache, resolvePDS } from "../utils/api.js";
-import { ComAtprotoLabelDefs } from "@atcute/client/lexicons";
 import { localDateFromTimestamp } from "../utils/date.js";
+import { ComAtprotoLabelDefs } from "@atcute/atproto";
 
 const LabelView = () => {
   const params = useParams();

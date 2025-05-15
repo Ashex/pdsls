@@ -1,9 +1,10 @@
 import { createSignal, For, Show, createResource } from "solid-js";
 import { Client, CredentialManager } from "@atcute/client";
-import { ComAtprotoServerDescribeServer, ComAtprotoSyncListRepos } from "@atcute/client/lexicons";
 import { A, useParams } from "@solidjs/router";
 import { setPDS } from "../components/navbar";
 import Tooltip from "../components/tooltip";
+import { InferXRPCBodyOutput } from "@atcute/lexicons";
+import { ComAtprotoServerDescribeServer, ComAtprotoSyncListRepos } from "@atcute/atproto";
 
 const LIMIT = 1000;
 
@@ -43,7 +44,8 @@ const PdsView = () => {
   const params = useParams();
   if (params.pds.startsWith("web%2Bat%3A%2F%2F")) return;
   const [version, setVersion] = createSignal<string>();
-  const [serverInfos, setServerInfos] = createSignal<ComAtprotoServerDescribeServer.Output>();
+  const [serverInfos, setServerInfos] =
+    createSignal<InferXRPCBodyOutput<ComAtprotoServerDescribeServer.mainSchema["output"]>>();
   const [cursor, setCursor] = createSignal<string>();
   setPDS(params.pds);
   const pds = params.pds.startsWith("localhost") ? `http://${params.pds}` : `https://${params.pds}`;
@@ -62,7 +64,9 @@ const PdsView = () => {
     setVersion((res.data as any).version);
   };
 
-  const fetchRepos = async (): Promise<ComAtprotoSyncListRepos.Repo[]> => {
+  const fetchRepos = async (): Promise<
+    InferXRPCBodyOutput<ComAtprotoSyncListRepos.mainSchema["output"]>
+  > => {
     await getVersion();
     const describeRes = await describeServer();
     if (!describeRes.ok) console.error(describeRes.data.error);
@@ -72,7 +76,7 @@ const PdsView = () => {
     setCursor(res.data.repos.length < LIMIT ? undefined : res.data.cursor);
     setRepos(repos()?.concat(res.data.repos) ?? res.data.repos);
     await getVersion();
-    return res.data.repos;
+    return res.data;
   };
 
   const [response, { refetch }] = createResource(fetchRepos);

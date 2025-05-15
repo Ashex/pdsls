@@ -9,7 +9,7 @@ import {
   resolveFromIdentity,
   type Session,
 } from "@atcute/oauth-browser-client";
-import { At } from "@atcute/client/lexicons";
+import { Did } from "@atcute/lexicons";
 
 configureOAuth({
   metadata: {
@@ -86,9 +86,9 @@ const retrieveSession = async () => {
 
       if (lastSignedIn) {
         try {
-          return await getSession(lastSignedIn as At.Did);
+          return await getSession(lastSignedIn as Did);
         } catch (err) {
-          deleteStoredSession(lastSignedIn as At.Did);
+          deleteStoredSession(lastSignedIn as Did);
           localStorage.removeItem("lastSignedIn");
           throw err;
         }

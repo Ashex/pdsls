@@ -3,6 +3,7 @@ import { A } from "@solidjs/router";
 import Tooltip from "./tooltip.jsx";
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 import { agent, loginState } from "../components/login.jsx";
+import { Handle } from "@atcute/lexicons";
 
 const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 1;
 
@@ -32,7 +33,7 @@ const Search = () => {
     let did = "";
     try {
       setLoading(true);
-      did = uri.startsWith("did:") ? actor : await resolveHandle(actor);
+      did = uri.startsWith("did:") ? actor : await resolveHandle(actor as Handle);
       setLoading(false);
     } catch {
       window.location.href = `/${actor}`;
