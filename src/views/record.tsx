@@ -202,7 +202,7 @@ export default () => {
         <div class="w-20rem mb-2 mt-3 break-words text-red-500 dark:text-red-400">{notice()}</div>
       </Show>
       <Show when={record()}>
-        <div class="my-4 flex w-full justify-center gap-x-2">
+        <div class="my-4 flex w-full justify-center gap-x-1">
           <button
             onclick={() => setJSONSyntax(!JSONSyntax())}
             class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
@@ -215,7 +215,7 @@ export default () => {
               target="_blank"
               href={externalLink()?.link}
             >
-              {externalLink()?.label} <div class="i-lucide-external-link text-xs" />
+              {externalLink()?.label} <div class="i-lucide-external-link text-[0.65rem]" />
             </a>
           </Show>
           <Show when={loginState() && agent.sub === record()?.uri.split("/")[2]}>
@@ -308,7 +308,7 @@ export default () => {
             </Show>
             <button
               onclick={() => setOpenDelete(true)}
-              class="rounded-lg bg-red-500 px-2 py-1.5 text-xs font-bold text-slate-100 hover:bg-red-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
+              class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-red-400 bg-white px-2 py-1.5 text-xs font-bold text-red-500 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-red-400"
             >
               Delete
             </button>
