@@ -76,7 +76,7 @@ const AccountManager = () => {
                   <div class="group/select flex w-full items-center justify-between gap-x-2">
                     <button
                       classList={{
-                        "bg-transparent basis-full text-left font-mono max-w-[32ch] text-sm truncate group-hover/select:bg-slate-300 dark:group-hover/select:bg-neutral-700":
+                        "bg-transparent basis-full text-left font-mono max-w-[32ch] text-sm truncate group-hover/select:bg-neutral-300 py-0.5 dark:group-hover/select:bg-neutral-600":
                           true,
                         "text-green-500 dark:text-green-400": session === agent?.sub,
                       }}
