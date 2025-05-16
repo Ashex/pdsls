@@ -308,7 +308,7 @@ export default () => {
             </Show>
             <button
               onclick={() => setOpenDelete(true)}
-              class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-red-400 bg-white px-2 py-1.5 text-xs font-bold text-red-500 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-red-400"
+              class="dark:bg-dark-700 dark:hover:bg-dark-800 rounded-lg border border-red-500 bg-white px-2 py-1.5 text-xs font-bold text-red-500 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-red-400 dark:border-red-400 dark:text-red-400"
             >
               Delete
             </button>
