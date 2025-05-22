@@ -68,6 +68,13 @@ const resolveHandle = async (handle: Handle) => {
   return await handleResolver.resolve(handle);
 };
 
+const resolveDidDoc = async (did: Did) => {
+  if (!isAtprotoDid(did)) {
+    throw new Error("Not a valid DID identifier");
+  }
+  return await didDocumentResolver.resolve(did);
+};
+
 const validateHandle = async (handle: Handle, did: Did) => {
   if (!isHandle(handle)) return false;
 
@@ -160,6 +167,7 @@ export {
   getRecordBacklinks,
   labelerCache,
   resolveHandle,
+  resolveDidDoc,
   validateHandle,
   resolvePDS,
   type LinkData,

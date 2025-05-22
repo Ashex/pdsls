@@ -3,11 +3,13 @@ import Tooltip from "./tooltip.jsx";
 import { deleteStoredSession, getSession, OAuthUserAgent } from "@atcute/oauth-browser-client";
 import { agent, Login, setLoginState } from "./login.jsx";
 import { Did } from "@atcute/lexicons";
+import { resolveDidDoc } from "../utils/api.js";
+import { createStore } from "solid-js/store";
 
 const AccountManager = () => {
   const [modal, setModal] = createSignal<HTMLDialogElement>();
   const [openManager, setOpenManager] = createSignal(false);
-  const [sessions, setSessions] = createSignal<Did[]>([]);
+  const [sessions, setSessions] = createStore<Record<string, string | undefined>>();
 
   const clickEvent = (event: MouseEvent) => {
     if (modal() && event.target == modal()) setOpenManager(false);
@@ -19,6 +21,21 @@ const AccountManager = () => {
   onMount(() => {
     window.addEventListener("keydown", keyEvent);
     window.addEventListener("click", clickEvent);
+
+    const storedSessions = localStorage.getItem("atcute-oauth:sessions");
+    if (storedSessions) {
+      const sessionDids = Object.keys(JSON.parse(storedSessions)) as Did[];
+      sessionDids.forEach((did) => setSessions(did, ""));
+      sessionDids.forEach(async (did) => {
+        const doc = await resolveDidDoc(did);
+        doc.alsoKnownAs?.forEach((alias) => {
+          if (alias.startsWith("at://")) {
+            setSessions(did, alias.replace("at://", ""));
+            return;
+          }
+        });
+      });
+    }
   });
 
   onCleanup(() => {
@@ -29,15 +46,6 @@ const AccountManager = () => {
   createEffect(() => {
     if (openManager()) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "auto";
-  });
-
-  createEffect(() => {
-    if (openManager()) {
-      const storedSessions = localStorage.getItem("atcute-oauth:sessions");
-      if (storedSessions) {
-        setSessions(Object.keys(JSON.parse(storedSessions)) as Did[]);
-      }
-    }
   });
 
   const resumeSession = (did: `did:${string}`) => {
@@ -54,7 +62,7 @@ const AccountManager = () => {
     } catch {
       deleteStoredSession(did);
     }
-    setSessions(sessions().filter((session) => session !== did));
+    setSessions(did, undefined);
     if (currentSession === did) {
       setLoginState(false);
       window.location.reload;
@@ -71,22 +79,22 @@ const AccountManager = () => {
           <div class="dark:bg-dark-400 top-10% absolute rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
             <h3 class="mb-2 font-bold">Manage accounts</h3>
             <div class="mb-2 max-h-[20rem] overflow-y-auto border-b border-neutral-500 pb-2 md:max-h-[25rem]">
-              <For each={sessions()}>
-                {(session) => (
+              <For each={Object.keys(sessions)}>
+                {(did) => (
                   <div class="group/select flex w-full items-center justify-between gap-x-2">
                     <button
                       classList={{
                         "bg-transparent basis-full text-left font-mono max-w-[32ch] text-sm truncate group-hover/select:bg-neutral-300 py-0.5 dark:group-hover/select:bg-neutral-600":
                           true,
-                        "text-green-500 dark:text-green-400": session === agent?.sub,
+                        "text-green-500 dark:text-green-400": did === agent?.sub,
                       }}
-                      onclick={() => resumeSession(session)}
+                      onclick={() => resumeSession(did as Did)}
                     >
-                      {session}
+                      {sessions[did]?.length ? sessions[did] : did}
                     </button>
                     <button
                       class="i-lucide-x text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500"
-                      onclick={() => removeSession(session)}
+                      onclick={() => removeSession(did as Did)}
                     />
                   </div>
                 )}
