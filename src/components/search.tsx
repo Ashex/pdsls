@@ -13,7 +13,8 @@ const Search = () => {
 
   const processInput = async (input: string) => {
     (document.getElementById("uriForm") as HTMLFormElement).reset();
-    if (!input.trim().length) return;
+    input = input.trim();
+    if (!input.length) return;
     if (
       !input.startsWith("https://bsky.app/") &&
       !input.startsWith("https://deer.social/") &&
