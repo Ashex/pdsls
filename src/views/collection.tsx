@@ -44,7 +44,7 @@ const RecordLink = (props: { record: AtprotoRecord; index: number }) => {
   return (
     <span
       id={`rkey-${props.index}`}
-      class="relative cursor-pointer rounded px-0.5 hover:bg-gray-200 dark:hover:bg-neutral-700"
+      class="relative cursor-pointer rounded px-0.5 hover:bg-zinc-200 dark:hover:bg-neutral-700"
       onmouseover={(e) => setHoverRk(e.currentTarget)}
       onmouseleave={() => setHoverRk(undefined)}
     >
@@ -57,7 +57,7 @@ const RecordLink = (props: { record: AtprotoRecord; index: number }) => {
       <Show when={hoverRk()?.id === `rkey-${props.index}`}>
         <span
           classList={{
-            "preview w-max lg:max-w-lg max-w-sm bg-slate-100 dark:bg-dark-500 left-50% border-neutral-400 dark:border-neutral-600 max-h-md pointer-events-none absolute z-25 mt-2 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
+            "preview w-max lg:max-w-lg max-w-sm bg-zinc-100 dark:bg-dark-500 left-50% border-neutral-400 dark:border-neutral-600 max-h-md pointer-events-none absolute z-25 mt-2 block -translate-x-1/2 overflow-hidden whitespace-pre-wrap rounded-md border p-2 text-xs":
               true,
             "bottom-8": isOverflowing(hoverRk()!, previewHeight()),
           }}
@@ -192,7 +192,7 @@ const CollectionView = () => {
 
   return (
     <Show when={records.length || response()}>
-      <div class="z-5 dark:bg-dark-700 sticky top-0 mb-2 flex w-full flex-col items-center justify-center gap-2 border-b border-neutral-500 bg-slate-100 py-4">
+      <div class="z-5 dark:bg-dark-700 sticky top-0 mb-2 flex w-full flex-col items-center justify-center gap-2 border-b border-neutral-500 bg-zinc-100 py-4">
         <div
           classList={{
             "flex items-center gap-2": true,
@@ -262,14 +262,14 @@ const CollectionView = () => {
                     ref={setModal}
                     class="z-2 backdrop-brightness-60 fixed left-0 top-0 flex h-screen w-screen items-center justify-center bg-transparent"
                   >
-                    <div class="dark:bg-dark-400 rounded-md border border-neutral-500 bg-slate-100 p-3 text-slate-900 dark:text-slate-100">
+                    <div class="dark:bg-dark-400 rounded-md border border-neutral-500 bg-zinc-100 p-3 text-slate-900 dark:text-slate-100">
                       <h3 class="text-lg font-bold">
                         Delete {records.filter((rec) => rec.toDelete).length} records?
                       </h3>
                       <div class="mt-2 inline-flex gap-2">
                         <button
                           onclick={() => setOpenDelete(false)}
-                          class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg border border-neutral-500 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+                          class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg border border-neutral-500 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
                         >
                           Cancel
                         </button>

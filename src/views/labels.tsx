@@ -90,7 +90,7 @@ const LabelView = () => {
           </div>
         </div>
       </form>
-      <div class="z-5 dark:bg-dark-700 sticky top-0 flex w-full flex-col items-center justify-center gap-3 border-b border-neutral-500 bg-slate-100 py-3">
+      <div class="z-5 dark:bg-dark-700 sticky top-0 flex w-full flex-col items-center justify-center gap-3 border-b border-neutral-500 bg-zinc-100 py-3">
         <input
           type="text"
           spellcheck={false}

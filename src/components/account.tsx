@@ -76,7 +76,7 @@ const AccountManager = () => {
           ref={setModal}
           class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
         >
-          <div class="dark:bg-dark-400 top-10% absolute rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
+          <div class="dark:bg-dark-400 top-10% absolute rounded-md border border-slate-900 bg-zinc-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
             <h3 class="mb-2 font-bold">Manage accounts</h3>
             <div class="mb-2 max-h-[20rem] overflow-y-auto border-b border-neutral-500 pb-2 md:max-h-[25rem]">
               <For each={Object.keys(sessions)}>
@@ -84,7 +84,7 @@ const AccountManager = () => {
                   <div class="group/select flex w-full items-center justify-between gap-x-2">
                     <button
                       classList={{
-                        "bg-transparent basis-full text-left font-mono max-w-[32ch] text-sm truncate group-hover/select:bg-gray-200 p-0.5 rounded dark:group-hover/select:bg-neutral-600":
+                        "bg-transparent basis-full text-left font-mono max-w-[32ch] text-sm truncate group-hover/select:bg-zinc-200 p-0.5 rounded dark:group-hover/select:bg-neutral-600":
                           true,
                         "text-green-500 dark:text-green-400": did === agent?.sub,
                       }}

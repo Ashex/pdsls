@@ -204,7 +204,7 @@ export const RecordView = () => {
         <div class="my-3 flex w-full justify-center gap-x-1">
           <Show when={externalLink()}>
             <a
-              class="dark:bg-dark-700 dark:hover:bg-dark-300 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+              class="dark:bg-dark-700 dark:hover:bg-dark-300 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
               target="_blank"
               href={externalLink()?.link}
             >
@@ -212,7 +212,7 @@ export const RecordView = () => {
             </a>
           </Show>
           <button
-            class="dark:bg-dark-700 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+            class="dark:bg-dark-700 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
             onclick={() => navigator.clipboard.writeText(JSON.stringify(record()?.value))}
           >
             Copy
@@ -223,7 +223,7 @@ export const RecordView = () => {
                 ref={setModal}
                 class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
               >
-                <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
+                <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-zinc-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
                   <h3 class="mb-2 text-lg font-bold">Editing record</h3>
                   <form ref={formRef}>
                     <div class="mb-2 flex items-center gap-x-2">
@@ -252,7 +252,7 @@ export const RecordView = () => {
                         </div>
                         <button
                           onclick={() => setOpenEdit(false)}
-                          class="dark:bg-dark-900 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+                          class="dark:bg-dark-900 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
                         >
                           Cancel
                         </button>
@@ -274,7 +274,7 @@ export const RecordView = () => {
                 model = editor.createModel(JSON.stringify(record()?.value, null, 2), "json");
                 setOpenEdit(true);
               }}
-              class="dark:bg-dark-700 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+              class="dark:bg-dark-700 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
             >
               Edit
             </button>
@@ -283,13 +283,13 @@ export const RecordView = () => {
                 ref={setModal}
                 class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
               >
-                <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
+                <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-zinc-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
                   <h3 class="text-lg font-bold">Delete this record?</h3>
                   <form>
                     <div class="mt-2 inline-flex gap-2">
                       <button
                         onclick={() => setOpenDelete(false)}
-                        class="dark:bg-dark-900 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+                        class="dark:bg-dark-900 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
                       >
                         Cancel
                       </button>
@@ -307,7 +307,7 @@ export const RecordView = () => {
             </Show>
             <button
               onclick={() => setOpenDelete(true)}
-              class="dark:bg-dark-700 dark:hover:bg-dark-300 rounded-lg border border-red-500 bg-white px-2 py-1.5 text-xs font-bold text-red-500 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-red-400 dark:border-red-400 dark:text-red-400"
+              class="dark:bg-dark-700 dark:hover:bg-dark-300 rounded-lg border border-red-500 bg-white px-2 py-1.5 text-xs font-bold text-red-500 hover:bg-zinc-100 focus:outline-none focus:ring-1 focus:ring-red-400 dark:border-red-400 dark:text-red-400"
             >
               Delete
             </button>

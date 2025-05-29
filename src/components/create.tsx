@@ -85,7 +85,7 @@ const CreateRecord = () => {
           ref={setModal}
           class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
         >
-          <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
+          <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-zinc-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
             <h3 class="mb-2 text-lg font-bold">Creating record</h3>
             <form ref={formRef} class="flex flex-col gap-y-3">
               <div class="flex w-fit flex-col gap-y-3">
@@ -138,7 +138,7 @@ const CreateRecord = () => {
                 <div class="flex items-center justify-end gap-2">
                   <button
                     onclick={() => setOpenCreate(false)}
-                    class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+                    class="dark:bg-dark-900 dark:hover:bg-dark-800 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
                   >
                     Close
                   </button>

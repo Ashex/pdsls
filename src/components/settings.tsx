@@ -70,14 +70,14 @@ const Settings = () => {
           ref={setModal}
           class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
         >
-          <div class="dark:bg-dark-400 top-10% absolute rounded-md border border-slate-900 bg-slate-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
+          <div class="dark:bg-dark-400 top-10% absolute rounded-md border border-slate-900 bg-zinc-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
             <h3 class="mb-2 border-b border-neutral-500 pb-2 text-xl font-bold">Settings</h3>
             <h4 class="mb-1 font-semibold">Theme</h4>
             <div class="w-xs flex divide-x divide-neutral-500 overflow-hidden rounded-lg border border-neutral-500">
               <button
                 classList={{
                   "basis-1/3 p-2": true,
-                  "bg-transparent hover:bg-slate-200 dark:hover:bg-dark-200": !theme().system,
+                  "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-200": !theme().system,
                   "bg-neutral-500 text-slate-100": theme().system,
                 }}
                 onclick={() =>
@@ -93,7 +93,7 @@ const Settings = () => {
               <button
                 classList={{
                   "basis-1/3 p-2": true,
-                  "bg-transparent hover:bg-slate-200 dark:hover:bg-dark-200":
+                  "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-200":
                     theme().color !== "light" || theme().system,
                   "bg-neutral-500 text-slate-100": theme().color === "light" && !theme().system,
                 }}
@@ -104,7 +104,7 @@ const Settings = () => {
               <button
                 classList={{
                   "basis-1/3 p-2": true,
-                  "bg-transparent hover:bg-slate-200 dark:hover:bg-dark-200":
+                  "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-200":
                     theme().color !== "dark" || theme().system,
                   "bg-neutral-500": theme().color === "dark" && !theme().system,
                 }}
