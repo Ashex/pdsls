@@ -9,14 +9,15 @@ import { Backlinks } from "../components/backlinks.jsx";
 import { Editor } from "../components/editor.jsx";
 import { JSONValue } from "../components/json.jsx";
 import { agent, loginState } from "../components/login.jsx";
-import { setCID, setValidRecord, validRecord } from "../components/navbar.jsx";
+import { setCID, setValidRecord, setValidSchema, validRecord } from "../components/navbar.jsx";
 import { theme } from "../components/settings.jsx";
 
 import { didDocCache, getAllBacklinks, LinkData, resolvePDS } from "../utils/api.js";
 import { AtUri, uriTemplates } from "../utils/templates.js";
 import { verifyRecord } from "../utils/verify.js";
-import { ActorIdentifier, InferXRPCBodyOutput } from "@atcute/lexicons";
+import { ActorIdentifier, InferXRPCBodyOutput, is } from "@atcute/lexicons";
 import { ComAtprotoRepoGetRecord } from "@atcute/atproto";
+import { lexicons } from "../utils/types/lexicons.js";
 
 export const RecordView = () => {
   const params = useParams();
@@ -54,6 +55,7 @@ export const RecordView = () => {
     window.addEventListener("keydown", keyEvent);
     setCID(undefined);
     setValidRecord(undefined);
+    setValidSchema(undefined);
     const pds = await resolvePDS(did);
     rpc = new Client({ handler: new CredentialManager({ service: pds }) });
     const res = await getRecord(did, params.collection, params.rkey);
@@ -67,6 +69,10 @@ export const RecordView = () => {
     setExternalLink(checkUri(res.data.uri));
 
     try {
+      if (params.collection in lexicons) {
+        if (is(lexicons[params.collection], res.data.value)) setValidSchema(true);
+        else setValidSchema(false);
+      }
       const { errors } = await verifyRecord({
         rpc: rpc,
         uri: res.data.uri,
@@ -198,7 +204,7 @@ export const RecordView = () => {
         <div class="i-line-md-loading-twotone-loop mt-3 text-xl" />
       </Show>
       <Show when={validRecord() === false}>
-        <div class="w-20rem mb-2 mt-3 break-words text-red-500 dark:text-red-400">{notice()}</div>
+        <div class="mt-3 break-words text-red-500 dark:text-red-400">{notice()}</div>
       </Show>
       <Show when={record()}>
         <div class="my-3 flex w-full justify-center gap-x-1">

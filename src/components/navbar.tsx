@@ -9,6 +9,7 @@ export const [pds, setPDS] = createSignal<string>();
 export const [cid, setCID] = createSignal<string>();
 export const [isLabeler, setIsLabeler] = createSignal(false);
 export const [validRecord, setValidRecord] = createSignal<boolean | undefined>(undefined);
+export const [validSchema, setValidSchema] = createSignal<boolean | undefined>(undefined);
 
 const swapIcons: Record<string, string> = {
   "did:plc:vwzwgnygau7ed7b7wt5ux7y2": "i-hugeicons-nintendo-switch",
@@ -221,37 +222,53 @@ const NavBar = (props: { params: Params }) => {
           </div>
         </Show>
         <Show when={props.params.rkey}>
-          <div class="mt-1 flex items-center">
-            <Tooltip text="Record">
-              <div class="i-lucide-braces mr-1" />
-            </Tooltip>
-            <span class="mr-1">{props.params.rkey}</span>
-            <Show when={validRecord()}>
-              <Tooltip
-                text="Valid record"
-                children={<div class="i-lucide-lock-keyhole mr-1 text-xs" />}
-              />
-            </Show>
-            <Show when={validRecord() === false}>
-              <Tooltip
-                text="Invalid record"
-                children={
-                  <div class="i-lucide-circle-x mr-1 text-xs text-red-500 dark:text-red-400" />
-                }
-              />
-            </Show>
-            <Show when={validRecord() === undefined}>
-              <Tooltip
-                text="Validating"
-                children={<div class="i-line-md-loading-twotone-loop mr-1 text-xs" />}
-              />
-            </Show>
+          <div class="relative mt-1 flex items-center justify-between">
+            <div class="flex basis-full items-center">
+              <Tooltip text="Record">
+                <div class="i-lucide-braces mr-1" />
+              </Tooltip>
+              <span class="mr-1">{props.params.rkey}</span>
+              <Show when={validRecord()}>
+                <Tooltip
+                  text="Valid record"
+                  children={<div class="i-lucide-lock-keyhole mr-1 text-xs" />}
+                />
+              </Show>
+              <Show when={validRecord() === false}>
+                <Tooltip
+                  text="Invalid record"
+                  children={
+                    <div class="i-lucide-circle-x mr-1 text-xs text-red-500 dark:text-red-400" />
+                  }
+                />
+              </Show>
+              <Show when={validRecord() === undefined}>
+                <Tooltip
+                  text="Validating"
+                  children={<div class="i-line-md-loading-twotone-loop mr-1 text-xs" />}
+                />
+              </Show>
+              <Show when={validSchema()}>
+                <Tooltip
+                  text="Valid schema"
+                  children={<div class="i-lucide-file-check mr-1 text-xs" />}
+                />
+              </Show>
+              <Show when={validSchema() === false}>
+                <Tooltip
+                  text="Invalid schema"
+                  children={
+                    <div class="i-lucide-file-x mr-1 text-xs text-red-500 dark:text-red-400" />
+                  }
+                />
+              </Show>
+            </div>
             <Tooltip text="Record on PDS">
               <a
                 href={`https://${pds()}/xrpc/com.atproto.repo.getRecord?repo=${props.params.repo}&collection=${props.params.collection}&rkey=${props.params.rkey}`}
                 target="_blank"
               >
-                <div class="i-lucide-external-link text-xs" />
+                <div class="i-lucide-external-link" />
               </a>
             </Tooltip>
           </div>
