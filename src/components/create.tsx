@@ -1,8 +1,8 @@
 import { createSignal, onMount, Show, onCleanup, createEffect } from "solid-js";
 import { Client } from "@atcute/client";
 import { agent } from "../components/login.jsx";
-import { Editor } from "../components/editor.jsx";
-import { editor } from "monaco-editor";
+import { editor, Editor } from "../components/editor.jsx";
+import * as monaco from "monaco-editor";
 import { theme } from "../components/settings.jsx";
 import Tooltip from "./tooltip.jsx";
 
@@ -10,7 +10,7 @@ const CreateRecord = () => {
   const [modal, setModal] = createSignal<HTMLDialogElement>();
   const [openCreate, setOpenCreate] = createSignal(false);
   const [createNotice, setCreateNotice] = createSignal("");
-  let model: editor.IModel;
+  let model: monaco.editor.IModel;
   let formRef!: HTMLFormElement;
 
   const placeholder = (date: string) => {
@@ -43,7 +43,13 @@ const CreateRecord = () => {
     const collection = formData.get("collection");
     const rkey = formData.get("rkey");
     const validate = formData.get("validate")?.toString();
-    const record = JSON.parse(model.getValue());
+    let record: any;
+    try {
+      record = JSON.parse(model.getValue());
+    } catch (e: any) {
+      setCreateNotice(e.message);
+      return;
+    }
     const res = await rpc.post("com.atproto.repo.createRecord", {
       input: {
         repo: agent.sub,
@@ -64,6 +70,28 @@ const CreateRecord = () => {
     window.location.href = `/${res.data.uri}`;
   };
 
+  const uploadBlob = async () => {
+    setCreateNotice("");
+    const file = (document.getElementById("blob") as HTMLInputElement)?.files?.[0];
+    if (!file) return;
+    (document.getElementById("blob") as HTMLInputElement).value = "";
+    const rpc = new Client({ handler: agent });
+    const res = await rpc.post("com.atproto.repo.uploadBlob", {
+      input: file,
+    });
+    if (!res.ok) {
+      setCreateNotice(res.data.error);
+      return;
+    }
+    editor.executeEdits("editor", [
+      {
+        range: editor.getSelection() as monaco.IRange,
+        text: JSON.stringify(res.data.blob, null, 2),
+      },
+    ]);
+    editor.trigger("editor", "editor.action.formatDocument", {});
+  };
+
   createEffect(() => {
     if (openCreate()) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "auto";
@@ -72,7 +100,7 @@ const CreateRecord = () => {
 
   const createModel = () => {
     if (!model)
-      model = editor.createModel(
+      model = monaco.editor.createModel(
         JSON.stringify(placeholder(new Date().toISOString()), null, 2),
         "json",
       );
@@ -131,10 +159,25 @@ const CreateRecord = () => {
                     <option value="false">False</option>
                   </select>
                 </div>
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-center">
+                  <input type="file" id="blob" />
+                  <div class="flex flex-row items-center gap-1">
+                    <button
+                      type="button"
+                      onclick={() => uploadBlob()}
+                      class="dark:hover:bg-dark-300 w-fit rounded-lg border border-gray-400 bg-transparent px-2 py-1 hover:bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                    >
+                      Upload
+                    </button>
+                    <p class="text-sm">Metadata will be pasted after cursor</p>
+                  </div>
+                </div>
               </div>
               <Editor theme={theme().color} model={model!} />
-              <div class="flex flex-col gap-x-2">
-                <div class="text-red-500 dark:text-red-400">{createNotice()}</div>
+              <div class="flex flex-col gap-2">
+                <Show when={createNotice()}>
+                  <div class="text-red-500 dark:text-red-400">{createNotice()}</div>
+                </Show>
                 <div class="flex items-center justify-end gap-2">
                   <button
                     onclick={() => setOpenCreate(false)}
