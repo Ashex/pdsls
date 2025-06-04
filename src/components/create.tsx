@@ -124,13 +124,21 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
 
   const uploadBlob = async () => {
     setNotice("");
+    let blob: Blob;
+
     const file = (document.getElementById("blob") as HTMLInputElement)?.files?.[0];
     if (!file) return;
     (document.getElementById("blob") as HTMLInputElement).value = "";
+
+    const mimetype = (document.getElementById("mimetype") as HTMLInputElement)?.value;
+    (document.getElementById("mimetype") as HTMLInputElement).value = "";
+    if (mimetype) blob = new Blob([file], { type: mimetype });
+    else blob = file;
+
     const rpc = new Client({ handler: agent });
     setUploading(true);
     const res = await rpc.post("com.atproto.repo.uploadBlob", {
-      input: file,
+      input: blob,
     });
     setUploading(false);
     if (!res.ok) {
@@ -218,6 +226,19 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                     <option value="true">True</option>
                     <option value="false">False</option>
                   </select>
+                </div>
+                <div class="flex items-center gap-x-2">
+                  <label for="mimetype" class="min-w-20 select-none">
+                    MIME type
+                  </label>
+                  <input
+                    id="mimetype"
+                    type="text"
+                    spellcheck={false}
+                    placeholder="Optional"
+                    size={22}
+                    class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                  />
                 </div>
                 <div class="flex flex-col gap-1 sm:flex-row sm:items-center">
                   <input type="file" id="blob" />
