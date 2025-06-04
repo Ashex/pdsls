@@ -19,11 +19,13 @@ const StreamView = () => {
   const [records, setRecords] = createSignal<Array<any>>([]);
   const [connected, setConnected] = createSignal(false);
   const [allEvents, setAllEvents] = createSignal(false);
+  const [notice, setNotice] = createSignal("");
   let socket: WebSocket;
   let firehose: Firehose;
   let formRef!: HTMLFormElement;
 
   const connectSocket = async (formData: FormData) => {
+    setNotice("");
     if (connected()) {
       if (streamType === StreamType.JETSTREAM) socket?.close();
       else firehose?.close();
@@ -82,6 +84,10 @@ const StreamView = () => {
         const rec = JSON.parse(event.data);
         if (allEvents() || (rec.kind !== "account" && rec.kind !== "identity"))
           setRecords(records().concat(rec).slice(-LIMIT));
+      });
+      socket.addEventListener("error", () => {
+        setNotice("Connection error");
+        setConnected(false);
       });
     } else {
       firehose = new Firehose({
@@ -241,6 +247,9 @@ const StreamView = () => {
           </button>
         </div>
       </form>
+      <Show when={notice().length}>
+        <div class="text-red-500 dark:text-red-400">{notice()}</div>
+      </Show>
       <div class="break-anywhere md:w-screen-md flex h-screen w-full flex-col gap-2 divide-y divide-neutral-500 overflow-auto whitespace-pre-wrap pl-4 font-mono text-sm">
         <For each={records().toReversed()}>
           {(rec) => (
