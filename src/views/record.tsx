@@ -64,10 +64,8 @@ export const RecordView = () => {
         if (is(lexicons[params.collection], res.data.value)) setValidSchema(true);
         else setValidSchema(false);
       } else if (params.collection === "com.atproto.lexicon.schema") {
-        let rec = structuredClone(res.data.value);
-        delete rec.$type;
         try {
-          lexiconDoc.parse(rec);
+          lexiconDoc.parse(res.data.value, { mode: "passthrough" });
           setValidSchema(true);
         } catch (e) {
           console.error(e);
