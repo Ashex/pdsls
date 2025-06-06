@@ -159,7 +159,7 @@ export const RecordView = () => {
         <div class="break-words text-red-500 dark:text-red-400">{notice()}</div>
       </Show>
       <Show when={record()}>
-        <div class="mt-3 flex w-full justify-center gap-x-1">
+        <div class="mb-1 mt-3 flex w-full justify-center gap-x-1">
           <Show when={externalLink()}>
             <a
               class="dark:bg-dark-700 dark:hover:bg-dark-300 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
