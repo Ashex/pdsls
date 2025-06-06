@@ -134,8 +134,8 @@ const RepoView = () => {
           <div class="flex items-center gap-1">
             <button
               classList={{
-                "bg-transparent font-semibold": true,
-                "text-stone-600 dark:text-stone-400": !showBacklinks(),
+                "bg-transparent": true,
+                "text-stone-600 dark:text-stone-400 font-semibold": !showBacklinks(),
                 "text-lightblue-500 hover:underline": showBacklinks(),
               }}
               onclick={() => setShowBacklinks(false)}
@@ -155,8 +155,8 @@ const RepoView = () => {
           <Show when={backlinks()}>
             <button
               classList={{
-                "bg-transparent font-semibold": true,
-                "text-stone-600 dark:text-stone-400": showBacklinks(),
+                "bg-transparent": true,
+                "text-stone-600 dark:text-stone-400 font-semibold": showBacklinks(),
                 "text-lightblue-500 hover:underline": !showBacklinks(),
               }}
               onclick={() => setShowBacklinks(true)}
