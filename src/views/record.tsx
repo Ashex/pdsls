@@ -28,6 +28,7 @@ export const RecordView = () => {
   const [modal, setModal] = createSignal<HTMLDialogElement>();
   const [openDelete, setOpenDelete] = createSignal(false);
   const [notice, setNotice] = createSignal("");
+  const [showBacklinks, setShowBacklinks] = createSignal(false);
   const [externalLink, setExternalLink] = createSignal<
     { label: string; link: string } | undefined
   >();
@@ -149,15 +150,15 @@ export const RecordView = () => {
   };
 
   return (
-    <>
+    <div class="flex w-full flex-col gap-2">
       <Show when={record() === undefined && validRecord() !== false}>
-        <div class="i-line-md-loading-twotone-loop mt-3 text-xl" />
+        <div class="i-line-md-loading-twotone-loop text-xl" />
       </Show>
       <Show when={validRecord() === false}>
-        <div class="mt-3 break-words text-red-500 dark:text-red-400">{notice()}</div>
+        <div class="break-words text-red-500 dark:text-red-400">{notice()}</div>
       </Show>
       <Show when={record()}>
-        <div class="my-3 flex w-full justify-center gap-x-1">
+        <div class="mt-3 flex w-full justify-center gap-x-1">
           <Show when={externalLink()}>
             <a
               class="dark:bg-dark-700 dark:hover:bg-dark-300 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-white px-2 py-1.5 text-xs font-bold hover:bg-zinc-100 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
@@ -210,13 +211,43 @@ export const RecordView = () => {
             </button>
           </Show>
         </div>
-        <div class="break-anywhere mb-3 w-full whitespace-pre-wrap font-mono text-xs sm:text-sm">
-          <JSONValue data={record()?.value as any} repo={record()!.uri.split("/")[2]} />
-        </div>
         <Show when={backlinks()}>
-          {(backlinks) => <Backlinks links={backlinks().links} target={backlinks().target} />}
+          <div class="sm:w-23rem w-21rem flex justify-between self-center">
+            <div class="flex items-center gap-1">
+              <button
+                classList={{
+                  "bg-transparent font-semibold": true,
+                  "text-stone-600 dark:text-stone-400": !showBacklinks(),
+                  "text-lightblue-500 hover:underline": showBacklinks(),
+                }}
+                onclick={() => setShowBacklinks(false)}
+              >
+                Record
+              </button>
+            </div>
+            <button
+              classList={{
+                "bg-transparent font-semibold": true,
+                "text-stone-600 dark:text-stone-400": showBacklinks(),
+                "text-lightblue-500 hover:underline": !showBacklinks(),
+              }}
+              onclick={() => setShowBacklinks(true)}
+            >
+              Backlinks
+            </button>
+          </div>
+        </Show>
+        <Show when={!showBacklinks()}>
+          <div class="break-anywhere w-full whitespace-pre-wrap font-mono text-xs sm:text-sm">
+            <JSONValue data={record()?.value as any} repo={record()!.uri.split("/")[2]} />
+          </div>
+        </Show>
+        <Show when={showBacklinks()}>
+          <Show when={backlinks()}>
+            {(backlinks) => <Backlinks links={backlinks().links} target={backlinks().target} />}
+          </Show>
         </Show>
       </Show>
-    </>
+    </div>
   );
 };

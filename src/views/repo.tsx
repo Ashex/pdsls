@@ -18,6 +18,7 @@ const RepoView = () => {
   }>();
   const [nsids, setNsids] = createSignal<Record<string, { hidden: boolean; nsids: string[] }>>();
   const [allCollapsed, setAllCollapsed] = createSignal(false);
+  const [showBacklinks, setShowBacklinks] = createSignal(false);
   let rpc: Client;
   let pds: string;
   const did = params.repo;
@@ -129,10 +130,19 @@ const RepoView = () => {
             {error()}
           </div>
         </Show>
-        <Show when={nsids()}>
-          <div class="flex flex-col border-b border-neutral-500 pb-2 font-mono">
-            <div class="flex items-center gap-1">
-              <p class="font-sans font-semibold text-stone-600 dark:text-stone-400">Collections</p>
+        <div class="flex justify-between">
+          <div class="flex items-center gap-1">
+            <button
+              classList={{
+                "bg-transparent font-semibold": true,
+                "text-stone-600 dark:text-stone-400": !showBacklinks(),
+                "text-lightblue-500 hover:underline": showBacklinks(),
+              }}
+              onclick={() => setShowBacklinks(false)}
+            >
+              Collections
+            </button>
+            <Show when={!showBacklinks()}>
               <Tooltip text={allCollapsed() ? "Expand all" : "Collapse all"}>
                 <button class="bg-transparent" onclick={toggleAllCollections}>
                   {allCollapsed() ?
@@ -140,7 +150,32 @@ const RepoView = () => {
                   : <div class="i-lucide-copy-minus" />}
                 </button>
               </Tooltip>
-            </div>
+            </Show>
+          </div>
+          <Show when={backlinks()}>
+            <button
+              classList={{
+                "bg-transparent font-semibold": true,
+                "text-stone-600 dark:text-stone-400": showBacklinks(),
+                "text-lightblue-500 hover:underline": !showBacklinks(),
+              }}
+              onclick={() => setShowBacklinks(true)}
+            >
+              Backlinks
+            </button>
+          </Show>
+        </div>
+        <Show when={showBacklinks()}>
+          <Show when={backlinks()}>
+            {(backlinks) => (
+              <div class="">
+                <Backlinks links={backlinks().links} target={backlinks().target} />
+              </div>
+            )}
+          </Show>
+        </Show>
+        <Show when={nsids() && !showBacklinks()}>
+          <div class="flex flex-col font-mono">
             <div class="grid grid-cols-[min-content_1fr] items-center overflow-hidden text-sm">
               <For each={Object.keys(nsids() ?? {})}>
                 {(authority) => (
@@ -186,7 +221,7 @@ const RepoView = () => {
         </Show>
         <Show when={didDoc()}>
           {(didDocument) => (
-            <div class="flex flex-col gap-y-1">
+            <div class="flex flex-col gap-y-1 border-t border-neutral-500 pt-2">
               <div>
                 <span class="font-semibold text-stone-600 dark:text-stone-400">ID </span>
                 <span>{didDocument().id}</span>
@@ -261,13 +296,6 @@ const RepoView = () => {
                     <div class="i-line-md-loading-twotone-loop" />
                   </Show>
                 </div>
-              </Show>
-              <Show when={backlinks()}>
-                {(backlinks) => (
-                  <div class="mt-2 border-t border-neutral-500 pt-2">
-                    <Backlinks links={backlinks().links} target={backlinks().target} />
-                  </div>
-                )}
               </Show>
             </div>
           )}

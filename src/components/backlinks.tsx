@@ -30,20 +30,10 @@ const Backlinks = ({ links, target }: { links: LinkData; target: string }) => {
   const filteredLinks = createMemo(() => linksBySource(links));
 
   return (
-    <div class="break-anywhere flex flex-col pb-2">
-      <p class="font-sans font-semibold text-stone-600 dark:text-stone-400">
-        Backlinks{" "}
-        <a
-          href="https://constellation.microcosm.blue"
-          title="constellation: atproto backlink index"
-          target="_blank"
-        >
-          🌌
-        </a>{" "}
-      </p>
+    <div class="break-anywhere flex flex-col">
       <For each={filteredLinks().links}>
         {({ collection, path, matchesFilter, counts }) => (
-          <div class="mt-2 font-mono text-sm">
+          <div class="font-mono text-sm">
             <p classList={{ "text-stone-400": matchesFilter }}>
               <span title="Collection containing linking records">{collection}</span>
               <span class="text-cyan-500">@</span>
