@@ -125,7 +125,6 @@ const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: str
             <a
               href={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${blob.ref.$link}@jpeg`}
               target="_blank"
-              class="contents"
             >
               <img
                 class="max-h-[16rem] max-w-[16rem]"
