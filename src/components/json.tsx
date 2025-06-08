@@ -3,6 +3,7 @@ import { createSignal, For, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import { pds } from "./navbar";
 import Tooltip from "./tooltip";
+import { disableMedia } from "./settings";
 
 interface AtBlob {
   $type: string;
@@ -116,7 +117,7 @@ const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: str
     return (
       <>
         <span class="flex gap-x-1">
-          <Show when={blob.mimeType.startsWith("image/")}>
+          <Show when={blob.mimeType.startsWith("image/") && !disableMedia()}>
             <a
               href={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${blob.ref.$link}@jpeg`}
               target="_blank"
@@ -128,7 +129,7 @@ const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: str
               />
             </a>
           </Show>
-          <Show when={blob.mimeType === "video/mp4"}>
+          <Show when={blob.mimeType === "video/mp4" && !disableMedia()}>
             <VideoPlayer did={repo} cid={blob.ref.$link} />
           </Show>
           <Show when={pds()}>

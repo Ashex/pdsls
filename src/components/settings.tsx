@@ -16,6 +16,7 @@ export const [showHandle, setShowHandle] = createSignal(localStorage.showHandle 
 export const [backlinksEnabled, setBacklinksEnabled] = createSignal(
   localStorage.backlinks === "true",
 );
+export const [disableMedia, setDisableMedia] = createSignal(localStorage.disableMedia === "true");
 
 const Settings = () => {
   const [modal, setModal] = createSignal<HTMLDialogElement>();
@@ -186,8 +187,23 @@ const Settings = () => {
                       setShowHandle(e.currentTarget.checked);
                     }}
                   />
-                  <label for="showHandle" class="select-none font-semibold">
+                  <label for="showHandle" class="select-none">
                     Default to showing handle
+                  </label>
+                </div>
+                <div class="flex items-center gap-1">
+                  <input
+                    id="disableMedia"
+                    class="size-4"
+                    type="checkbox"
+                    checked={localStorage.disableMedia === "true"}
+                    onChange={(e) => {
+                      localStorage.disableMedia = e.currentTarget.checked;
+                      setDisableMedia(e.currentTarget.checked);
+                    }}
+                  />
+                  <label for="disableMedia" class="select-none">
+                    Disable media embeds
                   </label>
                 </div>
               </div>
