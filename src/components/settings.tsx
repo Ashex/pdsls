@@ -16,7 +16,7 @@ export const [showHandle, setShowHandle] = createSignal(localStorage.showHandle 
 export const [backlinksEnabled, setBacklinksEnabled] = createSignal(
   localStorage.backlinks === "true",
 );
-export const [disableMedia, setDisableMedia] = createSignal(localStorage.disableMedia === "true");
+export const [hideMedia, setHideMedia] = createSignal(localStorage.hideMedia === "true");
 
 const Settings = () => {
   const [modal, setModal] = createSignal<HTMLDialogElement>();
@@ -196,10 +196,10 @@ const Settings = () => {
                     id="disableMedia"
                     class="size-4"
                     type="checkbox"
-                    checked={localStorage.disableMedia === "true"}
+                    checked={localStorage.hideMedia === "true"}
                     onChange={(e) => {
-                      localStorage.disableMedia = e.currentTarget.checked;
-                      setDisableMedia(e.currentTarget.checked);
+                      localStorage.hideMedia = e.currentTarget.checked;
+                      setHideMedia(e.currentTarget.checked);
                     }}
                   />
                   <label for="disableMedia" class="select-none">

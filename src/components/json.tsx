@@ -1,9 +1,9 @@
 import VideoPlayer from "./video-player";
-import { createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import { pds } from "./navbar";
 import Tooltip from "./tooltip";
-import { disableMedia } from "./settings";
+import { hideMedia } from "./settings";
 
 interface AtBlob {
   $type: string;
@@ -71,6 +71,10 @@ const JSONNull = () => {
 
 const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: string }) => {
   const [clip, setClip] = createSignal(false);
+  const [hide, setHide] = createSignal(localStorage.hideMedia === "true");
+
+  createEffect(() => setHide(hideMedia()));
+
   const rawObj = (
     <For each={Object.entries(data)}>
       {([key, value]) => (
@@ -117,7 +121,7 @@ const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: str
     return (
       <>
         <span class="flex gap-x-1">
-          <Show when={blob.mimeType.startsWith("image/") && !disableMedia()}>
+          <Show when={blob.mimeType.startsWith("image/") && !hide()}>
             <a
               href={`https://cdn.bsky.app/img/feed_thumbnail/plain/${repo}/${blob.ref.$link}@jpeg`}
               target="_blank"
@@ -129,20 +133,28 @@ const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: str
               />
             </a>
           </Show>
-          <Show when={blob.mimeType === "video/mp4" && !disableMedia()}>
+          <Show when={blob.mimeType === "video/mp4" && !hide()}>
             <VideoPlayer did={repo} cid={blob.ref.$link} />
           </Show>
-          <Show when={pds()}>
-            <a
-              href={`https://${pds()}/xrpc/com.atproto.sync.getBlob?did=${repo}&cid=${blob.ref.$link}`}
-              target="_blank"
-              class="size-fit"
-            >
-              <Tooltip text="Blob link">
-                <div class="i-lucide-external-link text-sm" />
-              </Tooltip>
-            </a>
-          </Show>
+          <span class="flex flex-col items-center justify-between">
+            <Show when={blob.mimeType.startsWith("image/") || blob.mimeType === "video/mp4"}>
+              <button
+                classList={{ "text-lg": true, "i-lucide-eye": !hide(), "i-lucide-eye-off": hide() }}
+                onclick={() => setHide(!hide())}
+              />
+            </Show>
+            <Show when={pds()}>
+              <a
+                href={`https://${pds()}/xrpc/com.atproto.sync.getBlob?did=${repo}&cid=${blob.ref.$link}`}
+                target="_blank"
+                class="size-fit"
+              >
+                <Tooltip text="Blob link">
+                  <div class="i-lucide-external-link text-lg" />
+                </Tooltip>
+              </a>
+            </Show>
+          </span>
         </span>
         {rawObj}
       </>
