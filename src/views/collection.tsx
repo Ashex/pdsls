@@ -193,12 +193,7 @@ const CollectionView = () => {
   return (
     <Show when={records.length || response()}>
       <div class="z-5 dark:bg-dark-700 sticky top-0 mb-2 flex w-full flex-col items-center justify-center gap-2 border-b border-neutral-500 bg-zinc-100 py-4">
-        <div
-          classList={{
-            "flex items-center gap-2": true,
-            "flex-col md:flex-row": batchDelete(),
-          }}
-        >
+        <div class="flex w-full items-center gap-2">
           <Show when={loginState() && agent.sub === did}>
             <div
               classList={{
@@ -291,7 +286,7 @@ const CollectionView = () => {
             type="text"
             spellcheck={false}
             placeholder="Filter by substring"
-            class="dark:bg-dark-100 w-14rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            class="dark:bg-dark-100 w-full rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
             onInput={(e) => setFilter(e.currentTarget.value)}
           />
         </div>
