@@ -18,7 +18,7 @@ const RepoView = () => {
   }>();
   const [nsids, setNsids] = createSignal<Record<string, { hidden: boolean; nsids: string[] }>>();
   const [allCollapsed, setAllCollapsed] = createSignal(false);
-  const [showBacklinks, setShowBacklinks] = createSignal(false);
+  const [tab, setTab] = createSignal<"collections" | "backlinks" | "doc">("collections");
   let rpc: Client;
   let pds: string;
   const did = params.repo;
@@ -64,6 +64,7 @@ const RepoView = () => {
           setError("This repository is unreachable");
           break;
       }
+      setTab("doc");
     }
 
     if (localStorage.backlinks === "true") {
@@ -130,42 +131,43 @@ const RepoView = () => {
             {error()}
           </div>
         </Show>
-        <div class="flex justify-between">
-          <div class="flex items-center gap-1">
+        <div class="flex divide-x divide-neutral-500 overflow-hidden rounded-lg border border-neutral-500">
+          <Show when={!error()}>
             <button
               classList={{
-                "bg-transparent": true,
-                "text-stone-600 dark:text-stone-400 font-semibold": !showBacklinks(),
-                "text-lightblue-500 hover:underline": showBacklinks(),
+                "flex flex-1 py-1 justify-center": true,
+                "bg-neutral-200 dark:bg-dark-100 ": tab() === "collections",
+                "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-400": tab() !== "collections",
               }}
-              onclick={() => setShowBacklinks(false)}
+              onclick={() => setTab("collections")}
             >
               Collections
             </button>
-            <Show when={!showBacklinks()}>
-              <Tooltip text={allCollapsed() ? "Expand all" : "Collapse all"}>
-                <button class="bg-transparent" onclick={toggleAllCollections}>
-                  {allCollapsed() ?
-                    <div class="i-lucide-copy-plus" />
-                  : <div class="i-lucide-copy-minus" />}
-                </button>
-              </Tooltip>
-            </Show>
-          </div>
+          </Show>
+          <button
+            classList={{
+              "flex flex-1 py-1 justify-center": true,
+              "bg-neutral-200 dark:bg-dark-100": tab() === "doc",
+              "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-400": tab() !== "doc",
+            }}
+            onclick={() => setTab("doc")}
+          >
+            DID Doc
+          </button>
           <Show when={backlinks()}>
             <button
               classList={{
-                "bg-transparent": true,
-                "text-stone-600 dark:text-stone-400 font-semibold": showBacklinks(),
-                "text-lightblue-500 hover:underline": !showBacklinks(),
+                "flex flex-1 py-1 justify-center": true,
+                "bg-neutral-200 dark:bg-dark-100": tab() === "backlinks",
+                "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-400": tab() !== "backlinks",
               }}
-              onclick={() => setShowBacklinks(true)}
+              onclick={() => setTab("backlinks")}
             >
               Backlinks
             </button>
           </Show>
         </div>
-        <Show when={showBacklinks()}>
+        <Show when={tab() === "backlinks"}>
           <Show when={backlinks()}>
             {(backlinks) => (
               <div class="">
@@ -174,7 +176,16 @@ const RepoView = () => {
             )}
           </Show>
         </Show>
-        <Show when={nsids() && !showBacklinks()}>
+        <Show when={nsids() && tab() === "collections"}>
+          <button
+            class="flex w-fit items-center gap-1 bg-transparent"
+            onclick={toggleAllCollections}
+          >
+            {allCollapsed() ?
+              <div class="i-lucide-copy-plus text-sm" />
+            : <div class="i-lucide-copy-minus text-sm" />}
+            {allCollapsed() ? "Expand all" : "Collapse all"}
+          </button>
           <div class="flex flex-col font-mono">
             <div class="grid grid-cols-[min-content_1fr] items-center overflow-hidden text-sm">
               <For each={Object.keys(nsids() ?? {})}>
@@ -219,86 +230,90 @@ const RepoView = () => {
             </div>
           </div>
         </Show>
-        <Show when={didDoc()}>
-          {(didDocument) => (
-            <div class="flex flex-col gap-y-1 border-t border-neutral-500 pt-2">
-              <div>
-                <span class="font-semibold text-stone-600 dark:text-stone-400">ID </span>
-                <span>{didDocument().id}</span>
-              </div>
-              <div>
-                <p class="font-semibold text-stone-600 dark:text-stone-400">Identities</p>
-                <ul class="ml-3">
-                  <For each={didDocument().alsoKnownAs}>{(alias) => <li>{alias}</li>}</For>
-                </ul>
-              </div>
-              <div>
-                <p class="font-semibold text-stone-600 dark:text-stone-400">Services</p>
-                <ul class="ml-3">
-                  <For each={didDocument().service}>
-                    {(service) => (
-                      <li class="flex flex-col">
-                        <span>#{service.id.split("#")[1]}</span>
-                        <a
-                          class="text-lightblue-500 w-fit hover:underline"
-                          href={service.serviceEndpoint.toString()}
-                          target="_blank"
-                        >
-                          {service.serviceEndpoint.toString()}
-                        </a>
-                      </li>
-                    )}
-                  </For>
-                </ul>
-              </div>
-              <div>
-                <p class="font-semibold text-stone-600 dark:text-stone-400">Verification methods</p>
-                <ul class="ml-3">
-                  <For each={didDocument().verificationMethod}>
-                    {(verif) => (
-                      <li class="flex flex-col">
-                        <span>#{verif.id.split("#")[1]}</span>
-                        <span>{verif.publicKeyMultibase}</span>
-                      </li>
-                    )}
-                  </For>
-                </ul>
-              </div>
-              <a
-                class="text-lightblue-500 flex w-fit items-center hover:underline"
-                href={
-                  did.startsWith("did:plc") ?
-                    `${localStorage.plcDirectory ?? "https://plc.directory"}/${did}`
-                  : `https://${did.split("did:web:")[1]}/.well-known/did.json`
-                }
-                target="_blank"
-              >
-                DID document <div class="i-lucide-external-link ml-0.5 text-[0.65rem]" />
-              </a>
-              <Show when={did.startsWith("did:plc")}>
+        <Show when={tab() === "doc"}>
+          <Show when={didDoc()}>
+            {(didDocument) => (
+              <div class="flex flex-col gap-y-1">
+                <div>
+                  <span class="font-semibold text-stone-600 dark:text-stone-400">ID </span>
+                  <span>{didDocument().id}</span>
+                </div>
+                <div>
+                  <p class="font-semibold text-stone-600 dark:text-stone-400">Identities</p>
+                  <ul class="ml-3">
+                    <For each={didDocument().alsoKnownAs}>{(alias) => <li>{alias}</li>}</For>
+                  </ul>
+                </div>
+                <div>
+                  <p class="font-semibold text-stone-600 dark:text-stone-400">Services</p>
+                  <ul class="ml-3">
+                    <For each={didDocument().service}>
+                      {(service) => (
+                        <li class="flex flex-col">
+                          <span>#{service.id.split("#")[1]}</span>
+                          <a
+                            class="text-lightblue-500 w-fit hover:underline"
+                            href={service.serviceEndpoint.toString()}
+                            target="_blank"
+                          >
+                            {service.serviceEndpoint.toString()}
+                          </a>
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </div>
+                <div>
+                  <p class="font-semibold text-stone-600 dark:text-stone-400">
+                    Verification methods
+                  </p>
+                  <ul class="ml-3">
+                    <For each={didDocument().verificationMethod}>
+                      {(verif) => (
+                        <li class="flex flex-col">
+                          <span>#{verif.id.split("#")[1]}</span>
+                          <span>{verif.publicKeyMultibase}</span>
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </div>
                 <a
                   class="text-lightblue-500 flex w-fit items-center hover:underline"
-                  href={`https://boat.kelinci.net/plc-oplogs?q=${did}`}
+                  href={
+                    did.startsWith("did:plc") ?
+                      `${localStorage.plcDirectory ?? "https://plc.directory"}/${did}`
+                    : `https://${did.split("did:web:")[1]}/.well-known/did.json`
+                  }
                   target="_blank"
                 >
-                  PLC operation logs <div class="i-lucide-external-link ml-0.5 text-[0.65rem]" />
+                  DID document <div class="i-lucide-external-link ml-0.5 text-[0.65rem]" />
                 </a>
-              </Show>
-              <Show when={error()?.length === 0 || error() === undefined}>
-                <div class="flex items-center gap-1">
-                  <button
-                    onclick={() => downloadRepo()}
-                    class="text-lightblue-500 flex w-fit items-center bg-transparent hover:underline"
+                <Show when={did.startsWith("did:plc")}>
+                  <a
+                    class="text-lightblue-500 flex w-fit items-center hover:underline"
+                    href={`https://boat.kelinci.net/plc-oplogs?q=${did}`}
+                    target="_blank"
                   >
-                    Export repo
-                  </button>
-                  <Show when={downloading()}>
-                    <div class="i-line-md-loading-twotone-loop" />
-                  </Show>
-                </div>
-              </Show>
-            </div>
-          )}
+                    PLC operation logs <div class="i-lucide-external-link ml-0.5 text-[0.65rem]" />
+                  </a>
+                </Show>
+                <Show when={error()?.length === 0 || error() === undefined}>
+                  <div class="flex items-center gap-1">
+                    <button
+                      onclick={() => downloadRepo()}
+                      class="text-lightblue-500 flex w-fit items-center bg-transparent hover:underline"
+                    >
+                      Export repo
+                    </button>
+                    <Show when={downloading()}>
+                      <div class="i-line-md-loading-twotone-loop" />
+                    </Show>
+                  </div>
+                </Show>
+              </div>
+            )}
+          </Show>
         </Show>
       </div>
     </Show>
