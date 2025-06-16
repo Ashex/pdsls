@@ -10,18 +10,6 @@
   height: 1.2em;
 }
 
-.i-lucide-clipboard-check-fill {
-  --un-icon: url("data:image/svg+xml,%3Csvg%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M19.9993%202.66675H11.9993C11.263%202.66675%2010.666%203.2637%2010.666%204.00008V6.66675C10.666%207.40313%2011.263%208.00008%2011.9993%208.00008H19.9993C20.7357%208.00008%2021.3327%207.40313%2021.3327%206.66675V4.00008C21.3327%203.2637%2020.7357%202.66675%2019.9993%202.66675Z%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.66667%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M23.9997%205.3335H21.333H10.6663H7.99967C7.29243%205.3335%206.61415%205.61445%206.11406%206.11454C5.61396%206.61464%205.33301%207.29292%205.33301%208.00016V26.6668C5.33301%2027.3741%205.61396%2028.0524%206.11406%2028.5524C6.61415%2029.0525%207.29243%2029.3335%207.99967%2029.3335H23.9997C24.7069%2029.3335%2025.3852%2029.0525%2025.8853%2028.5524C26.3854%2028.0524%2026.6663%2027.3741%2026.6663%2026.6668V8.00016C26.6663%207.29292%2026.3854%206.61464%2025.8853%206.11454C25.3852%205.61445%2024.7069%205.3335%2023.9997%205.3335ZM20.9422%2016.9429C21.4629%2016.4222%2021.4629%2015.578%2020.9422%2015.0573C20.4215%2014.5366%2019.5772%2014.5366%2019.0565%2015.0573L14.666%2019.4478L12.9422%2017.7239C12.4215%2017.2032%2011.5772%2017.2032%2011.0565%2017.7239C10.5358%2018.2446%2010.5358%2019.0889%2011.0565%2019.6096L13.7232%2022.2762C14.2439%2022.7969%2015.0881%2022.7969%2015.6088%2022.2762L20.9422%2016.9429Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E");
-  -webkit-mask: var(--un-icon) no-repeat;
-  mask: var(--un-icon) no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  background-color: currentColor;
-  color: inherit;
-  width: 1.2em;
-  height: 1.2em;
-}
-
 .i-line-md-loading-twotone-loop {
   --un-icon: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 24 24' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg' %3E%3Cg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Cpath stroke-dasharray='16' stroke-dashoffset='16' d='M12 3c4.97 0 9 4.03 9 9'%3E%3Canimate fill='freeze' attributeName='stroke-dashoffset' dur='0.3s' values='16;0'/%3E%3CanimateTransform attributeName='transform' dur='1.5s' repeatCount='indefinite' type='rotate' values='0 12 12;360 12 12'/%3E%3C/path%3E%3Cpath stroke-dasharray='64' stroke-dashoffset='64' stroke-opacity='.3' d='M12 3c4.97 0 9 4.03 9 9c0 4.97 -4.03 9 -9 9c-4.97 0 -9 -4.03 -9 -9c0 -4.97 4.03 -9 9 -9Z'%3E%3Canimate fill='freeze' attributeName='stroke-dashoffset' dur='1.2s' values='64;0'/%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
   -webkit-mask: var(--un-icon) no-repeat;
