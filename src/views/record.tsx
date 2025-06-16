@@ -188,7 +188,7 @@ export const RecordView = () => {
                     <div class="mt-2 inline-flex gap-2">
                       <button
                         onclick={() => setOpenDelete(false)}
-                        class="dark:bg-dark-900 dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-white px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
+                        class="dark:bg-dark-900 dark:hover:bg-dark-300 bg-light-100 rounded-lg border border-slate-400 px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
                       >
                         Cancel
                       </button>

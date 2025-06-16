@@ -83,7 +83,7 @@ const NavBar = (props: { params: Params }) => {
           onclick={() => setOpenMenu(!openMenu())}
         />
         <Show when={openMenu()}>
-          <div class="absolute right-0 top-full z-10 w-max rounded-md border border-neutral-500 bg-white p-1 font-sans dark:bg-neutral-800">
+          <div class="bg-light-100 absolute right-0 top-full z-10 w-max rounded-md border border-neutral-500 p-1 font-sans dark:bg-neutral-800">
             <div class="flex flex-col">
               <Show when={pds()}>
                 {(pds) => (
