@@ -70,9 +70,8 @@ const LabelView = () => {
             name="patterns"
             spellcheck={false}
             rows={3}
-            cols={25}
             value={searchParams.uriPatterns ?? "*"}
-            class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            class="dark:bg-dark-100 w-16rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
           />
           <div class="absolute -right-14 flex min-w-[3rem] justify-center">
             <Show when={!response.loading}>
@@ -95,7 +94,7 @@ const LabelView = () => {
           type="text"
           spellcheck={false}
           placeholder="Filter by label"
-          class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+          class="dark:bg-dark-100 w-16rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
           onInput={(e) => setFilter(e.currentTarget.value)}
         />
         <div class="flex items-center gap-x-2">

@@ -291,7 +291,7 @@ const CollectionView = () => {
             type="text"
             spellcheck={false}
             placeholder="Filter by substring"
-            class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            class="dark:bg-dark-100 w-14rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
             onInput={(e) => setFilter(e.currentTarget.value)}
           />
         </div>

@@ -200,8 +200,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                       type="text"
                       spellcheck={false}
                       placeholder="Optional (default: record type)"
-                      size={22}
-                      class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                      class="dark:bg-dark-100 w-14rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
                     />
                   </div>
                   <div class="flex items-center gap-x-2">
@@ -214,8 +213,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                       type="text"
                       spellcheck={false}
                       placeholder="Optional"
-                      size={22}
-                      class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                      class="dark:bg-dark-100 w-14rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
                     />
                   </div>
                 </Show>
@@ -233,7 +231,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                     <option value="false">False</option>
                   </select>
                 </div>
-                <div class="flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                   <div class="flex items-center gap-x-2">
                     <label for="mimetype" class="min-w-20 select-none">
                       MIME type
@@ -243,8 +241,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                       type="text"
                       spellcheck={false}
                       placeholder="Optional"
-                      size={22}
-                      class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                      class="dark:bg-dark-100 w-14rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
                     />
                   </div>
                   <div class="flex items-center gap-1">
