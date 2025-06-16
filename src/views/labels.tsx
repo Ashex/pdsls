@@ -4,6 +4,7 @@ import { A, useParams, useSearchParams } from "@solidjs/router";
 import { labelerCache, resolvePDS } from "../utils/api.js";
 import { localDateFromTimestamp } from "../utils/date.js";
 import { ComAtprotoLabelDefs } from "@atcute/atproto";
+import { TextInput } from "../components/text-input.jsx";
 
 const LabelView = () => {
   const params = useParams();
@@ -71,7 +72,7 @@ const LabelView = () => {
             spellcheck={false}
             rows={3}
             value={searchParams.uriPatterns ?? "*"}
-            class="dark:bg-dark-100 w-16rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            class="dark:bg-dark-100 bg-light-100 w-16rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
           />
           <div class="absolute -right-14 flex min-w-[3rem] justify-center">
             <Show when={!response.loading}>
@@ -90,12 +91,10 @@ const LabelView = () => {
         </div>
       </form>
       <div class="z-5 dark:bg-dark-800 sticky top-0 flex w-full flex-col items-center justify-center gap-3 border-b border-neutral-500 bg-zinc-100 py-3">
-        <input
-          type="text"
-          spellcheck={false}
+        <TextInput
           placeholder="Filter by label"
-          class="dark:bg-dark-100 w-16rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
           onInput={(e) => setFilter(e.currentTarget.value)}
+          class="w-16rem"
         />
         <div class="flex items-center gap-x-2">
           <Show when={labelCount() && labels().length}>

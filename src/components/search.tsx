@@ -4,6 +4,7 @@ import Tooltip from "./tooltip.jsx";
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 import { agent, loginState } from "../components/login.jsx";
 import { Handle } from "@atcute/lexicons";
+import { TextInput } from "./text-input.jsx";
 
 const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 1;
 
@@ -72,13 +73,11 @@ const Search = () => {
           </label>
         </div>
         <div class="flex w-full items-center gap-1">
-          <input
-            type="text"
-            id="input"
+          <TextInput
             ref={searchInput}
-            spellcheck={false}
+            id="input"
             placeholder={isTouchDevice ? "" : "Type / to search"}
-            class="dark:bg-dark-100 grow rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            class="grow"
           />
           <div class="flex min-w-[2rem] justify-center">
             <Show when={loading()}>

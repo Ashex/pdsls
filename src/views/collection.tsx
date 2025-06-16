@@ -19,6 +19,7 @@ import Tooltip from "../components/tooltip.jsx";
 import { localDateFromTimestamp } from "../utils/date.js";
 import { $type, ActorIdentifier, InferXRPCBodyOutput } from "@atcute/lexicons";
 import { ComAtprotoRepoApplyWrites, ComAtprotoRepoGetRecord } from "@atcute/atproto";
+import { TextInput } from "../components/text-input.jsx";
 
 interface AtprotoRecord {
   rkey: string;
@@ -282,11 +283,9 @@ const CollectionView = () => {
               </Show>
             </div>
           </Show>
-          <input
-            type="text"
-            spellcheck={false}
+          <TextInput
             placeholder="Filter by substring"
-            class="dark:bg-dark-100 w-full rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            class="w-full"
             onInput={(e) => setFilter(e.currentTarget.value)}
           />
         </div>

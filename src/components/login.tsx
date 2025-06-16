@@ -11,6 +11,7 @@ import {
 } from "@atcute/oauth-browser-client";
 import { Did } from "@atcute/lexicons";
 import { isHandle } from "@atcute/lexicons/syntax";
+import { TextInput } from "./text-input";
 
 configureOAuth({
   metadata: {
@@ -52,11 +53,9 @@ const Login = () => {
     <form class="flex flex-col gap-y-1" onsubmit={(e) => e.preventDefault()}>
       <label for="handle">Add new account</label>
       <div class="flex gap-x-2">
-        <input
-          type="text"
+        <TextInput
           id="handle"
           placeholder="user.bsky.social"
-          class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
           onInput={(e) => setLoginInput(e.currentTarget.value)}
         />
         <button

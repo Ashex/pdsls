@@ -8,6 +8,7 @@ import Tooltip from "./tooltip.jsx";
 import { ActorIdentifier } from "@atcute/lexicons";
 import { useParams } from "@solidjs/router";
 import { remove } from "@mary/exif-rm";
+import { TextInput } from "./text-input.jsx";
 
 export const RecordEditor = (props: { create: boolean; record?: any }) => {
   const params = useParams();
@@ -194,27 +195,18 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                     <label for="collection" class="min-w-20 select-none">
                       Collection
                     </label>
-                    <input
+                    <TextInput
                       id="collection"
                       name="collection"
-                      type="text"
-                      spellcheck={false}
                       placeholder="Optional (default: record type)"
-                      class="dark:bg-dark-100 w-14rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                      class="w-14rem"
                     />
                   </div>
                   <div class="flex items-center gap-x-2">
                     <label for="rkey" class="min-w-20 select-none">
                       Record key
                     </label>
-                    <input
-                      id="rkey"
-                      name="rkey"
-                      type="text"
-                      spellcheck={false}
-                      placeholder="Optional"
-                      class="dark:bg-dark-100 w-14rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                    />
+                    <TextInput id="rkey" name="rkey" placeholder="Optional" class="w-14rem" />
                   </div>
                 </Show>
                 <div class="flex items-center gap-x-2">
@@ -224,7 +216,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                   <select
                     name="validate"
                     id="validate"
-                    class="dark:bg-dark-100 rounded-lg border border-gray-400 px-1 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                    class="dark:bg-dark-100 bg-light-100 rounded-lg border border-gray-400 px-1 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
                   >
                     <option value="unset">Unset</option>
                     <option value="true">True</option>
@@ -236,13 +228,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                     <label for="mimetype" class="min-w-20 select-none">
                       MIME type
                     </label>
-                    <input
-                      id="mimetype"
-                      type="text"
-                      spellcheck={false}
-                      placeholder="Optional"
-                      class="dark:bg-dark-100 w-14rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                    />
+                    <TextInput id="mimetype" placeholder="Optional" class="w-14rem" />
                   </div>
                   <div class="flex items-center gap-1">
                     <input id="exif-rm" class="size-4" type="checkbox" checked />

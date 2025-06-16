@@ -1,5 +1,6 @@
 import { createSignal, onMount, Show, onCleanup, createEffect } from "solid-js";
 import Tooltip from "./tooltip.jsx";
+import { TextInput } from "./text-input.jsx";
 
 const getInitialTheme = () => {
   const isDarkMode =
@@ -142,13 +143,11 @@ const Settings = () => {
                 >
                   Constellation host
                 </label>
-                <input
+                <TextInput
                   id="constellation"
-                  type="text"
-                  spellcheck={false}
                   value={localStorage.constellationHost || "https://constellation.microcosm.blue"}
                   disabled={!backlinksEnabled()}
-                  class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300 disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-500 dark:disabled:border-gray-700 dark:disabled:bg-gray-800/20"
+                  class="disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-500 dark:disabled:border-gray-700 dark:disabled:bg-gray-800/20"
                   onInput={(e) => {
                     e.currentTarget.value.length ?
                       (localStorage.constellationHost = e.currentTarget.value)
@@ -161,12 +160,9 @@ const Settings = () => {
                   <label for="plcDirectory" class="select-none font-semibold">
                     PLC Directory
                   </label>
-                  <input
+                  <TextInput
                     id="plcDirectory"
-                    type="text"
-                    spellcheck={false}
                     value={localStorage.plcDirectory || "https://plc.directory"}
-                    class="dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
                     onInput={(e) => {
                       e.currentTarget.value.length ?
                         (localStorage.plcDirectory = e.currentTarget.value)

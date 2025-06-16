@@ -2,6 +2,7 @@ import { createSignal, For, Show, onCleanup, onMount } from "solid-js";
 import { JSONValue } from "../components/json";
 import { A, useLocation, useSearchParams } from "@solidjs/router";
 import { Firehose } from "@skyware/firehose";
+import { TextInput } from "../components/text-input";
 
 const LIMIT = 25;
 type Parameter = { name: string; param: string | string[] | undefined };
@@ -157,53 +158,49 @@ const StreamView = () => {
       <form ref={formRef} class="flex flex-col gap-y-3">
         <Show when={!connected()}>
           <label class="flex items-center justify-end gap-x-2">
-            <span class="">Instance</span>
-            <input
-              type="text"
+            <span>Instance</span>
+            <TextInput
               name="instance"
-              spellcheck={false}
               value={
                 searchParams.instance ??
                 (streamType === StreamType.JETSTREAM ?
                   "wss://jetstream1.us-east.bsky.network/subscribe"
                 : "wss://bsky.network")
               }
-              class="w-16rem dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              class="w-16rem"
             />
           </label>
           <Show when={streamType === StreamType.JETSTREAM}>
             <label class="flex items-center justify-end gap-x-2">
-              <span class="">Collections</span>
+              <span>Collections</span>
               <textarea
                 name="collections"
                 spellcheck={false}
                 placeholder="Comma-separated list of collections"
                 value={searchParams.collections ?? ""}
-                class="w-16rem dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                class="w-16rem dark:bg-dark-100 bg-light-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
               />
             </label>
           </Show>
           <Show when={streamType === StreamType.JETSTREAM}>
             <label class="flex items-center justify-end gap-x-2">
-              <span class="">DIDs</span>
+              <span>DIDs</span>
               <textarea
                 name="dids"
                 spellcheck={false}
                 placeholder="Comma-separated list of DIDs"
                 value={searchParams.dids ?? ""}
-                class="w-16rem dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                class="w-16rem dark:bg-dark-100 bg-light-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
               />
             </label>
           </Show>
           <label class="flex items-center justify-end gap-x-2">
-            <span class="">Cursor</span>
-            <input
-              type="text"
+            <span>Cursor</span>
+            <TextInput
               name="cursor"
-              spellcheck={false}
               placeholder="Leave empty for live-tail"
               value={searchParams.cursor ?? ""}
-              class="w-16rem dark:bg-dark-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              class="w-16rem"
             />
           </label>
           <Show when={streamType === StreamType.JETSTREAM}>
