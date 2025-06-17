@@ -3,7 +3,6 @@ import { Client, CredentialManager } from "@atcute/client";
 import { A, query, useParams } from "@solidjs/router";
 import { didDocCache, getAllBacklinks, LinkData, resolvePDS } from "../utils/api.js";
 import { Backlinks } from "../components/backlinks.jsx";
-import Tooltip from "../components/tooltip.jsx";
 import { ActorIdentifier } from "@atcute/lexicons";
 import { DidDocument } from "@atcute/identity";
 
