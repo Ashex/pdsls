@@ -316,15 +316,15 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
         />
       </Show>
       <Show when={!props.create}>
-        <button
-          onclick={() => {
-            createModel();
-            setOpenDialog(true);
-          }}
-          class="dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-transparent px-2 py-1.5 text-xs font-bold hover:bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
-        >
-          Edit
-        </button>
+        <Tooltip text="Edit">
+          <button
+            onclick={() => {
+              createModel();
+              setOpenDialog(true);
+            }}
+            class="i-lucide-pencil text-xl"
+          />
+        </Tooltip>
       </Show>
     </>
   );

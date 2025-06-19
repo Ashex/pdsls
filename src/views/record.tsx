@@ -16,8 +16,8 @@ import { lexiconDoc } from "@atcute/lexicon-doc";
 import { ComAtprotoRepoGetRecord } from "@atcute/atproto";
 import { lexicons } from "../utils/types/lexicons.js";
 import { RecordEditor } from "../components/create.jsx";
-import { backlinksEnabled } from "../components/settings.jsx";
 import { addToClipboard } from "../utils/copy.js";
+import Tooltip from "../components/tooltip.jsx";
 
 export const RecordView = () => {
   const params = useParams();
@@ -32,7 +32,7 @@ export const RecordView = () => {
   const [notice, setNotice] = createSignal("");
   const [showBacklinks, setShowBacklinks] = createSignal(false);
   const [externalLink, setExternalLink] = createSignal<
-    { label: string; link: string } | undefined
+    { label: string; link: string; icon?: string } | undefined
   >();
   const did = params.repo;
   let rpc: Client;
@@ -160,22 +160,13 @@ export const RecordView = () => {
         <div class="break-words text-red-500 dark:text-red-400">{notice()}</div>
       </Show>
       <Show when={record()}>
-        <div class="mb-1 mt-3 flex w-full justify-center gap-x-1">
-          <Show when={externalLink()}>
-            <a
-              class="dark:hover:bg-dark-300 block flex items-center gap-x-1 rounded-lg border border-slate-400 bg-transparent px-2 py-1.5 text-xs font-bold hover:bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
-              target="_blank"
-              href={externalLink()?.link}
-            >
-              {externalLink()?.label} <div class="i-lucide-external-link" />
-            </a>
-          </Show>
-          <button
-            class="dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-transparent px-2 py-1.5 text-xs font-bold hover:bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
-            onclick={() => addToClipboard(JSON.stringify(record()?.value))}
-          >
-            Copy
-          </button>
+        <div class="mt-2 flex gap-2">
+          <Tooltip text="Copy record">
+            <button
+              class="i-lucide-copy text-xl"
+              onclick={() => addToClipboard(JSON.stringify(record()?.value))}
+            />
+          </Tooltip>
           <Show when={loginState() && agent.sub === record()?.uri.split("/")[2]}>
             <RecordEditor create={false} record={record()?.value} />
             <Show when={openDelete()}>
@@ -205,42 +196,33 @@ export const RecordView = () => {
                 </div>
               </dialog>
             </Show>
-            <button
-              onclick={() => setOpenDelete(true)}
-              class="dark:hover:bg-dark-300 rounded-lg border border-red-500 bg-transparent px-2 py-1.5 text-xs font-bold text-red-500 hover:bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-red-400 dark:border-red-400 dark:text-red-400"
-            >
-              Delete
-            </button>
+            <Tooltip text="Delete">
+              <button onclick={() => setOpenDelete(true)} class="i-lucide-trash-2 text-xl" />
+            </Tooltip>
+          </Show>
+          <Show when={externalLink()}>
+            {(externalLink) => (
+              <Tooltip text={`Open on ${externalLink().label}`}>
+                <a
+                  class={`${externalLink().icon ?? "i-lucide-external-link"} text-xl`}
+                  target="_blank"
+                  href={externalLink()?.link}
+                ></a>
+              </Tooltip>
+            )}
+          </Show>
+          <Show when={backlinks()}>
+            <Tooltip text={showBacklinks() ? "Show record" : "Show backlinks"}>
+              <button
+                classList={{
+                  "i-lucide-send-to-back text-xl": !showBacklinks(),
+                  "i-lucide-file-json text-xl": showBacklinks(),
+                }}
+                onclick={() => setShowBacklinks(!showBacklinks())}
+              />
+            </Tooltip>
           </Show>
         </div>
-        <Show when={backlinksEnabled()}>
-          <div class="sm:w-23rem w-21rem flex justify-between self-center">
-            <div class="flex items-center gap-1">
-              <button
-                classList={{
-                  "bg-transparent": true,
-                  "text-stone-600 dark:text-stone-400 font-semibold": !showBacklinks(),
-                  "text-lightblue-500 hover:underline": showBacklinks(),
-                }}
-                onclick={() => setShowBacklinks(false)}
-              >
-                Record
-              </button>
-            </div>
-            <Show when={backlinks()}>
-              <button
-                classList={{
-                  "bg-transparent": true,
-                  "text-stone-600 dark:text-stone-400 font-semibold": showBacklinks(),
-                  "text-lightblue-500 hover:underline": !showBacklinks(),
-                }}
-                onclick={() => setShowBacklinks(true)}
-              >
-                Backlinks
-              </button>
-            </Show>
-          </div>
-        </Show>
         <Show when={!showBacklinks()}>
           <div class="break-anywhere w-full whitespace-pre-wrap font-mono text-xs sm:text-sm">
             <JSONValue data={record()?.value as any} repo={record()!.uri.split("/")[2]} />

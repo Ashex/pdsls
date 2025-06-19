@@ -1,23 +1,27 @@
 export type AtUri = { repo: string; collection: string; rkey: string };
-type TemplateFn = (uri: AtUri) => { label: string; link: string };
+type TemplateFn = (uri: AtUri) => { label: string; link: string; icon?: string };
 type TemplateMap = Record<string, TemplateFn>;
 
 export const uriTemplates: TemplateMap = {
   "app.bsky.actor.profile": (uri) => ({
     label: "Bluesky",
     link: `https://bsky.app/profile/${uri.repo}`,
+    icon: "i-tabler-brand-bluesky",
   }),
   "app.bsky.feed.post": (uri) => ({
     label: "Bluesky",
     link: `https://bsky.app/profile/${uri.repo}/post/${uri.rkey}`,
+    icon: "i-tabler-brand-bluesky",
   }),
   "app.bsky.graph.list": (uri) => ({
     label: "Bluesky",
     link: `https://bsky.app/profile/${uri.repo}/lists/${uri.rkey}`,
+    icon: "i-tabler-brand-bluesky",
   }),
   "app.bsky.feed.generator": (uri) => ({
     label: "Bluesky",
     link: `https://bsky.app/profile/${uri.repo}/feed/${uri.rkey}`,
+    icon: "i-tabler-brand-bluesky",
   }),
   "fyi.unravel.frontpage.post": (uri) => ({
     label: "Frontpage",
