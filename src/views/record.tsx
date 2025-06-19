@@ -152,7 +152,7 @@ export const RecordView = () => {
   };
 
   return (
-    <div class="flex w-full flex-col items-center gap-2">
+    <div class="flex w-full flex-col items-center gap-3">
       <Show when={record() === undefined && validRecord() !== false}>
         <div class="i-line-md-loading-twotone-loop text-2xl" />
       </Show>
@@ -160,7 +160,7 @@ export const RecordView = () => {
         <div class="break-words text-red-500 dark:text-red-400">{notice()}</div>
       </Show>
       <Show when={record()}>
-        <div class="mt-2 flex gap-2">
+        <div class="mt-3 flex gap-2">
           <Tooltip text="Copy record">
             <button
               class="i-lucide-copy text-xl"
