@@ -1,6 +1,6 @@
 import { A, Params } from "@solidjs/router";
 import Tooltip from "./tooltip";
-import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import { didDocCache, labelerCache, validateHandle } from "../utils/api";
 import { setShowHandle, showHandle } from "./settings";
 import { Did, Handle } from "@atcute/lexicons";
@@ -35,18 +35,9 @@ const swapIcons: Record<string, string> = {
 };
 
 const NavBar = (props: { params: Params }) => {
-  const [openMenu, setOpenMenu] = createSignal(false);
-  const [dropdown, setDropdown] = createSignal<HTMLDivElement>();
   const [handle, setHandle] = createSignal(props.params.repo);
   const [validHandle, setValidHandle] = createSignal<boolean | undefined>(undefined);
   const [fullCid, setFullCid] = createSignal(false);
-
-  const clickEvent = (event: MouseEvent) => {
-    if (openMenu() && event.target !== dropdown()) setOpenMenu(false);
-  };
-
-  onMount(() => window.addEventListener("click", clickEvent));
-  onCleanup(() => window.removeEventListener("click", clickEvent));
 
   createEffect(() => {
     if (cid() !== undefined) setFullCid(false);
@@ -79,55 +70,18 @@ const NavBar = (props: { params: Params }) => {
             </A>
           </Show>
         </div>
-        <button
-          ref={setDropdown}
-          class="i-lucide-ellipsis ml-1 shrink-0"
-          onclick={() => setOpenMenu(!openMenu())}
-        />
-        <Show when={openMenu()}>
-          <div class="bg-light-100 absolute right-0 top-full z-10 w-max rounded-md border border-neutral-500 p-1 font-sans dark:bg-neutral-800">
-            <div class="flex flex-col">
-              <Show when={pds()}>
-                {(pds) => (
-                  <button
-                    class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
-                    onclick={() => addToClipboard(pds())}
-                  >
-                    Copy PDS
-                  </button>
-                )}
-              </Show>
-              <Show when={props.params.repo}>
-                <button
-                  class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
-                  onclick={() => addToClipboard(props.params.repo)}
-                >
-                  Copy DID
-                </button>
-                <button
-                  class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
-                  onclick={() =>
-                    addToClipboard(
-                      `at://${props.params.repo}${props.params.collection ? `/${props.params.collection}` : ""}${props.params.rkey ? `/${props.params.rkey}` : ""}`,
-                    )
-                  }
-                >
-                  Copy AT URI
-                </button>
-              </Show>
-              <Show when={props.params.rkey && cid()}>
-                {(cid) => (
-                  <button
-                    class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
-                    onclick={() => addToClipboard(cid())}
-                  >
-                    Copy CID
-                  </button>
-                )}
-              </Show>
-            </div>
-          </div>
-        </Show>
+        <Tooltip text={`Copy ${props.params.repo ? "AT URI" : "PDS"}`}>
+          <button
+            class="i-lucide-copy ml-1 shrink-0"
+            onclick={() =>
+              addToClipboard(
+                props.params.repo ?
+                  `at://${props.params.repo}${props.params.collection ? `/${props.params.collection}` : ""}${props.params.rkey ? `/${props.params.rkey}` : ""}`
+                : pds()!,
+              )
+            }
+          />
+        </Tooltip>
       </div>
       <div class="flex flex-col flex-wrap">
         <Show when={props.params.repo}>
