@@ -4,6 +4,7 @@ import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { didDocCache, labelerCache, validateHandle } from "../utils/api";
 import { setShowHandle, showHandle } from "./settings";
 import { Did, Handle } from "@atcute/lexicons";
+import { addToClipboard } from "../utils/copy";
 
 export const [pds, setPDS] = createSignal<string>();
 export const [cid, setCID] = createSignal<string>();
@@ -70,7 +71,7 @@ const NavBar = (props: { params: Params }) => {
       <div class="relative flex items-center justify-between">
         <div class="min-h-1.25rem flex basis-full items-center">
           <Tooltip text="PDS">
-            <div class="i-lucide-server mr-1 shrink-0" />
+            <button class="i-lucide-server mr-1 shrink-0" onclick={() => addToClipboard(pds()!)} />
           </Tooltip>
           <Show when={pds()}>
             <A end href={pds()!} inactiveClass="text-lightblue-500 w-full hover:underline">
@@ -90,7 +91,7 @@ const NavBar = (props: { params: Params }) => {
                 {(pds) => (
                   <button
                     class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
-                    onclick={() => navigator.clipboard.writeText(pds())}
+                    onclick={() => addToClipboard(pds())}
                   >
                     Copy PDS
                   </button>
@@ -99,14 +100,14 @@ const NavBar = (props: { params: Params }) => {
               <Show when={props.params.repo}>
                 <button
                   class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
-                  onclick={() => navigator.clipboard.writeText(props.params.repo)}
+                  onclick={() => addToClipboard(props.params.repo)}
                 >
                   Copy DID
                 </button>
                 <button
                   class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
                   onclick={() =>
-                    navigator.clipboard.writeText(
+                    addToClipboard(
                       `at://${props.params.repo}${props.params.collection ? `/${props.params.collection}` : ""}${props.params.rkey ? `/${props.params.rkey}` : ""}`,
                     )
                   }
@@ -118,7 +119,7 @@ const NavBar = (props: { params: Params }) => {
                 {(cid) => (
                   <button
                     class="p-0.75 flex items-center rounded bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-600"
-                    onclick={() => navigator.clipboard.writeText(cid())}
+                    onclick={() => addToClipboard(cid())}
                   >
                     Copy CID
                   </button>
@@ -134,7 +135,10 @@ const NavBar = (props: { params: Params }) => {
             <div class="relative mt-1 flex items-center justify-between">
               <div class="flex basis-full items-center">
                 <Tooltip text="Repository">
-                  <div class="i-lucide-at-sign mr-1" />
+                  <button
+                    class="i-lucide-at-sign mr-1"
+                    onclick={() => addToClipboard(props.params.repo)}
+                  />
                 </Tooltip>
                 <A
                   end
@@ -211,7 +215,10 @@ const NavBar = (props: { params: Params }) => {
         <Show when={props.params.collection}>
           <div class="mt-1 flex items-center">
             <Tooltip text="Collection">
-              <div class="i-lucide-list mr-1" />
+              <button
+                class="i-lucide-list mr-1"
+                onclick={() => addToClipboard(props.params.collection)}
+              />
             </Tooltip>
             <A
               end
@@ -226,7 +233,10 @@ const NavBar = (props: { params: Params }) => {
           <div class="relative mt-1 flex items-center justify-between">
             <div class="flex basis-full items-center">
               <Tooltip text="Record">
-                <div class="i-lucide-braces mr-1" />
+                <button
+                  class="i-lucide-braces mr-1"
+                  onclick={() => addToClipboard(props.params.rkey)}
+                />
               </Tooltip>
               <span class="mr-1">{props.params.rkey}</span>
               <Show when={validRecord()}>
@@ -279,7 +289,7 @@ const NavBar = (props: { params: Params }) => {
         {(cid) => (
           <div class="mt-1 flex items-center">
             <Tooltip text="CID">
-              <div class="i-lucide-box mr-1" />
+              <button class="i-lucide-box mr-1" onclick={() => addToClipboard(cid())} />
             </Tooltip>
             <button
               dir="rtl"

@@ -17,6 +17,7 @@ import { ComAtprotoRepoGetRecord } from "@atcute/atproto";
 import { lexicons } from "../utils/types/lexicons.js";
 import { RecordEditor } from "../components/create.jsx";
 import { backlinksEnabled } from "../components/settings.jsx";
+import { addToClipboard } from "../utils/copy.js";
 
 export const RecordView = () => {
   const params = useParams();
@@ -171,7 +172,7 @@ export const RecordView = () => {
           </Show>
           <button
             class="dark:hover:bg-dark-300 rounded-lg border border-slate-400 bg-transparent px-2 py-1.5 text-xs font-bold hover:bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
-            onclick={() => navigator.clipboard.writeText(JSON.stringify(record()?.value))}
+            onclick={() => addToClipboard(JSON.stringify(record()?.value))}
           >
             Copy
           </button>

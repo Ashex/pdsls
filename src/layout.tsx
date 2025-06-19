@@ -10,6 +10,7 @@ import { resolveHandle } from "./utils/api.js";
 import { Meta, MetaProvider } from "@solidjs/meta";
 import { Settings } from "./components/settings.jsx";
 import { Handle } from "@atcute/lexicons";
+import { copyNotice } from "./utils/copy.js";
 
 const Layout = (props: RouteSectionProps<unknown>) => {
   try {
@@ -80,6 +81,12 @@ const Layout = (props: RouteSectionProps<unknown>) => {
           </ErrorBoundary>
         </Show>
       </div>
+      <Show when={copyNotice()}>
+        <div class="dark:bg-dark-100 fixed bottom-5 z-10 flex items-center rounded-md bg-neutral-200 p-2">
+          <div class="i-lucide-clipboard mr-1" />
+          Copied to clipboard
+        </div>
+      </Show>
     </div>
   );
 };
