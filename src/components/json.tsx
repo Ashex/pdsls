@@ -29,7 +29,8 @@ const JSONString = ({ data }: { data: string }) => {
     });
 
   return (
-    <span class="text-stone-800 dark:text-stone-200">
+    <span>
+      "
       <For each={data.split(/(\s)/)}>
         {(part) => (
           <>
@@ -53,20 +54,21 @@ const JSONString = ({ data }: { data: string }) => {
           </>
         )}
       </For>
+      "
     </span>
   );
 };
 
 const JSONNumber = ({ data }: { data: number }) => {
-  return <span class="text-[#f85552] dark:text-red-400">{data}</span>;
+  return <span>{data}</span>;
 };
 
 const JSONBoolean = ({ data }: { data: boolean }) => {
-  return <span class="text-[#f57d26] dark:text-orange-300">{data ? "true" : "false"}</span>;
+  return <span>{data ? "true" : "false"}</span>;
 };
 
 const JSONNull = () => {
-  return <span class="text-neutral-400 dark:text-neutral-500">null</span>;
+  return <span>null</span>;
 };
 
 const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: string }) => {
