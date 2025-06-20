@@ -306,7 +306,7 @@ const RepoView = () => {
                       Export repo
                     </button>
                     <Show when={downloading()}>
-                      <div class="i-line-md-loading-twotone-loop text-xl" />
+                      <div class="i-eos-icons-loading text-xl" />
                     </Show>
                   </div>
                 </Show>

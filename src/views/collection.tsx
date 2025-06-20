@@ -311,7 +311,7 @@ const CollectionView = () => {
                 </button>
               </Show>
               <Show when={response.loading}>
-                <div class="i-line-md-loading-twotone-loop text-2xl"></div>
+                <div class="i-eos-icons-loading text-2xl" />
               </Show>
             </div>
           </Show>

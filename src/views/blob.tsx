@@ -68,7 +68,7 @@ const BlobView = () => {
         </button>
       </Show>
       <Show when={response.loading}>
-        <div class="i-line-md-loading-twotone-loop mt-2 text-xl"></div>
+        <div class="i-eos-icons-loading mt-2 text-xl" />
       </Show>
     </div>
   );

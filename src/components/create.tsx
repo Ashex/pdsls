@@ -259,7 +259,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                       <p>Metadata will be pasted after cursor</p>
                     </Show>
                     <Show when={uploading()}>
-                      <div class="i-line-md-loading-twotone-loop text-xl" />
+                      <div class="i-eos-icons-loading text-xl" />
                     </Show>
                   </div>
                 </div>

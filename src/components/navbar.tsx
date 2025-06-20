@@ -119,7 +119,7 @@ const NavBar = (props: { params: Params }) => {
                           "i-lucide-circle-check": validHandle() === true,
                           "i-lucide-circle-x text-red-500 dark:text-red-400":
                             validHandle() === false,
-                          "i-line-md-loading-twotone-loop": validHandle() === undefined,
+                          "i-eos-icons-loading": validHandle() === undefined,
                         }}
                       />
                     }
@@ -207,10 +207,7 @@ const NavBar = (props: { params: Params }) => {
                 />
               </Show>
               <Show when={validRecord() === undefined}>
-                <Tooltip
-                  text="Validating"
-                  children={<div class="i-line-md-loading-twotone-loop" />}
-                />
+                <Tooltip text="Validating" children={<div class="i-eos-icons-loading" />} />
               </Show>
               <Show when={validSchema()}>
                 <Tooltip text="Valid schema" children={<div class="i-lucide-file-check" />} />

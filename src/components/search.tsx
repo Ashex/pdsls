@@ -79,7 +79,7 @@ const Search = () => {
           class="grow"
         />
         <Show when={loading()}>
-          <div class="i-line-md-loading-twotone-loop text-2xl" />
+          <div class="i-eos-icons-loading text-2xl" />
         </Show>
         <Show when={!loading()}>
           <button
