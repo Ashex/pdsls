@@ -177,28 +177,28 @@ const RepoView = () => {
         </Show>
         <Show when={nsids() && tab() === "collections"}>
           <button
-            class="flex w-fit items-center gap-1 bg-transparent"
+            class="flex w-fit items-center gap-2 bg-transparent"
             onclick={toggleAllCollections}
           >
             {allCollapsed() ?
-              <div class="i-lucide-copy-plus" />
-            : <div class="i-lucide-copy-minus" />}
+              <div class="i-lucide-copy-plus text-lg" />
+            : <div class="i-lucide-copy-minus text-lg" />}
             {allCollapsed() ? "Expand all" : "Collapse all"}
           </button>
           <div class="flex flex-col font-mono">
-            <div class="grid grid-cols-[min-content_1fr] items-center overflow-hidden text-sm">
+            <div class="grid grid-cols-[min-content_1fr] gap-x-1 items-center overflow-hidden text-sm">
               <For each={Object.keys(nsids() ?? {})}>
                 {(authority) => (
                   <>
                     <Show when={nsids()?.[authority].hidden}>
                       <button
-                        class="i-lucide-plus-square mr-1 text-base"
+                        class="i-lucide-plus-square mr-1 text-lg"
                         onclick={() => toggleCollection(authority)}
                       />
                     </Show>
                     <Show when={!nsids()?.[authority].hidden}>
                       <button
-                        class="i-lucide-minus-square mr-1 text-base"
+                        class="i-lucide-minus-square mr-1 text-lg"
                         onclick={() => toggleCollection(authority)}
                       />
                     </Show>

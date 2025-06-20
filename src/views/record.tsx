@@ -160,7 +160,7 @@ export const RecordView = () => {
         <div class="break-words text-red-500 dark:text-red-400">{notice()}</div>
       </Show>
       <Show when={record()}>
-        <div class="mt-3 flex gap-2">
+        <div class="mt-3 flex gap-3">
           <Tooltip text="Copy record">
             <button
               class="i-lucide-copy text-xl"
