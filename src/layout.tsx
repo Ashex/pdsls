@@ -52,7 +52,7 @@ const Layout = (props: RouteSectionProps<unknown>) => {
           </A>
           <AccountManager />
         </div>
-        <div class="basis-1/3 text-center font-mono text-xl font-bold">
+        <div class="basis-1/3 text-center font-mono text-lg font-bold">
           <A href="/" class="hover:underline">
             PDSls
           </A>
