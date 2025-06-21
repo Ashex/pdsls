@@ -1,13 +1,4 @@
-import {
-  createEffect,
-  createResource,
-  createSignal,
-  For,
-  onCleanup,
-  onMount,
-  Show,
-  untrack,
-} from "solid-js";
+import { createEffect, createResource, createSignal, For, Show, untrack } from "solid-js";
 import { CredentialManager, Client } from "@atcute/client";
 import { A, query, useParams } from "@solidjs/router";
 import { resolvePDS } from "../utils/api.js";
@@ -80,28 +71,9 @@ const CollectionView = () => {
   const [filter, setFilter] = createSignal<string>();
   const [batchDelete, setBatchDelete] = createSignal(false);
   const [lastSelected, setLastSelected] = createSignal<number>();
-  const [modal, setModal] = createSignal<HTMLDialogElement>();
-  const [openDelete, setOpenDelete] = createSignal(false);
   const did = params.repo;
   let pds: string;
   let rpc: Client;
-
-  const clickEvent = (event: MouseEvent) => {
-    if (modal() && event.target === modal()) setOpenDelete(false);
-  };
-  const keyDownEvent = (event: KeyboardEvent) => {
-    if (modal() && event.key === "Escape") setOpenDelete(false);
-  };
-
-  onMount(() => {
-    window.addEventListener("click", clickEvent);
-    window.addEventListener("keydown", keyDownEvent);
-  });
-
-  onCleanup(() => {
-    window.removeEventListener("click", clickEvent);
-    window.removeEventListener("keydown", keyDownEvent);
-  });
 
   const listRecords = query(
     (did: string, collection: string, cursor: string | undefined) =>
@@ -249,37 +221,10 @@ const CollectionView = () => {
                   children={
                     <button
                       class="i-lucide-trash-2 text-lg text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
-                      onclick={() => setOpenDelete(true)}
+                      onclick={() => deleteRecords()}
                     />
                   }
                 />
-                <Show when={openDelete()}>
-                  <dialog
-                    ref={setModal}
-                    class="z-2 backdrop-brightness-60 fixed left-0 top-0 flex h-screen w-screen items-center justify-center bg-transparent"
-                  >
-                    <div class="dark:bg-dark-400 rounded-md border border-neutral-500 bg-zinc-100 p-3 text-slate-900 dark:text-slate-100">
-                      <h3 class="text-lg font-bold">
-                        Delete {records.filter((rec) => rec.toDelete).length} records?
-                      </h3>
-                      <div class="mt-2 inline-flex gap-2">
-                        <button
-                          onclick={() => setOpenDelete(false)}
-                          class="dark:bg-dark-900 dark:hover:bg-dark-800 bg-light-100 rounded-lg border border-neutral-500 px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onclick={() => deleteRecords()}
-                          class="rounded-lg bg-red-500 px-2.5 py-1.5 text-sm font-bold text-slate-100 hover:bg-red-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </dialog>
-                </Show>
               </Show>
             </div>
           </Show>
