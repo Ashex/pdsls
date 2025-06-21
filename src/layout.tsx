@@ -26,11 +26,9 @@ const Layout = (props: RouteSectionProps<unknown>) => {
   const location = useLocation();
 
   onMount(async () => {
+    if (location.search.includes("kawaii=true")) localStorage.kawaii = "true";
     await retrieveSession();
     if (loginState() && location.pathname === "/") window.location.href = `/at://${agent.sub}`;
-    if (location.search.includes("kawaii=true")) {
-      localStorage.kawaii = "true";
-    }
   });
 
   createEffect(async () => {
