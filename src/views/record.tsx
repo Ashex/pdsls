@@ -1,7 +1,7 @@
 import { CredentialManager, Client } from "@atcute/client";
 
 import { query, useParams } from "@solidjs/router";
-import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import { Backlinks } from "../components/backlinks.jsx";
 import { JSONValue } from "../components/json.jsx";
@@ -28,6 +28,7 @@ export const RecordView = () => {
     target: string;
   }>();
   const [modal, setModal] = createSignal<HTMLDialogElement>();
+  const [deleteIcon, setDeleteIcon] = createSignal<HTMLButtonElement>();
   const [openDelete, setOpenDelete] = createSignal(false);
   const [notice, setNotice] = createSignal("");
   const [showBacklinks, setShowBacklinks] = createSignal(false);
@@ -38,10 +39,10 @@ export const RecordView = () => {
   let rpc: Client;
 
   const clickEvent = (event: MouseEvent) => {
-    if (modal() && event.target == modal()) setOpenDelete(false);
+    if (modal() && event.target !== modal() && event.target !== deleteIcon()) setOpenDelete(false);
   };
   const keyEvent = (event: KeyboardEvent) => {
-    if (modal() && event.key == "Escape") setOpenDelete(false);
+    if (modal() && event.key === "Escape") setOpenDelete(false);
   };
 
   onMount(async () => {
@@ -132,11 +133,6 @@ export const RecordView = () => {
     window.location.href = `/at://${params.repo}/${params.collection}`;
   };
 
-  createEffect(() => {
-    if (openDelete()) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "auto";
-  });
-
   const checkUri = (uri: string) => {
     const uriParts = uri.split("/"); // expected: ["at:", "", "repo", "collection", "rkey"]
     if (uriParts.length != 5) return undefined;
@@ -169,36 +165,25 @@ export const RecordView = () => {
           </Tooltip>
           <Show when={loginState() && agent.sub === record()?.uri.split("/")[2]}>
             <RecordEditor create={false} record={record()?.value} />
-            <Show when={openDelete()}>
-              <dialog
-                ref={setModal}
-                class="backdrop-brightness-60 fixed left-0 top-0 z-20 flex h-screen w-screen items-center justify-center bg-transparent"
-              >
-                <div class="dark:bg-dark-400 rounded-md border border-slate-900 bg-zinc-100 p-4 text-slate-900 dark:border-slate-100 dark:text-slate-100">
-                  <h3 class="text-lg font-bold">Delete this record?</h3>
-                  <form>
-                    <div class="mt-2 inline-flex gap-2">
-                      <button
-                        onclick={() => setOpenDelete(false)}
-                        class="dark:bg-dark-900 dark:hover:bg-dark-300 bg-light-100 rounded-lg border border-slate-400 px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-200 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:focus:ring-slate-300"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onclick={deleteRecord}
-                        class="rounded-lg bg-red-500 px-2.5 py-1.5 text-sm font-bold text-slate-100 hover:bg-red-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </dialog>
-            </Show>
-            <Tooltip text="Delete">
-              <button onclick={() => setOpenDelete(true)} class="i-lucide-trash-2 text-xl" />
-            </Tooltip>
+            <div class="relative flex">
+              <Tooltip text="Delete">
+                <button
+                  ref={setDeleteIcon}
+                  onclick={() => setOpenDelete(true)}
+                  class="i-lucide-trash-2 text-xl"
+                />
+              </Tooltip>
+              <Show when={openDelete()}>
+                <button
+                  ref={setModal}
+                  type="button"
+                  onclick={deleteRecord}
+                  class="left-50% w-7rem absolute top-7 z-50 -translate-x-1/2 rounded-lg bg-red-500 px-2 py-1.5 text-sm font-bold text-slate-100 shadow-lg hover:bg-red-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
+                >
+                  Delete record
+                </button>
+              </Show>
+            </div>
           </Show>
           <Show when={externalLink()}>
             {(externalLink) => (
