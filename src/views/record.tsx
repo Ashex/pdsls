@@ -178,7 +178,7 @@ export const RecordView = () => {
                   ref={setModal}
                   type="button"
                   onclick={deleteRecord}
-                  class="left-50% w-7rem absolute top-7 z-50 -translate-x-1/2 rounded-lg bg-red-500 px-2 py-1.5 text-sm font-bold text-slate-100 shadow-lg hover:bg-red-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
+                  class="left-50% w-7rem absolute top-7 z-50 -translate-x-1/2 rounded-lg bg-red-500 px-2 py-1.5 text-sm font-bold text-slate-100 shadow-md hover:bg-red-400 focus:outline-none focus:ring-1 focus:ring-slate-700 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-slate-300"
                 >
                   Delete record
                 </button>
