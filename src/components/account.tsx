@@ -86,7 +86,7 @@ const AccountManager = () => {
                       classList={{
                         "bg-transparent basis-full text-left font-mono max-w-[32ch] text-sm truncate group-hover/select:bg-zinc-200 p-0.5 rounded dark:group-hover/select:bg-neutral-600":
                           true,
-                        "text-green-500 dark:text-green-400 font-semibold": did === agent?.sub,
+                        "text-blue-500 dark:text-blue-400 font-bold": did === agent?.sub,
                       }}
                       onclick={() => resumeSession(did as Did)}
                     >
