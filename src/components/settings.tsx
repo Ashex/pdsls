@@ -217,7 +217,7 @@ const Settings = () => {
                       }}
                     />
                     <label for="enableKawaii" class="select-none">
-                      Enable kawaii mode
+                      Kawaii mode
                     </label>
                   </div>
                 </Show>
