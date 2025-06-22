@@ -137,7 +137,9 @@ const JSONObject = ({ data, repo }: { data: { [x: string]: JSONType }; repo: str
           <Show when={blob.mimeType === "video/mp4" && !hide()}>
             <VideoPlayer did={repo} cid={blob.ref.$link} />
           </Show>
-          <span class="flex flex-col items-center justify-between">
+          <span
+            classList={{ "flex items-center justify-between gap-2": true, "flex-col": !hide() }}
+          >
             <Show when={blob.mimeType.startsWith("image/") || blob.mimeType === "video/mp4"}>
               <Tooltip text={hide() ? "Show" : "Hide"}>
                 <button
