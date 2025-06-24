@@ -75,13 +75,20 @@ const NavBar = (props: { params: Params }) => {
             </A>
           </Show>
         </div>
-        <Tooltip text={`Copy ${props.params.repo ? "AT URI" : "PDS"}`}>
+        <Tooltip
+          text={`Copy ${
+            props.params.collection ? "AT URI"
+            : props.params.repo ? "DID"
+            : "PDS"
+          }`}
+        >
           <button
             class="i-lucide-copy shrink-0 text-lg"
             onclick={() =>
               addToClipboard(
-                props.params.repo ?
+                props.params.collection ?
                   `at://${props.params.repo}${props.params.collection ? `/${props.params.collection}` : ""}${props.params.rkey ? `/${props.params.rkey}` : ""}`
+                : props.params.repo ? props.params.repo
                 : pds()!,
               )
             }
