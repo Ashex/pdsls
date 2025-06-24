@@ -152,7 +152,7 @@ const NavBar = (props: { params: Params }) => {
                 <A
                   end
                   href={`/at://${props.params.repo}/blobs`}
-                  inactiveClass="text-sky-500 w-full hover:underline"
+                  inactiveClass="text-sky-500 grow hover:underline"
                 >
                   blobs
                 </A>
@@ -168,7 +168,7 @@ const NavBar = (props: { params: Params }) => {
                 <A
                   end
                   href={`/at://${props.params.repo}/labels`}
-                  inactiveClass="text-sky-500 w-full hover:underline"
+                  inactiveClass="text-sky-500 grow hover:underline"
                 >
                   labels
                 </A>
