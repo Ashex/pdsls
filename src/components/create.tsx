@@ -138,7 +138,6 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
 
     const file = (document.getElementById("blob") as HTMLInputElement)?.files?.[0];
     if (!file) return;
-    (document.getElementById("blob") as HTMLInputElement).value = "";
 
     const mimetype = (document.getElementById("mimetype") as HTMLInputElement)?.value;
     (document.getElementById("mimetype") as HTMLInputElement).value = "";
@@ -156,6 +155,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
       input: blob,
     });
     setUploading(false);
+    (document.getElementById("blob") as HTMLInputElement).value = "";
     if (!res.ok) {
       setNotice(res.data.error);
       return;
@@ -231,7 +231,24 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                     <option value="false">False</option>
                   </select>
                 </div>
-                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-row items-center gap-2">
+                  <Show when={!uploading()}>
+                    <Tooltip text="Upload file">
+                      <input
+                        type="file"
+                        title=""
+                        id="blob"
+                        class="i-lucide-upload text-xl"
+                        onChange={() => uploadBlob()}
+                      />
+                    </Tooltip>
+                    <p>Blob metadata will be pasted after the cursor</p>
+                  </Show>
+                  <Show when={uploading()}>
+                    <div class="i-eos-icons-loading text-xl" />
+                  </Show>
+                </div>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div class="flex items-center gap-x-2">
                     <label for="mimetype" class="min-w-20 select-none">
                       MIME type
@@ -243,28 +260,6 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                     <label for="exif-rm" class="select-none">
                       Remove EXIF data
                     </label>
-                  </div>
-                </div>
-                <div class="flex flex-col gap-1 sm:flex-row sm:items-center">
-                  <input
-                    type="file"
-                    id="blob"
-                    class="file:dark:hover:bg-dark-300 file:rounded-lg file:border file:border-gray-400 file:px-2 file:py-1 file:hover:bg-zinc-50"
-                  />
-                  <div class="flex min-h-9 flex-row items-center gap-1">
-                    <Show when={!uploading()}>
-                      <button
-                        type="button"
-                        onclick={() => uploadBlob()}
-                        class="dark:hover:bg-dark-300 w-fit rounded-lg border border-gray-400 bg-transparent px-2 py-1 hover:bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                      >
-                        Upload
-                      </button>
-                      <p>Metadata will be pasted after cursor</p>
-                    </Show>
-                    <Show when={uploading()}>
-                      <div class="i-eos-icons-loading text-xl" />
-                    </Show>
                   </div>
                 </div>
               </div>
