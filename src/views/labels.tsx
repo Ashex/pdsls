@@ -72,14 +72,14 @@ const LabelView = () => {
             spellcheck={false}
             rows={3}
             value={searchParams.uriPatterns ?? "*"}
-            class="dark:bg-dark-100 bg-light-100 w-16rem border-1.5 rounded-lg border-neutral-400 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
+            class="dark:bg-dark-100 bg-light-100 w-16rem border-1.5 rounded-lg border-neutral-300 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
           />
           <div class="absolute -right-14 flex min-w-[3rem] justify-center">
             <Show when={!response.loading}>
               <button
                 onclick={() => initQuery()}
                 type="submit"
-                class="dark:hover:bg-dark-300 rounded-lg border border-gray-400 bg-transparent px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                class="dark:hover:bg-dark-300 rounded-lg border border-gray-400 bg-transparent px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-100 focus:outline-none focus:ring-1 focus:ring-gray-300"
               >
                 Get
               </button>
@@ -90,7 +90,7 @@ const LabelView = () => {
           </div>
         </div>
       </form>
-      <div class="z-5 dark:bg-dark-800 sticky top-0 flex w-full flex-col items-center justify-center gap-3 border-b border-neutral-500 bg-zinc-100 py-3">
+      <div class="z-5 dark:bg-dark-800 sticky top-0 flex w-full flex-col items-center justify-center gap-3 border-b border-neutral-500 bg-zinc-50 py-3">
         <TextInput
           placeholder="Filter by label"
           onInput={(e) => setFilter(e.currentTarget.value)}

@@ -224,7 +224,7 @@ export const RecordEditor = (props: { create: boolean; record?: any }) => {
                   <select
                     name="validate"
                     id="validate"
-                    class="dark:bg-dark-100 bg-light-100 border-1.5 rounded-lg border-neutral-400 px-1 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
+                    class="dark:bg-dark-100 bg-light-100 border-1.5 rounded-lg border-neutral-300 px-1 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
                   >
                     <option value="unset">Unset</option>
                     <option value="true">True</option>

@@ -135,8 +135,8 @@ const RepoView = () => {
             <button
               classList={{
                 "flex flex-1 py-1 justify-center": true,
-                "bg-neutral-200 dark:bg-dark-100 ": tab() === "collections",
-                "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-400": tab() !== "collections",
+                "bg-neutral-200 dark:bg-dark-100": tab() === "collections",
+                "bg-transparent hover:bg-zinc-100 dark:hover:bg-dark-400": tab() !== "collections",
               }}
               onclick={() => setTab("collections")}
             >
@@ -147,7 +147,7 @@ const RepoView = () => {
             classList={{
               "flex flex-1 py-1 justify-center": true,
               "bg-neutral-200 dark:bg-dark-100": tab() === "doc",
-              "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-400": tab() !== "doc",
+              "bg-transparent hover:bg-zinc-100 dark:hover:bg-dark-400": tab() !== "doc",
             }}
             onclick={() => setTab("doc")}
           >
@@ -158,7 +158,7 @@ const RepoView = () => {
               classList={{
                 "flex flex-1 py-1 justify-center": true,
                 "bg-neutral-200 dark:bg-dark-100": tab() === "backlinks",
-                "bg-transparent hover:bg-zinc-200 dark:hover:bg-dark-400": tab() !== "backlinks",
+                "bg-transparent hover:bg-zinc-100 dark:hover:bg-dark-400": tab() !== "backlinks",
               }}
               onclick={() => setTab("backlinks")}
             >
@@ -251,7 +251,7 @@ const RepoView = () => {
                         <li class="flex flex-col">
                           <span>#{service.id.split("#")[1]}</span>
                           <a
-                            class="text-sky-500 w-fit hover:underline"
+                            class="w-fit text-sky-500 hover:underline"
                             href={service.serviceEndpoint.toString()}
                             target="_blank"
                           >
@@ -278,7 +278,7 @@ const RepoView = () => {
                   </ul>
                 </div>
                 <a
-                  class="text-sky-500 flex w-fit items-center hover:underline"
+                  class="flex w-fit items-center text-sky-500 hover:underline"
                   href={
                     did.startsWith("did:plc") ?
                       `${localStorage.plcDirectory ?? "https://plc.directory"}/${did}`
@@ -290,7 +290,7 @@ const RepoView = () => {
                 </a>
                 <Show when={did.startsWith("did:plc")}>
                   <a
-                    class="text-sky-500 flex w-fit items-center hover:underline"
+                    class="flex w-fit items-center text-sky-500 hover:underline"
                     href={`https://boat.kelinci.net/plc-oplogs?q=${did}`}
                     target="_blank"
                   >
@@ -301,7 +301,7 @@ const RepoView = () => {
                   <div class="flex items-center gap-1">
                     <button
                       onclick={() => downloadRepo()}
-                      class="text-sky-500 bg-transparent hover:underline"
+                      class="bg-transparent text-sky-500 hover:underline"
                     >
                       Export repo
                     </button>

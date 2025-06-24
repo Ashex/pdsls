@@ -178,7 +178,7 @@ const StreamView = () => {
                 spellcheck={false}
                 placeholder="Comma-separated list of collections"
                 value={searchParams.collections ?? ""}
-                class="w-16rem dark:bg-dark-100 bg-light-100 border-1.5 rounded-lg border-neutral-400 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
+                class="w-16rem dark:bg-dark-100 bg-light-100 border-1.5 rounded-lg border-neutral-300 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
               />
             </label>
           </Show>
@@ -190,7 +190,7 @@ const StreamView = () => {
                 spellcheck={false}
                 placeholder="Comma-separated list of DIDs"
                 value={searchParams.dids ?? ""}
-                class="w-16rem dark:bg-dark-100 bg-light-100 border-1.5 rounded-lg border-neutral-400 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
+                class="w-16rem dark:bg-dark-100 bg-light-100 border-1.5 rounded-lg border-neutral-300 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
               />
             </label>
           </Show>
@@ -238,7 +238,7 @@ const StreamView = () => {
           <button
             type="button"
             onclick={() => connectSocket(new FormData(formRef))}
-            class="dark:hover:bg-dark-300 w-fit rounded-lg border border-slate-400 bg-transparent px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
+            class="dark:hover:bg-dark-300 w-fit rounded-lg border border-slate-400 bg-transparent px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-slate-700 dark:focus:ring-slate-300"
           >
             {connected() ? "Disconnect" : "Connect"}
           </button>

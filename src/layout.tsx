@@ -78,7 +78,7 @@ const Layout = (props: RouteSectionProps<unknown>) => {
           <Settings />
         </div>
       </div>
-      <div class="min-w-21rem sm:min-w-23rem z-1 dark:bg-dark-800 mb-5 flex max-w-full flex-col items-center text-pretty bg-zinc-100 md:max-w-screen-md">
+      <div class="min-w-21rem sm:min-w-23rem z-1 dark:bg-dark-800 mb-5 flex max-w-full flex-col items-center text-pretty bg-zinc-50 md:max-w-screen-md">
         <Show when={location.pathname !== "/jetstream" && location.pathname !== "/firehose"}>
           <Search />
         </Show>
