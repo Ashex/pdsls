@@ -74,15 +74,13 @@ const LabelView = () => {
             value={searchParams.uriPatterns ?? "*"}
             class="dark:bg-dark-100 bg-light-100 w-16rem border-1.5 rounded-lg border-neutral-300 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
           />
-          <div class="absolute -right-14 flex min-w-[3rem] justify-center">
+          <div class="absolute -right-8 flex justify-center">
             <Show when={!response.loading}>
               <button
                 onclick={() => initQuery()}
                 type="submit"
-                class="dark:hover:bg-dark-300 rounded-lg border border-gray-400 bg-transparent px-2.5 py-1.5 text-sm font-bold hover:bg-zinc-100 focus:outline-none focus:ring-1 focus:ring-gray-300"
-              >
-                Get
-              </button>
+                class="i-lucide-arrow-right text-2xl"
+              />
             </Show>
             <Show when={response.loading}>
               <div class="i-eos-icons-loading text-2xl" />
