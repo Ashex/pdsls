@@ -155,7 +155,7 @@ const StreamView = () => {
           Firehose
         </A>
       </div>
-      <form ref={formRef} class="flex flex-col gap-y-3">
+      <form ref={formRef} class="flex flex-col gap-y-2">
         <Show when={!connected()}>
           <label class="flex items-center justify-end gap-x-2">
             <span>Instance</span>
@@ -178,7 +178,7 @@ const StreamView = () => {
                 spellcheck={false}
                 placeholder="Comma-separated list of collections"
                 value={searchParams.collections ?? ""}
-                class="w-16rem dark:bg-dark-100 bg-light-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                class="w-16rem dark:bg-dark-100 bg-light-100 border-1.5 rounded-lg border-neutral-400 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
               />
             </label>
           </Show>
@@ -190,7 +190,7 @@ const StreamView = () => {
                 spellcheck={false}
                 placeholder="Comma-separated list of DIDs"
                 value={searchParams.dids ?? ""}
-                class="w-16rem dark:bg-dark-100 bg-light-100 rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                class="w-16rem dark:bg-dark-100 bg-light-100 border-1.5 rounded-lg border-neutral-400 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
               />
             </label>
           </Show>

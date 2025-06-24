@@ -72,7 +72,7 @@ const LabelView = () => {
             spellcheck={false}
             rows={3}
             value={searchParams.uriPatterns ?? "*"}
-            class="dark:bg-dark-100 bg-light-100 w-16rem rounded-lg border border-gray-400 px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            class="dark:bg-dark-100 bg-light-100 w-16rem border-1.5 rounded-lg border-neutral-400 px-2 py-1 focus:border-blue-500 focus:outline-none dark:border-neutral-500"
           />
           <div class="absolute -right-14 flex min-w-[3rem] justify-center">
             <Show when={!response.loading}>
