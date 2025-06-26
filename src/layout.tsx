@@ -13,15 +13,6 @@ import { Handle } from "@atcute/lexicons";
 import { copyNotice } from "./utils/copy.js";
 
 const Layout = (props: RouteSectionProps<unknown>) => {
-  try {
-    navigator.registerProtocolHandler("web+at", "/%s");
-    const pathname = decodeURIComponent(useLocation().pathname);
-    if (pathname.startsWith("/web+at://")) {
-      window.location.href = pathname.replace("web+at://", "at://");
-    }
-  } catch (err) {
-    console.error(err);
-  }
   const params = useParams();
   const location = useLocation();
 
