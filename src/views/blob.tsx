@@ -41,7 +41,7 @@ const BlobView = () => {
         <p>
           {blobs()?.length} blob{(blobs()?.length ?? 0 > 1) ? "s" : ""}
         </p>
-        <div class="break-anywhere flex flex-col font-mono">
+        <div class="break-anywhere flex flex-col font-mono text-sm">
           <For each={blobs()}>
             {(cid) => (
               <a
