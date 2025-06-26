@@ -1,15 +1,10 @@
 import { createResource, createSignal, For, Show } from "solid-js";
 import { Client, CredentialManager } from "@atcute/client";
-import { useParams } from "@solidjs/router";
-import { resolvePDS } from "../utils/api.js";
 
 const LIMIT = 1000;
 
-const BlobView = () => {
-  const params = useParams();
+const BlobView = (props: { pds: string; repo: string }) => {
   const [cursor, setCursor] = createSignal<string>();
-  const did = params.repo;
-  let pds: string;
   let rpc: Client;
 
   const listBlobs = (did: string, cursor: string | undefined) =>
@@ -22,9 +17,8 @@ const BlobView = () => {
     });
 
   const fetchBlobs = async () => {
-    if (!pds) pds = await resolvePDS(did);
-    if (!rpc) rpc = new Client({ handler: new CredentialManager({ service: pds }) });
-    const res = await listBlobs(did, cursor());
+    if (!rpc) rpc = new Client({ handler: new CredentialManager({ service: props.pds }) });
+    const res = await listBlobs(props.repo, cursor());
     if (!res.ok) throw new Error(res.data.error);
     if (!res.data.cids) return [];
     setCursor(res.data.cids.length < LIMIT ? undefined : res.data.cursor);
@@ -36,16 +30,16 @@ const BlobView = () => {
   const [blobs, setBlobs] = createSignal<string[]>();
 
   return (
-    <div class="mt-3 flex flex-col items-center gap-2">
+    <div class="flex flex-col items-center gap-2">
       <Show when={blobs() || response()}>
         <p>
           {blobs()?.length} blob{(blobs()?.length ?? 0 > 1) ? "s" : ""}
         </p>
-        <div class="break-anywhere flex flex-col font-mono text-sm">
+        <div class="break-anywhere flex flex-col gap-0.5 font-mono text-sm lg:break-normal">
           <For each={blobs()}>
             {(cid) => (
               <a
-                href={`${pds}/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`}
+                href={`${props.pds}/xrpc/com.atproto.sync.getBlob?did=${props.repo}&cid=${cid}`}
                 target="_blank"
                 class="rounded px-0.5 hover:bg-zinc-200 dark:hover:bg-neutral-700"
               >

@@ -146,18 +146,6 @@ const NavBar = (props: { params: Params }) => {
                 />
               </Tooltip>
             </div>
-            <Show when={!props.params.collection && !props.params.rkey}>
-              <div class="mt-1 flex items-center gap-2">
-                <div class="i-lucide-file-digit text-lg" />
-                <A
-                  end
-                  href={`/at://${props.params.repo}/blobs`}
-                  inactiveClass="text-sky-500 grow hover:underline"
-                >
-                  blobs
-                </A>
-              </div>
-            </Show>
             <Show
               when={
                 props.params.repo in labelerCache && !props.params.collection && !props.params.rkey

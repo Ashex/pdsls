@@ -5,6 +5,9 @@ import { didDocCache, getAllBacklinks, LinkData, resolvePDS } from "../utils/api
 import { Backlinks } from "../components/backlinks.jsx";
 import { ActorIdentifier } from "@atcute/lexicons";
 import { DidDocument } from "@atcute/identity";
+import { BlobView } from "./blob.jsx";
+
+type Tab = "collections" | "backlinks" | "doc" | "blobs";
 
 const RepoView = () => {
   const params = useParams();
@@ -17,10 +20,23 @@ const RepoView = () => {
   }>();
   const [nsids, setNsids] = createSignal<Record<string, { hidden: boolean; nsids: string[] }>>();
   const [allCollapsed, setAllCollapsed] = createSignal(false);
-  const [tab, setTab] = createSignal<"collections" | "backlinks" | "doc">("collections");
+  const [tab, setTab] = createSignal<Tab>("collections");
   let rpc: Client;
   let pds: string;
   const did = params.repo;
+
+  const RepoTab = (props: { tab: Tab; label: string }) => (
+    <button
+      classList={{
+        "flex flex-1 py-1 justify-center": true,
+        "bg-neutral-200 dark:bg-dark-100": tab() === props.tab,
+        "bg-transparent hover:bg-zinc-100 dark:hover:bg-dark-400": tab() !== props.tab,
+      }}
+      onclick={() => setTab(props.tab)}
+    >
+      {props.label}
+    </button>
+  );
 
   const describeRepo = (repo: string) =>
     rpc.get("com.atproto.repo.describeRepo", { params: { repo: repo as ActorIdentifier } });
@@ -127,40 +143,16 @@ const RepoView = () => {
             {error()}
           </div>
         </Show>
-        <div class="flex divide-x divide-neutral-500 overflow-hidden rounded-lg border border-neutral-500">
+        <div class="flex divide-x divide-neutral-500 overflow-hidden rounded-lg border border-neutral-500 text-sm">
           <Show when={!error()}>
-            <button
-              classList={{
-                "flex flex-1 py-1 justify-center": true,
-                "bg-neutral-200 dark:bg-dark-100": tab() === "collections",
-                "bg-transparent hover:bg-zinc-100 dark:hover:bg-dark-400": tab() !== "collections",
-              }}
-              onclick={() => setTab("collections")}
-            >
-              Collections
-            </button>
+            <RepoTab tab="collections" label="Collections" />
           </Show>
-          <button
-            classList={{
-              "flex flex-1 py-1 justify-center": true,
-              "bg-neutral-200 dark:bg-dark-100": tab() === "doc",
-              "bg-transparent hover:bg-zinc-100 dark:hover:bg-dark-400": tab() !== "doc",
-            }}
-            onclick={() => setTab("doc")}
-          >
-            DID Doc
-          </button>
+          <RepoTab tab="doc" label="DID Doc" />
+          <Show when={!error()}>
+            <RepoTab tab="blobs" label="Blobs" />
+          </Show>
           <Show when={backlinks()}>
-            <button
-              classList={{
-                "flex flex-1 py-1 justify-center": true,
-                "bg-neutral-200 dark:bg-dark-100": tab() === "backlinks",
-                "bg-transparent hover:bg-zinc-100 dark:hover:bg-dark-400": tab() !== "backlinks",
-              }}
-              onclick={() => setTab("backlinks")}
-            >
-              Backlinks
-            </button>
+            <RepoTab tab="backlinks" label="Backlinks" />
           </Show>
         </div>
         <Show when={tab() === "backlinks"}>
@@ -171,6 +163,9 @@ const RepoView = () => {
               </div>
             )}
           </Show>
+        </Show>
+        <Show when={tab() === "blobs"}>
+          <BlobView pds={pds!} repo={did} />
         </Show>
         <Show when={nsids() && tab() === "collections"}>
           <button
