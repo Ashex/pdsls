@@ -146,11 +146,7 @@ const NavBar = (props: { params: Params }) => {
                 />
               </Tooltip>
             </div>
-            <Show
-              when={
-                props.params.repo in labelerCache && !props.params.collection && !props.params.rkey
-              }
-            >
+            <Show when={props.params.repo in labelerCache && !props.params.collection}>
               <div class="mt-1 flex items-center gap-2">
                 <div class="i-lucide-tag text-lg" />
                 <A
