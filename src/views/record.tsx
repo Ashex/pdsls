@@ -163,8 +163,8 @@ export const RecordView = () => {
             <RecordEditor create={false} record={record()?.value} />
             <div class="relative flex">
               <Tooltip text="Delete">
-                <button ref={setDeleteIcon} onclick={() => setOpenDelete(true)}>
-                  <div class="i-lucide-trash-2 text-xl" />
+                <button onclick={() => setOpenDelete(true)}>
+                  <div ref={setDeleteIcon} class="i-lucide-trash-2 text-xl" />
                 </button>
               </Tooltip>
               <Show when={openDelete()}>
