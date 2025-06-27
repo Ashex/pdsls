@@ -28,7 +28,7 @@ export const RecordView = () => {
     target: string;
   }>();
   const [modal, setModal] = createSignal<HTMLDialogElement>();
-  const [deleteIcon, setDeleteIcon] = createSignal<HTMLButtonElement>();
+  const [deleteIcon, setDeleteIcon] = createSignal<HTMLDivElement>();
   const [openDelete, setOpenDelete] = createSignal(false);
   const [notice, setNotice] = createSignal("");
   const [showBacklinks, setShowBacklinks] = createSignal(false);
