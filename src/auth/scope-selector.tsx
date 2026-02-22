@@ -17,6 +17,10 @@ export const ScopeSelector = (props: ScopeSelectorProps) => {
     return !scopes.has("create") && !scopes.has("update");
   };
 
+  const isStratosPostsDisabled = () => {
+    return !selectedScopes().has("stratos-enrollment");
+  };
+
   const toggleScope = (scopeId: string) => {
     setSelectedScopes((prev) => {
       const newSet = new Set(prev);
@@ -28,6 +32,9 @@ export const ScopeSelector = (props: ScopeSelectorProps) => {
           !newSet.has("update")
         ) {
           newSet.delete("blob");
+        }
+        if (scopeId === "stratos-enrollment") {
+          newSet.delete("stratos-posts");
         }
       } else {
         newSet.add(scopeId);
@@ -58,7 +65,9 @@ export const ScopeSelector = (props: ScopeSelectorProps) => {
         <For each={GRANULAR_SCOPES}>
           {(scope) => {
             const isSelected = () => selectedScopes().has(scope.id);
-            const isDisabled = () => scope.id === "blob" && isBlobDisabled();
+            const isDisabled = () =>
+              (scope.id === "blob" && isBlobDisabled()) ||
+              (scope.id === "stratos-posts" && isStratosPostsDisabled());
 
             return (
               <button

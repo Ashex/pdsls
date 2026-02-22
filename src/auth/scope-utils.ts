@@ -21,6 +21,16 @@ export const GRANULAR_SCOPES = [
     scope: "blob:*/*",
     label: "Upload blobs",
   },
+  {
+    id: "stratos-enrollment",
+    scope: "repo:app.stratos.actor.enrollment",
+    label: "Stratos enrollment",
+  },
+  {
+    id: "stratos-posts",
+    scope: "repo:app.stratos.feed.post",
+    label: "Stratos posts",
+  },
 ];
 
 export const BASE_SCOPES = ["atproto"];
