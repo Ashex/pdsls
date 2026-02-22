@@ -243,14 +243,12 @@ export const RecordView = () => {
   const fetchRecord = async () => {
     setValidRecord(undefined);
     setValidSchema(undefined);
-    const pds = await resolvePDS(did!);
     if (stratosActive()) {
       const enrollment = stratosEnrollment();
       if (enrollment) setPDS(new URL(enrollment.service).hostname);
-    }
-    if (stratosActive() && agent()) {
       rpc = createServiceClient(agent()!);
     } else {
+      const pds = await resolvePDS(did!);
       rpc = new Client({ handler: simpleFetchHandler({ service: pds }) });
     }
     const res = await rpc.get("com.atproto.repo.getRecord", {
