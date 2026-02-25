@@ -1,6 +1,4 @@
 import { Client, simpleFetchHandler } from "@atcute/client";
-import * as CAR from "@atcute/car";
-import * as CID from "@atcute/cid";
 import { DidDocument, getPdsEndpoint } from "@atcute/identity";
 import { lexiconDoc } from "@atcute/lexicon-doc";
 import { RecordValidator } from "@atcute/lexicon-doc/validations";
@@ -29,7 +27,7 @@ import { Modal } from "../components/modal.jsx";
 import { pds, setPDS } from "../components/navbar.jsx";
 import { addNotification, removeNotification } from "../components/notification.jsx";
 import { PermissionButton } from "../components/permission-button.jsx";
-import { createServiceClient, stratosActive, stratosEnrollment } from "../stratos/index.js";
+import { createServiceClient, stratosActive, stratosEnrollment, verifyStratosRecord } from "../stratos/index.js";
 import {
   didDocumentResolver,
   resolveLexiconAuthority,
@@ -336,33 +334,22 @@ export const RecordView = () => {
       const carBytes = data as Uint8Array<ArrayBufferLike>;
 
       if (stratosActive()) {
-        // Try full commit + MST verification first; fall back to CID-only for legacy repos
-        try {
-          setVerifyLabel("Record verification");
-          await verifyRecord({
-            did: did as AtprotoDid,
-            collection: params.collection!,
-            rkey: params.rkey!,
-            carBytes,
-          });
-        } catch {
-          setVerifyLabel("CID verified");
-          const reader = CAR.fromUint8Array(carBytes);
-          const roots = reader.roots;
-          if (roots.length !== 1) {
-            throw new Error(`expected 1 CAR root, got ${roots.length}`);
-          }
-          const rootCidStr = roots[0].$link;
-          for (const entry of reader) {
-            const computed = await CID.create(entry.cid.codec as 0x55 | 0x71, entry.bytes);
-            if (!CID.equals(entry.cid, computed)) {
-              throw new Error(`CID integrity check failed for ${CID.toString(entry.cid)}`);
-            }
-          }
-          if (record()?.cid && rootCidStr !== record()?.cid) {
-            throw new Error(`record CID mismatch: expected ${record()?.cid}, got ${rootCidStr}`);
-          }
-        }
+        const enrollment = stratosEnrollment();
+        const serviceDid = enrollment
+          ? `did:web:${new URL(enrollment.service).hostname}`
+          : undefined;
+        const result = await verifyStratosRecord(
+          carBytes,
+          did!,
+          params.collection!,
+          params.rkey!,
+          serviceDid,
+        );
+        setVerifyLabel(
+          result.level === "service-signature"
+            ? "Signature verified"
+            : "CID integrity verified",
+        );
       } else {
         setVerifyLabel("Record verification");
         await verifyRecord({
