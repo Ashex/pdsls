@@ -1,4 +1,3 @@
-import { Client } from "@atcute/client";
 import { Did } from "@atcute/lexicons";
 import { isNsid, isRecordKey } from "@atcute/lexicons/syntax";
 import { getSession, OAuthUserAgent } from "@atcute/oauth-browser-client";
@@ -15,6 +14,7 @@ import {
 } from "solid-js";
 import { hasUserScope } from "../../auth/scope-utils";
 import { agent, sessions } from "../../auth/state";
+import { createServiceClient } from "../../stratos/index.js";
 import { Button } from "../button.jsx";
 import { Modal } from "../modal.jsx";
 import { addNotification, removeNotification } from "../notification.jsx";
@@ -33,8 +33,8 @@ export { editorInstance, placeholder, setPlaceholder };
 
 export const RecordEditor = (props: {
   create: boolean;
-  record?: any;
-  refetch?: any;
+  record?: unknown;
+  refetch?: () => void;
   scope?: "create" | "update" | "delete" | "blob";
 }) => {
   const navigate = useNavigate();
@@ -116,14 +116,16 @@ export const RecordEditor = (props: {
     const formData = new FormData(formRef);
     const repo = formData.get("repo")?.toString();
     if (!repo) return;
-    const rpc = new Client({ handler: new OAuthUserAgent(await getSession(repo as Did)) });
+    const sessionAgent = new OAuthUserAgent(await getSession(repo as Did));
+    const rpc = createServiceClient(sessionAgent);
     const collection = formData.get("collection");
     const rkey = formData.get("rkey");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let record: any;
     try {
       record = JSON.parse(editorInstance.view.state.doc.toString());
-    } catch (e: any) {
-      setNotice(e.message);
+    } catch (e) {
+      setNotice(e instanceof Error ? e.message : String(e));
       return;
     }
     const res = await rpc.post("com.atproto.repo.createRecord", {
@@ -152,7 +154,7 @@ export const RecordEditor = (props: {
   const editRecord = async (validate: boolean | undefined, recreate: boolean) => {
     const record = editorInstance.view.state.doc.toString();
     if (!record) return;
-    const rpc = new Client({ handler: agent()! });
+    const rpc = createServiceClient(agent()!);
     try {
       const editedRecord = JSON.parse(record);
       if (recreate) {
@@ -207,8 +209,8 @@ export const RecordEditor = (props: {
       });
       setTimeout(() => removeNotification(id), 3000);
       props.refetch();
-    } catch (err: any) {
-      setNotice(err.message);
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : String(err));
     }
   };
 

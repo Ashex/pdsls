@@ -1,7 +1,8 @@
 import * as TID from "@atcute/tid";
 import { A, Params } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { canHover } from "../layout";
+import { stratosActive, stratosEnrollment, setStratosActive } from "../stratos";
 import { didDocCache } from "../utils/api";
 import { addToClipboard } from "../utils/copy";
 import { localDateFromTimestamp } from "../utils/date";
@@ -90,7 +91,12 @@ export const NavBar = (props: { params: Params }) => {
                     href={pds()!}
                     inactiveClass="text-blue-500 py-0.5 w-full font-medium hover:text-blue-600 transition-colors duration-150 dark:text-blue-400 dark:hover:text-blue-300"
                   >
-                    {pds()}
+                    <Show
+                      when={stratosActive() && stratosEnrollment()}
+                      fallback={pds()}
+                    >
+                      {new URL(stratosEnrollment()!.service).hostname}
+                    </Show>
                   </A>
                 </Show>
               }
@@ -99,10 +105,45 @@ export const NavBar = (props: { params: Params }) => {
             </Show>
           </Show>
         </div>
-        <Show when={pds() && pds() !== "Missing PDS"}>
-          <CopyButton content={pds()!} label="Copy PDS" />
-        </Show>
+        <div class="flex items-center gap-1">
+          <Show when={stratosEnrollment()}>
+            <Tooltip text={stratosActive() ? "Stratos active — click to switch to PDS" : "Switch to Stratos"}>
+              <button
+                type="button"
+                onclick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setStratosActive((v) => !v);
+                }}
+                classList={{
+                  "flex items-center rounded px-1.5 py-1 transition-all duration-200 sm:py-1.5": true,
+                  "text-purple-600 hover:bg-purple-100/70 dark:text-purple-400 dark:hover:bg-purple-900/40": stratosActive(),
+                  "text-neutral-400 hover:bg-neutral-200/70 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-700/70 dark:hover:text-neutral-300": !stratosActive(),
+                }}
+                aria-label={stratosActive() ? "Stratos active" : "Stratos inactive"}
+                aria-pressed={stratosActive()}
+              >
+                <span class="iconify lucide--shield"></span>
+              </button>
+            </Tooltip>
+          </Show>
+          <Show when={pds() && pds() !== "Missing PDS"}>
+            <CopyButton content={pds()!} label="Copy PDS" />
+          </Show>
+        </div>
       </div>
+
+      <Show when={stratosActive() && stratosEnrollment()?.boundaries?.length}>
+        <div class="flex flex-wrap gap-1 px-2 py-1">
+          <For each={stratosEnrollment()!.boundaries}>
+            {(boundary) => (
+              <span class="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                {boundary.value}
+              </span>
+            )}
+          </For>
+        </div>
+      </Show>
 
       <div class="flex flex-col">
         <Show when={props.params.repo}>

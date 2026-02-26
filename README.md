@@ -1,6 +1,6 @@
-# PDSls - Atmosphere Explorer
+# PDSlss - Atmosphere Explorer w/Stratos support
 
-Lightweight and client-side web app to navigate [atproto](https://atproto.com/).
+Lightweight and client-side web app to navigate [atproto](https://atproto.com/). This fork has been customized to support Stratos a private permission data service.
 
 ## Features
 
@@ -10,6 +10,7 @@ Lightweight and client-side web app to navigate [atproto](https://atproto.com/).
 - Backlinks support with [constellation](https://constellation.microcosm.blue/).
 - Query moderation labels.
 - Explore and unpack repository archives (CAR).
+- Explore Stratos records
 
 ## Hacking
 

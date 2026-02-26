@@ -8,7 +8,7 @@ import { AtprotoDid, Did, isNsid } from "@atcute/lexicons/syntax";
 import { verifyRecord } from "@atcute/repo";
 import { Title } from "@solidjs/meta";
 import { A, useLocation, useNavigate, useParams } from "@solidjs/router";
-import { createResource, createSignal, ErrorBoundary, For, Show, Suspense } from "solid-js";
+import { createResource, createSignal, ErrorBoundary, For, type JSX, Show, Suspense } from "solid-js";
 import { agent } from "../auth/state";
 import { Backlinks } from "../components/backlinks.jsx";
 import { Button } from "../components/button.jsx";
@@ -21,12 +21,13 @@ import {
   NavMenu,
 } from "../components/dropdown.jsx";
 import { Favicon } from "../components/favicon.jsx";
-import { JSONValue } from "../components/json.jsx";
+import { JSONValue, type JSONType } from "../components/json.jsx";
 import { LexiconSchemaView } from "../components/lexicon-schema.jsx";
 import { Modal } from "../components/modal.jsx";
-import { pds } from "../components/navbar.jsx";
+import { pds, setPDS } from "../components/navbar.jsx";
 import { addNotification, removeNotification } from "../components/notification.jsx";
 import { PermissionButton } from "../components/permission-button.jsx";
+import { createServiceClient, isStratosNsid, stratosActive, stratosEnrollment, stratosLexicons, verifyStratosRecord } from "../stratos/index.js";
 import {
   didDocumentResolver,
   resolveLexiconAuthority,
@@ -39,7 +40,7 @@ import { lexicons } from "../utils/types/lexicons.js";
 
 const toAuthority = (hostname: string) => hostname.split(".").reverse().join(".");
 
-const faviconWrapper = (children: any) => (
+const faviconWrapper = (children: JSX.Element) => (
   <div class="flex size-4 items-center justify-center">{children}</div>
 );
 
@@ -78,7 +79,7 @@ const getAuthoritySegment = (nsid: string): string => {
 const resolveSchema = async (authority: AtprotoDid, nsid: Nsid): Promise<unknown> => {
   const cacheKey = `${authority}:${nsid}`;
 
-  let cachedSchema = schemaCache.get(cacheKey);
+  const cachedSchema = schemaCache.get(cacheKey);
   if (cachedSchema) {
     return cachedSchema;
   }
@@ -125,22 +126,23 @@ const resolveSchema = async (authority: AtprotoDid, nsid: Nsid): Promise<unknown
   }
 };
 
-const extractRefs = (obj: any): Nsid[] => {
+const extractRefs = (obj: unknown): Nsid[] => {
   const refs: Set<string> = new Set();
 
-  const traverse = (value: any) => {
+  const traverse = (value: unknown) => {
     if (!value || typeof value !== "object") return;
+    const v = value as Record<string, unknown>;
 
-    if (value.type === "ref" && value.ref) {
-      const ref = value.ref;
+    if (v.type === "ref" && v.ref) {
+      const ref = v.ref as string;
       if (!ref.startsWith("#")) {
         const nsid = ref.split("#")[0];
         if (isNsid(nsid)) refs.add(nsid);
       }
     }
 
-    if (value.type === "union" && Array.isArray(value.refs)) {
-      for (const ref of value.refs) {
+    if (v.type === "union" && Array.isArray(v.refs)) {
+      for (const ref of v.refs) {
         if (!ref.startsWith("#")) {
           const nsid = ref.split("#")[0];
           if (isNsid(nsid)) refs.add(nsid);
@@ -159,10 +161,10 @@ const extractRefs = (obj: any): Nsid[] => {
 const resolveAllLexicons = async (
   nsid: Nsid,
   depth: number = 0,
-  resolved: Map<string, any> = new Map(),
+  resolved: Map<string, unknown> = new Map(),
   failed: Set<string> = new Set(),
   inFlight: Map<string, Promise<void>> = new Map(),
-): Promise<{ resolved: Map<string, any>; failed: Set<string> }> => {
+): Promise<{ resolved: Map<string, unknown>; failed: Set<string> }> => {
   if (depth >= 10) {
     console.warn(`Maximum recursion depth reached for ${nsid}`);
     return { resolved, failed };
@@ -179,18 +181,22 @@ const resolveAllLexicons = async (
     let authority: AtprotoDid | undefined;
     const authoritySegment = getAuthoritySegment(nsid);
     try {
-      let authorityPromise = authorityCache.get(authoritySegment);
-      if (!authorityPromise) {
-        authorityPromise = resolveLexiconAuthority(nsid);
-        authorityCache.set(authoritySegment, authorityPromise);
+      if (isStratosNsid(nsid)) {
+        resolved.set(nsid, stratosLexicons[nsid]);
+      } else {
+        let authorityPromise = authorityCache.get(authoritySegment);
+        if (!authorityPromise) {
+          authorityPromise = resolveLexiconAuthority(nsid);
+          authorityCache.set(authoritySegment, authorityPromise);
+        }
+
+        authority = await authorityPromise;
+        const schema = await resolveSchema(authority, nsid);
+
+        resolved.set(nsid, schema);
       }
 
-      authority = await authorityPromise;
-      const schema = await resolveSchema(authority, nsid);
-
-      resolved.set(nsid, schema);
-
-      const refs = extractRefs(schema);
+      const refs = extractRefs(resolved.get(nsid)!);
 
       if (refs.length > 0) {
         await Promise.all(
@@ -229,6 +235,7 @@ export const RecordView = () => {
   const [lexiconAuthority, setLexiconAuthority] = createSignal<AtprotoDid>();
   const [validRecord, setValidRecord] = createSignal<boolean | undefined>(undefined);
   const [validSchema, setValidSchema] = createSignal<boolean | undefined>(undefined);
+  const [verifyLabel, setVerifyLabel] = createSignal("Record verification");
   const [schema, setSchema] = createSignal<ResolvedSchema>();
   const [lexiconNotFound, setLexiconNotFound] = createSignal<boolean>();
   const [remoteValidation, setRemoteValidation] = createSignal<boolean>();
@@ -238,8 +245,15 @@ export const RecordView = () => {
   const fetchRecord = async () => {
     setValidRecord(undefined);
     setValidSchema(undefined);
-    const pds = await resolvePDS(did!);
-    rpc = new Client({ handler: simpleFetchHandler({ service: pds }) });
+    if (stratosActive()) {
+      const enrollment = stratosEnrollment();
+      if (enrollment) setPDS(new URL(enrollment.service).hostname);
+      if (!agent()) throw new Error("Sign in to view Stratos records");
+      rpc = createServiceClient(agent()!);
+    } else {
+      const pds = await resolvePDS(did!);
+      rpc = new Client({ handler: simpleFetchHandler({ service: pds }) });
+    }
     const res = await rpc.get("com.atproto.repo.getRecord", {
       params: {
         repo: did as ActorIdentifier,
@@ -261,7 +275,7 @@ export const RecordView = () => {
     return res.data;
   };
 
-  const [record, { refetch }] = createResource(fetchRecord);
+  const [record, { refetch }] = createResource(() => stratosActive(), fetchRecord);
 
   const validateLocalSchema = async (record: Record<string, unknown>) => {
     try {
@@ -272,11 +286,23 @@ export const RecordView = () => {
       } else if (params.collection && params.collection in lexicons) {
         if (is(lexicons[params.collection], record)) setValidSchema(true);
         else setValidSchema(false);
+      } else if (params.collection && isStratosNsid(params.collection)) {
+        const { resolved, failed } = await resolveAllLexicons(params.collection as Nsid);
+        if (failed.size > 0) {
+          console.error(`Failed to resolve ${failed.size} documents:`, Array.from(failed));
+          setValidSchema(false);
+          setValidationError(`Unable to resolve lexicon documents: ${Array.from(failed).join(", ")}`);
+          return;
+        }
+        const lexiconDocs = Object.fromEntries(resolved);
+        const validator = new RecordValidator(lexiconDocs, params.collection as Nsid);
+        validator.parse({ key: params.rkey ?? null, object: record });
+        setValidSchema(true);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Schema validation error:", err);
       setValidSchema(false);
-      setValidationError(err.message || String(err));
+      setValidationError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -301,10 +327,10 @@ export const RecordView = () => {
       });
 
       setValidSchema(true);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Schema validation error:", err);
       setValidSchema(false);
-      setValidationError(err.message || String(err));
+      setValidationError(err instanceof Error ? err.message : String(err));
     }
     setRemoteValidation(false);
   };
@@ -321,17 +347,39 @@ export const RecordView = () => {
       });
       if (!ok) throw data.error;
 
-      await verifyRecord({
-        did: did as AtprotoDid,
-        collection: params.collection!,
-        rkey: params.rkey!,
-        carBytes: data as Uint8Array<ArrayBufferLike>,
-      });
+      const carBytes = data as Uint8Array<ArrayBufferLike>;
+
+      if (stratosActive()) {
+        const enrollment = stratosEnrollment();
+        const serviceDid = enrollment
+          ? `did:web:${new URL(enrollment.service).hostname}`
+          : undefined;
+        const result = await verifyStratosRecord(
+          carBytes,
+          did!,
+          params.collection!,
+          params.rkey!,
+          serviceDid,
+        );
+        setVerifyLabel(
+          result.level === "service-signature"
+            ? "Signature verified"
+            : "CID integrity verified",
+        );
+      } else {
+        setVerifyLabel("Record verification");
+        await verifyRecord({
+          did: did as AtprotoDid,
+          collection: params.collection!,
+          rkey: params.rkey!,
+          carBytes,
+        });
+      }
 
       setValidRecord(true);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Record verification error:", err);
-      setVerifyError(err.message);
+      setVerifyError(err instanceof Error ? err.message : String(err));
       setValidRecord(false);
     }
   };
@@ -346,12 +394,17 @@ export const RecordView = () => {
         setLexiconNotFound(false);
       }
     } catch {
-      setLexiconNotFound(true);
+      if (isStratosNsid(nsid)) {
+        setSchema({ rawSchema: stratosLexicons[nsid] } as ResolvedSchema);
+        setLexiconNotFound(false);
+      } else {
+        setLexiconNotFound(true);
+      }
     }
   };
 
   const deleteRecord = async () => {
-    rpc = new Client({ handler: agent()! });
+    rpc = createServiceClient(agent()!);
     await rpc.post("com.atproto.repo.deleteRecord", {
       input: {
         repo: params.repo as ActorIdentifier,
@@ -368,7 +421,7 @@ export const RecordView = () => {
     navigate(`/at://${params.repo}/${params.collection}`);
   };
 
-  const checkUri = (uri: string, record: any) => {
+  const checkUri = (uri: string, record: unknown) => {
     const uriParts = uri.split("/"); // expected: ["at:", "", "repo", "collection", "rkey"]
     if (uriParts.length != 5) return undefined;
     if (uriParts[0] !== "at:" || uriParts[1] !== "") return undefined;
@@ -550,7 +603,7 @@ export const RecordView = () => {
             </div>
             <Show when={!location.hash || location.hash === "#record"}>
               <div class="w-full max-w-screen min-w-full px-2 font-mono text-xs wrap-anywhere whitespace-pre-wrap sm:w-max sm:text-sm md:max-w-3xl">
-                <JSONValue data={record()?.value as any} repo={record()!.uri.split("/")[2]} />
+                <JSONValue data={record()?.value as JSONType} repo={record()!.uri.split("/")[2]} />
               </div>
             </Show>
             <Show when={location.hash === "#schema" || location.hash.startsWith("#schema:")}>
@@ -563,6 +616,7 @@ export const RecordView = () => {
               <Show when={schema() || params.collection === "com.atproto.lexicon.schema"}>
                 <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
                   <LexiconSchemaView
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     schema={schema()?.rawSchema ?? (record()?.value as any)}
                     authority={lexiconAuthority()}
                   />
@@ -605,7 +659,7 @@ export const RecordView = () => {
                 </Show>
                 <div>
                   <div class="flex items-center gap-1">
-                    <p class="font-semibold">Record verification</p>
+                    <p class="font-semibold">{verifyLabel()}</p>
                     <span
                       classList={{
                         "iconify lucide--check text-green-500 dark:text-green-400":
