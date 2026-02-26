@@ -5,7 +5,8 @@ import {
 	P256PublicKey,
 	type PublicKey,
 } from '@atcute/crypto';
-import type { AtprotoDid } from '@atcute/lexicons/syntax';
+import { webDidToDocumentUrl, getVerificationMaterial, type DidDocument } from '@atcute/identity';
+import type { AtprotoDid, Did } from '@atcute/lexicons/syntax';
 
 export type VerificationLevel = 'service-signature' | 'cid-integrity';
 
@@ -18,6 +19,7 @@ const signingKeyCache = new Map<string, PublicKey>();
 
 /**
  * resolves a Stratos service's signing public key from its did:web document.
+ * uses the standard #atproto verificationMethod fragment per the AT Protocol DID spec.
  * results are cached — the key doesn't change unless the service rotates it.
  */
 export const resolveServiceSigningKey = async (serviceDid: string): Promise<PublicKey> => {
@@ -28,32 +30,21 @@ export const resolveServiceSigningKey = async (serviceDid: string): Promise<Publ
 		throw new Error(`expected did:web, got: ${serviceDid}`);
 	}
 
-	const host = serviceDid.slice('did:web:'.length).replaceAll(':', '/');
-	const url = `https://${host}/.well-known/did.json`;
+	const url = webDidToDocumentUrl(serviceDid as Did<'web'>);
 
 	const res = await fetch(url);
 	if (!res.ok) {
 		throw new Error(`failed to fetch DID document: ${res.status} ${res.statusText}`);
 	}
 
-	const doc = (await res.json()) as {
-		verificationMethod?: Array<{
-			type: string;
-			publicKeyMultibase?: string;
-		}>;
-	};
+	const doc = (await res.json()) as DidDocument;
 
-	const methods = doc.verificationMethod;
-	if (!methods || methods.length === 0) {
-		throw new Error('DID document has no verificationMethod');
+	const material = getVerificationMaterial(doc, '#atproto');
+	if (!material) {
+		throw new Error('DID document has no #atproto verificationMethod');
 	}
 
-	const multikey = methods.find((m) => m.type === 'Multikey' && m.publicKeyMultibase);
-	if (!multikey || !multikey.publicKeyMultibase) {
-		throw new Error('DID document has no Multikey verificationMethod');
-	}
-
-	const found = parsePublicMultikey(multikey.publicKeyMultibase);
+	const found = parsePublicMultikey(material.publicKeyMultibase);
 
 	let key: PublicKey;
 	switch (found.type) {
