@@ -1,5 +1,4 @@
-import type { FetchHandlerObject } from "@atcute/client";
-import type { OAuthUserAgent } from "@atcute/oauth-browser-client";
+import { buildFetchHandler, type FetchHandler, type FetchHandlerObject } from "@atcute/client";
 
 /**
  * creates a fetch handler that targets a specific service URL using
@@ -15,16 +14,17 @@ import type { OAuthUserAgent } from "@atcute/oauth-browser-client";
  * @returns a FetchHandlerObject that routes XRPC calls to the target service
  */
 export const createServiceFetchHandler = (
-  agent: OAuthUserAgent,
+  handler: FetchHandler | FetchHandlerObject,
   serviceUrl: string,
 ): FetchHandlerObject => {
+  const fetch = buildFetchHandler(handler);
   return {
     async handle(pathname: string, init?: RequestInit): Promise<Response> {
       const url = new URL(pathname, serviceUrl);
       const headers = new Headers(init?.headers);
       // ngrok free tier returns an HTML interstitial for browser User-Agents
       headers.set("ngrok-skip-browser-warning", "1");
-      return agent.handle(url.href, { ...init, headers });
+      return fetch(url.href, { ...init, headers });
     },
   };
 };

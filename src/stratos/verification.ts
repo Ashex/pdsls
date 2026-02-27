@@ -1,10 +1,11 @@
 import {
+  getPublicKeyFromDidController,
   P256PublicKey,
-  parsePublicMultikey,
   Secp256k1PublicKey,
   type PublicKey,
 } from "@atcute/crypto";
-import { getVerificationMaterial, webDidToDocumentUrl, type DidDocument } from "@atcute/identity";
+import { getAtprotoVerificationMaterial } from "@atcute/identity";
+import { WebDidDocumentResolver } from "@atcute/identity-resolver";
 import type { AtprotoDid, Did } from "@atcute/lexicons/syntax";
 import { verifyRecord } from "@atcute/repo";
 
@@ -30,21 +31,15 @@ export const resolveServiceSigningKey = async (serviceDid: string): Promise<Publ
     throw new Error(`expected did:web, got: ${serviceDid}`);
   }
 
-  const url = webDidToDocumentUrl(serviceDid as Did<"web">);
+  const resolver = new WebDidDocumentResolver();
+  const doc = await resolver.resolve(serviceDid as Did<"web">);
 
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`failed to fetch DID document: ${res.status} ${res.statusText}`);
-  }
-
-  const doc = (await res.json()) as DidDocument;
-
-  const material = getVerificationMaterial(doc, "#atproto");
+  const material = getAtprotoVerificationMaterial(doc);
   if (!material) {
     throw new Error("DID document has no #atproto verificationMethod");
   }
 
-  const found = parsePublicMultikey(material.publicKeyMultibase);
+  const found = getPublicKeyFromDidController(material);
 
   let key: PublicKey;
   switch (found.type) {

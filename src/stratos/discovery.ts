@@ -15,7 +15,7 @@ const isEnrollmentRecord = (
   return typeof obj.service === "string" && typeof obj.createdAt === "string";
 };
 
-export const discoverStratosEnrollment = async (did: Did): Promise<StratosEnrollment | null> => {
+export const discoverEnrollment = async (did: Did): Promise<StratosEnrollment | null> => {
   const pds = await resolvePDS(did);
   const rpc = new Client({ handler: simpleFetchHandler({ service: pds }) });
   const res = await rpc.get("com.atproto.repo.getRecord", {
