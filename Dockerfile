@@ -1,4 +1,5 @@
-FROM node:alpine
+# NPM build layer
+FROM node:alpine AS build
 
 ENV APP_DOMAIN="pdsls.northsky.social"
 ENV APP_PROTOCOL="https"
@@ -18,6 +19,10 @@ WORKDIR /build
 RUN pnpm install
 RUN pnpm build
 
-RUN cp -r /build/dist/* /app/
+# NGINX serving layer
 
-VOLUME /app
+FROM nginx:alpine
+
+COPY --from=build /build/dist/* /usr/share/nginx/html
+
+EXPOSE 80
