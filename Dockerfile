@@ -24,6 +24,9 @@ RUN pnpm build
 
 FROM nginx:alpine
 
+ENV APP_DOMAIN="pdsls.northsky.social"                                                                                     
+ENV APP_PROTOCOL="https"
+
 COPY --from=build /build/dist/* /usr/share/nginx/html
 
 EXPOSE 80
