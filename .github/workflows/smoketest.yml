@@ -1,0 +1,43 @@
+name: Smoketest
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-serve:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test --run
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Check style against prettier
+        run: pnpm run prettier-check
+
+      - name: Start preview server and verify
+        run: |
+          pnpm serve &
+          SERVER_PID=$!
+          sleep 5
+          curl --fail --retry 3 --retry-delay 2 http://localhost:4173 || (kill $SERVER_PID 2>/dev/null; exit 1)
+          kill $SERVER_PID 2>/dev/null || true
