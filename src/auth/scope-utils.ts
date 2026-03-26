@@ -23,12 +23,20 @@ export const GRANULAR_SCOPES = [
   },
   {
     id: "stratos-enrollment",
+<<<<<<< HEAD
     scope: "repo:zone.stratos.actor.enrollment",
+=======
+    scope: "repo:app.northsky.stratos.actor.enrollment",
+>>>>>>> 24378807 (Updates stratos code)
     label: "Stratos enrollment",
   },
   {
     id: "stratos-posts",
+<<<<<<< HEAD
     scope: "repo:zone.stratos.feed.post?action=create&action=delete",
+=======
+    scope: "repo:app.northsky.stratos.feed.post",
+>>>>>>> 24378807 (Updates stratos code)
     label: "Stratos posts",
   },
 ];

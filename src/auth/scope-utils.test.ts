@@ -38,7 +38,11 @@ describe("scope utility properties", () => {
       );
     });
 
+<<<<<<< HEAD
     it("contains stratos post scope when stratos-posts is selected", () => {
+=======
+    it("contains repo:app.northsky.stratos.feed.post when stratos-posts is selected", () => {
+>>>>>>> 24378807 (Updates stratos code)
       fc.assert(
         fc.property(arbScopeIdSet, (selected) => {
           // ensure stratos-posts is in the set
@@ -47,13 +51,21 @@ describe("scope utility properties", () => {
 
           const result = buildScopeString(withStratosPosts);
           const tokens = result.split(" ");
+<<<<<<< HEAD
           expect(tokens).toContain("repo:zone.stratos.feed.post?action=create&action=delete");
+=======
+          expect(tokens).toContain("repo:app.northsky.stratos.feed.post");
+>>>>>>> 24378807 (Updates stratos code)
         }),
         { numRuns: 200 },
       );
     });
 
+<<<<<<< HEAD
     it("does not contain stratos post scope when stratos-posts is not selected", () => {
+=======
+    it("does not contain repo:app.northsky.stratos.feed.post when stratos-posts is not selected", () => {
+>>>>>>> 24378807 (Updates stratos code)
       fc.assert(
         fc.property(arbScopeIdSet, (selected) => {
           const withoutStratosPosts = new Set(selected);
@@ -61,7 +73,11 @@ describe("scope utility properties", () => {
 
           const result = buildScopeString(withoutStratosPosts);
           const tokens = result.split(" ");
+<<<<<<< HEAD
           expect(tokens).not.toContain("repo:zone.stratos.feed.post?action=create&action=delete");
+=======
+          expect(tokens).not.toContain("repo:app.northsky.stratos.feed.post");
+>>>>>>> 24378807 (Updates stratos code)
         }),
         { numRuns: 200 },
       );

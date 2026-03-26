@@ -23,7 +23,11 @@ const configs = {
           logo_uri: `${baseUrl}/favicon.ico`,
           redirect_uris: [`${baseUrl}/`],
           scope:
+<<<<<<< HEAD
             "atproto repo:*?action=create repo:*?action=update repo:*?action=delete blob:*/* repo:zone.stratos.actor.enrollment repo:zone.stratos.feed.post?action=create&action=delete",
+=======
+            "atproto repo:*?action=create repo:*?action=update repo:*?action=delete blob:*/* repo:app.northsky.stratos.actor.enrollment repo:app.northsky.stratos.feed.post",
+>>>>>>> 24378807 (Updates stratos code)
           grant_types: ["authorization_code", "refresh_token"],
           response_types: ["code"],
           token_endpoint_auth_method: "none",

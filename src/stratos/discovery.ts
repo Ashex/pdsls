@@ -29,9 +29,15 @@ export const discoverStratosEnrollment = async (
   const rpc = new Client({ handler });
   const res = await rpc.get("com.atproto.repo.getRecord", {
     params: {
+<<<<<<< HEAD
       repo: did as `did:${string}:${string}`,
       collection: ENROLLMENT_COLLECTION,
       rkey: ENROLLMENT_RKEY,
+=======
+      repo: did,
+      collection: "app.northsky.stratos.actor.enrollment",
+      rkey: "self",
+>>>>>>> 24378807 (Updates stratos code)
     },
   });
   if (!res.ok) return null;
