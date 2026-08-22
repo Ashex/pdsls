@@ -16,6 +16,7 @@ import {
 
 import { hasUserScope } from "../../auth/scope-utils";
 import { agent, sessions } from "../../auth/state";
+import { createServiceClient, stratosActive, stratosEnrollment } from "../../stratos";
 import { Button } from "../button.jsx";
 import { Modal } from "../modal.jsx";
 import { addNotification, removeNotification } from "../notification.jsx";
@@ -31,6 +32,18 @@ import { editorInstance, placeholder, setPlaceholder } from "./state";
 const Editor = lazy(() => import("../editor.jsx").then((m) => ({ default: m.Editor })));
 
 export { editorInstance, placeholder, setPlaceholder };
+
+/**
+ * routes writes for the given repo through the user's own Stratos service
+ * when Stratos mode is on and the repo belongs to the enrolled user.
+ */
+const writeClient = (sessionAgent: OAuthUserAgent, repo: string): Client => {
+  const enrollment = stratosEnrollment();
+  if (stratosActive() && enrollment && repo === agent()?.sub) {
+    return createServiceClient(sessionAgent, enrollment.service);
+  }
+  return new Client({ handler: sessionAgent });
+};
 
 export const RecordEditor = (props: {
   create: boolean;
@@ -121,7 +134,7 @@ export const RecordEditor = (props: {
     const formData = new FormData(formRef);
     const repo = formData.get("repo")?.toString();
     if (!repo) return;
-    const rpc = new Client({ handler: new OAuthUserAgent(await getSession(repo as Did)) });
+    const rpc = writeClient(new OAuthUserAgent(await getSession(repo as Did)), repo);
     const collection = formData.get("collection");
     const rkey = formData.get("rkey");
     let record: any;
@@ -156,7 +169,7 @@ export const RecordEditor = (props: {
   const editRecord = async (validate: boolean | undefined, recreate: boolean) => {
     const record = editorInstance.view.state.doc.toString();
     if (!record) return;
-    const rpc = new Client({ handler: agent()! });
+    const rpc = writeClient(agent()!, agent()!.sub);
     try {
       const editedRecord = JSON.parse(record);
       if (recreate) {

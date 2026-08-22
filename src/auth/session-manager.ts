@@ -8,8 +8,9 @@ import {
 } from "@atcute/oauth-browser-client";
 
 import { resolveDidDoc } from "../lib/api";
+import { discoverEnrollment, setStratosEnrollment } from "../stratos";
 import { oauthScopeStringToIds, scopeIdsToString } from "./scope-utils";
-import { Sessions, setAgent, setSessions } from "./state";
+import { agent as currentAgent, Sessions, setAgent, setSessions } from "./state";
 
 export const saveSessionToStorage = (sessions: Sessions) => {
   localStorage.setItem("sessions", JSON.stringify(sessions));
@@ -90,10 +91,24 @@ export const retrieveSession = async (): Promise<void> => {
 
   const session = await init();
 
-  if (session) setAgent(new OAuthUserAgent(session));
+  if (session) {
+    const userAgent = new OAuthUserAgent(session);
+    setAgent(userAgent);
+    // discover the user's Stratos enrollment in the background; the
+    // persisted mode preference only takes effect once this resolves
+    const capturedDid = userAgent.sub;
+    discoverEnrollment(capturedDid, userAgent.handle.bind(userAgent))
+      .then((enrollment) => {
+        if (currentAgent()?.sub === capturedDid) setStratosEnrollment(enrollment);
+      })
+      .catch(() => {
+        if (currentAgent()?.sub === capturedDid) setStratosEnrollment(null);
+      });
+  }
 };
 
 export const resumeSession = async (did: Did): Promise<void> => {
   localStorage.setItem("lastSignedIn", did);
+  setStratosEnrollment(undefined);
   await retrieveSession();
 };

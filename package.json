@@ -13,7 +13,8 @@
     "format": "bun node_modules/oxfmt/bin/oxfmt",
     "format:check": "bun node_modules/oxfmt/bin/oxfmt --check",
     "pretypecheck": "bun scripts/generate-metadata.js",
-    "typecheck": "bun node_modules/typescript/bin/tsc --noEmit -p tsconfig.json"
+    "typecheck": "bun node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+    "test": "bun node_modules/vitest/vitest.mjs run"
   },
   "dependencies": {
     "@atcute/atproto": "^4.0.4",
@@ -42,6 +43,7 @@
     "@fsegurai/codemirror-theme-basic-light": "^6.2.5",
     "@mary/exif-rm": "https://npm.jsr.io/~/11/@jsr/mary__exif-rm/0.2.2.tgz",
     "@mary/zip": "https://npm.jsr.io/~/11/@jsr/mary__zip/0.2.1.tgz",
+    "@northskysocial/stratos-client": "^0.3.0",
     "@skyware/firehose": "^0.5.2",
     "@solidjs/router": "0.16.1",
     "@takumi-rs/image-response": "^2.10.0",
@@ -61,7 +63,8 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
-    "vite-plugin-solid": "^2.11.14"
+    "vite-plugin-solid": "^2.11.14",
+    "vitest": "^4.0.18"
   },
   "overrides": {
     "@atcute/lexicons": "2.1.0"

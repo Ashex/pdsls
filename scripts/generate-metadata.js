@@ -2,12 +2,30 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
+import {
+  buildCollectionScope,
+  buildRpcScope,
+  STRATOS_SCOPES,
+} from "@northskysocial/stratos-client";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const domain = process.env.APP_DOMAIN || "pdsls.dev";
 const protocol = process.env.APP_PROTOCOL || "https";
 const baseUrl = `${protocol}://${domain}`;
+
+const scope = [
+  "atproto",
+  "repo:*?action=create",
+  "repo:*?action=update",
+  "repo:*?action=delete",
+  "blob:*/*",
+  "space:*?authority=*&action=read_self",
+  buildCollectionScope(STRATOS_SCOPES.enrollment),
+  buildCollectionScope(STRATOS_SCOPES.post, ["create", "delete"]),
+  buildRpcScope(STRATOS_SCOPES.getFeed),
+].join(" ");
 
 const configs = {
   oauth: {
@@ -21,8 +39,7 @@ const configs = {
           client_uri: baseUrl,
           logo_uri: `${baseUrl}/favicon.ico`,
           redirect_uris: [`${baseUrl}/`],
-          scope:
-            "atproto repo:*?action=create repo:*?action=update repo:*?action=delete blob:*/* space:*?authority=*&action=read_self",
+          scope,
           grant_types: ["authorization_code", "refresh_token"],
           response_types: ["code"],
           token_endpoint_auth_method: "none",

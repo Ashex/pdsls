@@ -1,6 +1,6 @@
 import { createSignal, For } from "solid-js";
 
-import { buildScopeString, GRANULAR_SCOPES } from "./scope-utils";
+import { buildScopeString, GRANULAR_SCOPES, STRATOS_DEPENDENT_SCOPES } from "./scope-utils";
 
 interface ScopeSelectorProps {
   onConfirm: (scopeString: string) => void;
@@ -19,6 +19,10 @@ export const ScopeSelector = (props: ScopeSelectorProps) => {
     return !scopes.has("create") && !scopes.has("update");
   };
 
+  const isStratosDependentDisabled = () => {
+    return !selectedScopes().has("stratos-enrollment");
+  };
+
   const toggleScope = (scopeId: string) => {
     setSelectedScopes((prev) => {
       const newSet = new Set(prev);
@@ -30,6 +34,9 @@ export const ScopeSelector = (props: ScopeSelectorProps) => {
           !newSet.has("update")
         ) {
           newSet.delete("blob");
+        }
+        if (scopeId === "stratos-enrollment") {
+          STRATOS_DEPENDENT_SCOPES.forEach((id) => newSet.delete(id));
         }
       } else {
         newSet.add(scopeId);
@@ -57,7 +64,9 @@ export const ScopeSelector = (props: ScopeSelectorProps) => {
         <For each={GRANULAR_SCOPES}>
           {(scope) => {
             const isSelected = () => selectedScopes().has(scope.id);
-            const isDisabled = () => scope.id === "blob" && isBlobDisabled();
+            const isDisabled = () =>
+              (scope.id === "blob" && isBlobDisabled()) ||
+              (STRATOS_DEPENDENT_SCOPES.includes(scope.id) && isStratosDependentDisabled());
 
             return (
               <button

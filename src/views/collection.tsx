@@ -1,5 +1,4 @@
 import { ComAtprotoRepoApplyWrites, ComAtprotoRepoGetRecord } from "@atcute/atproto";
-import { Client } from "@atcute/client";
 import { $type, ActorIdentifier, InferXRPCBodyOutput } from "@atcute/lexicons";
 import * as TID from "@atcute/tid";
 import { A, type RouteSectionProps, useParams, useSearchParams } from "@solidjs/router";
@@ -30,6 +29,7 @@ import { createLatch } from "../lib/create-latch.js";
 import { useFilterShortcut } from "../lib/keyboard.js";
 import { useRepo } from "../lib/repo-context.jsx";
 import { SchemaTabContent, useLexiconSchema } from "../lib/schema-tab.jsx";
+import { createServiceClient, stratosMode } from "../stratos";
 import { localDateFromTimestamp } from "../utils/date.js";
 
 interface AtprotoRecord {
@@ -365,7 +365,17 @@ const CollectionView = () => {
 
   const shouldFetch = createLatch(() => !hidden() && !!repo.rpc());
 
-  const [response, { refetch }] = createResource(shouldFetch, fetchRecords);
+  // refetch (and reset pagination) when effective Stratos mode flips
+  const [response, { refetch }] = createResource(
+    () => (shouldFetch() ? `stratos:${stratosMode()}` : undefined),
+    (_source, info) => {
+      if (typeof info.refetching !== "boolean" || !info.refetching) {
+        setCursor(undefined);
+        setIsLoadingMore(false);
+      }
+      return fetchRecords();
+    },
+  );
 
   const filteredRecords = createMemo(() =>
     records.filter((rec) =>
@@ -411,7 +421,7 @@ const CollectionView = () => {
     });
 
     const BATCHSIZE = 200;
-    const authRpc = new Client({ handler: agent()! });
+    const authRpc = createServiceClient(agent()!);
     for (let i = 0; i < writes.length; i += BATCHSIZE) {
       await authRpc.post("com.atproto.repo.applyWrites", {
         input: {

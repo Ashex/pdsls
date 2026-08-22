@@ -1,3 +1,9 @@
+import {
+  buildCollectionScope,
+  buildRpcScope,
+  STRATOS_SCOPES,
+} from "@northskysocial/stratos-client";
+
 import { agent, sessions } from "./state";
 
 export const SPACE_READ_SCOPE_ID = "space-read" as const;
@@ -29,11 +35,29 @@ export const GRANULAR_SCOPES = [
     scope: SPACE_READ_SCOPE,
     label: "Read your Space records (alpha)",
   },
+  {
+    id: "stratos-enrollment",
+    scope: buildCollectionScope(STRATOS_SCOPES.enrollment),
+    label: "Stratos enrollment",
+  },
+  {
+    id: "stratos-posts",
+    scope: buildCollectionScope(STRATOS_SCOPES.post, ["create", "delete"]),
+    label: "Stratos posts",
+  },
+  {
+    id: "stratos-feed",
+    scope: buildRpcScope(STRATOS_SCOPES.getFeed),
+    label: "Stratos feeds",
+  },
 ] as const;
 
 export type ScopeId = (typeof GRANULAR_SCOPES)[number]["id"];
 
-const BASE_SCOPES = ["atproto"];
+/** scope ids that require the Stratos enrollment scope to be useful */
+export const STRATOS_DEPENDENT_SCOPES = ["stratos-posts", "stratos-feed"];
+
+export const BASE_SCOPES = ["atproto"];
 
 export const buildScopeString = (selected: Set<string>): string => {
   const granular = GRANULAR_SCOPES.filter((s) => selected.has(s.id)).map((s) => s.scope);

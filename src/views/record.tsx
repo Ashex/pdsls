@@ -22,6 +22,7 @@ import {
   NavMenu,
 } from "../components/dropdown.jsx";
 import { Favicon } from "../components/favicon.jsx";
+import HoverCard from "../components/hover-card/base";
 import { JSONValue } from "../components/json.jsx";
 import { Modal } from "../components/modal.jsx";
 import { addNotification, removeNotification } from "../components/notification.jsx";
@@ -32,6 +33,13 @@ import { useRepo } from "../lib/repo-context.jsx";
 import { SchemaTabContent, useLexiconSchema } from "../lib/schema-tab.jsx";
 import { AtUri, uriTemplates } from "../lib/templates.js";
 import { lexicons } from "../lib/types/lexicons.js";
+import {
+  createServiceClient,
+  stratosMode,
+  verifyEnrollmentAttestation,
+  verifyRecordCid,
+  type AttestationResult,
+} from "../stratos";
 import { addToClipboard } from "../utils/copy.js";
 import { hideMedia, setHideMedia } from "./settings.jsx";
 
@@ -220,6 +228,10 @@ export const RecordView = () => {
   >();
   const [validRecord, setValidRecord] = createSignal<boolean | undefined>(undefined);
   const [validSchema, setValidSchema] = createSignal<boolean | undefined>(undefined);
+  const [verifyLabel, setVerifyLabel] = createSignal("Record verification");
+  const [attestationResult, setAttestationResult] = createSignal<AttestationResult | undefined>(
+    undefined,
+  );
   const [remoteValidation, setRemoteValidation] = createSignal<boolean>();
   const lexicon = useLexiconSchema(() => params.collection);
   const did = repo.did();
@@ -230,6 +242,7 @@ export const RecordView = () => {
     const rkey = params.rkey!;
     setValidRecord(undefined);
     setValidSchema(undefined);
+    setAttestationResult(undefined);
     const res = await rpc.get("com.atproto.repo.getRecord", {
       params: {
         repo: did as ActorIdentifier,
@@ -244,14 +257,18 @@ export const RecordView = () => {
     }
     setPlaceholder(res.data.value);
     setExternalLink(checkUri(res.data.uri, res.data.value));
-    verifyRecordIntegrity(rpc, collection, rkey);
+    verifyRecordIntegrity(rpc, collection, rkey, res.data.value, res.data.cid);
     validateLocalSchema(collection, res.data.value);
+
+    if (collection === "zone.stratos.actor.enrollment") {
+      verifyEnrollmentAttestation(res.data.value, did).then(setAttestationResult);
+    }
 
     return res.data;
   };
 
   const [record, { refetch }] = createResource(
-    () => (repo.rpc() ? params.rkey : undefined),
+    () => (repo.rpc() ? `${params.rkey}:stratos:${stratosMode()}` : undefined),
     fetchRecord,
   );
 
@@ -302,24 +319,40 @@ export const RecordView = () => {
     setRemoteValidation(false);
   };
 
-  const verifyRecordIntegrity = async (rpc: Client, collection: string, rkey: string) => {
+  const verifyRecordIntegrity = async (
+    rpc: Client,
+    collection: string,
+    rkey: string,
+    value?: unknown,
+    cid?: string,
+  ) => {
     try {
-      const { ok, data } = await rpc.get("com.atproto.sync.getRecord", {
-        params: {
-          did: did as Did,
-          collection: collection as Nsid,
-          rkey,
-        },
-        as: "bytes",
-      });
-      if (!ok) throw data.error;
+      if (stratosMode()) {
+        // the Stratos service does not expose com.atproto.sync.getRecord
+        // (no CAR inclusion proofs), so verify the returned value against
+        // its claimed CID instead
+        if (!cid) throw new Error("record response is missing a CID");
+        await verifyRecordCid(value, cid);
+        setVerifyLabel("CID integrity verified");
+      } else {
+        const { ok, data } = await rpc.get("com.atproto.sync.getRecord", {
+          params: {
+            did: did as Did,
+            collection: collection as Nsid,
+            rkey,
+          },
+          as: "bytes",
+        });
+        if (!ok) throw data.error;
 
-      await verifyRecord({
-        did: did as AtprotoDid,
-        collection,
-        rkey,
-        carBytes: data as Uint8Array<ArrayBufferLike>,
-      });
+        setVerifyLabel("Record verification");
+        await verifyRecord({
+          did: did as AtprotoDid,
+          collection,
+          rkey,
+          carBytes: data as Uint8Array<ArrayBufferLike>,
+        });
+      }
 
       setValidRecord(true);
     } catch (err: any) {
@@ -332,7 +365,7 @@ export const RecordView = () => {
   const deleteRecord = async () => {
     const collection = params.collection!;
     const rkey = params.rkey!;
-    const authRpc = new Client({ handler: agent()! });
+    const authRpc = createServiceClient(agent()!);
     await authRpc.post("com.atproto.repo.deleteRecord", {
       input: {
         repo: params.repo as ActorIdentifier,
@@ -412,6 +445,89 @@ export const RecordView = () => {
                 <RecordTab tab="schema" label="Schema" />
                 <RecordTab tab="backlinks" label="Backlinks" />
                 <RecordTab tab="info" label="Info" error />
+                <Show when={params.collection === "zone.stratos.actor.enrollment"}>
+                  <HoverCard
+                    trigger={
+                      <span
+                        class="flex cursor-default items-center gap-0.5 text-sm"
+                        title={
+                          attestationResult() === undefined
+                            ? "Verifying attestation..."
+                            : attestationResult()?.valid
+                              ? "Attestation verified"
+                              : "Attestation verification failed"
+                        }
+                      >
+                        <span class="iconify lucide--shield"></span>
+                        <span
+                          classList={{
+                            "iconify lucide--check text-green-500 dark:text-green-400":
+                              attestationResult()?.valid === true,
+                            "iconify lucide--x text-red-500 dark:text-red-400":
+                              attestationResult() !== undefined &&
+                              attestationResult()?.valid === false,
+                            "iconify lucide--loader-circle animate-spin":
+                              attestationResult() === undefined,
+                          }}
+                        ></span>
+                      </span>
+                    }
+                    hoverDelay={100}
+                    previewClass="max-w-sm p-3 font-sans text-sm"
+                  >
+                    <Show
+                      when={attestationResult()}
+                      fallback={
+                        <div class="flex items-center gap-2">
+                          <span class="iconify lucide--loader-circle animate-spin"></span>
+                          Verifying attestation...
+                        </div>
+                      }
+                    >
+                      {(result) => (
+                        <div class="flex flex-col gap-2">
+                          <div class="flex items-center gap-1.5 font-semibold">
+                            <span
+                              classList={{
+                                "iconify lucide--check text-green-500 dark:text-green-400":
+                                  result().valid,
+                                "iconify lucide--x text-red-500 dark:text-red-400": !result().valid,
+                              }}
+                            ></span>
+                            {result().valid ? "Attestation verified" : "Attestation invalid"}
+                          </div>
+                          <Show when={result().error}>
+                            <div class="text-xs text-red-500 dark:text-red-400">
+                              {result().error}
+                            </div>
+                          </Show>
+                          <div class="flex flex-col gap-1 text-xs">
+                            <div>
+                              <span class="text-neutral-500 dark:text-neutral-400">
+                                Service key:{" "}
+                              </span>
+                              <span class="font-mono break-all">{result().serviceKey}</span>
+                            </div>
+                            <div>
+                              <span class="text-neutral-500 dark:text-neutral-400">
+                                User signing key:{" "}
+                              </span>
+                              <span class="font-mono break-all">{result().userSigningKey}</span>
+                            </div>
+                            <Show when={result().boundaries.length > 0}>
+                              <div>
+                                <span class="text-neutral-500 dark:text-neutral-400">
+                                  Boundaries:{" "}
+                                </span>
+                                <span class="font-mono">{result().boundaries.join(", ")}</span>
+                              </div>
+                            </Show>
+                          </div>
+                        </div>
+                      )}
+                    </Show>
+                  </HoverCard>
+                </Show>
               </div>
               <div class="flex sm:gap-0.5">
                 <Show when={agent() && agent()?.sub === record()?.uri.split("/")[2]}>
@@ -608,7 +724,7 @@ export const RecordView = () => {
                 </Show>
                 <div>
                   <div class="flex items-center gap-1">
-                    <p class="font-semibold">Record verification</p>
+                    <p class="font-semibold">{verifyLabel()}</p>
                     <span
                       classList={{
                         "iconify lucide--check text-green-500 dark:text-green-400":

@@ -9,8 +9,17 @@ import {
   useNavigate,
   useParams,
 } from "@solidjs/router";
-import { createEffect, createResource, createSignal, For, onMount, Show } from "solid-js";
+import {
+  createEffect,
+  createResource,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+  Show,
+} from "solid-js";
 
+import { agent } from "../../auth/state";
 import { Backlinks } from "../../components/backlinks.jsx";
 import {
   ActionMenu,
@@ -40,6 +49,13 @@ import {
 import { createLatch } from "../../lib/create-latch.js";
 import { useFilterShortcut } from "../../lib/keyboard.js";
 import { RepoProvider, useRepo } from "../../lib/repo-context.jsx";
+import {
+  createServiceClient,
+  discoverEnrollment,
+  setTargetEnrollment,
+  stratosMode,
+  targetEnrollment,
+} from "../../stratos";
 import { plcDirectory } from "../settings.jsx";
 import { BlobView } from "./blob.jsx";
 import { IdentityView } from "./identity.jsx";
@@ -86,11 +102,20 @@ export const RepoLayout = (props: RouteSectionProps) => {
     },
     async (did) => {
       setPDS(undefined);
+      setTargetEnrollment(undefined);
       try {
         const pdsUrl = await getPDS(did);
         const rpc = new Client({ handler: simpleFetchHandler({ service: pdsUrl }) });
         const didDoc = didDocCache[did] as DidDocument | undefined;
         setPDS(pdsUrl.replace("https://", "").replace("http://", ""));
+        // discover the browsed repo's Stratos enrollment without blocking PDS resolution
+        discoverEnrollment(did, pdsUrl)
+          .then((enrollment) => {
+            if (params.repo === did) setTargetEnrollment(enrollment);
+          })
+          .catch(() => {
+            if (params.repo === did) setTargetEnrollment(null);
+          });
         return { did, pds: pdsUrl, rpc, didDoc };
       } catch {
         let didDoc: DidDocument | undefined;
@@ -101,6 +126,7 @@ export const RepoLayout = (props: RouteSectionProps) => {
           } catch {}
         }
         setPDS("Missing PDS");
+        setTargetEnrollment(null);
         return {
           did,
           pds: undefined as string | undefined,
@@ -111,6 +137,8 @@ export const RepoLayout = (props: RouteSectionProps) => {
       }
     },
   );
+
+  onCleanup(() => setTargetEnrollment(undefined));
 
   // Only expose data when resolution matches current params (prevents stale data during transitions)
   const current = () => {
@@ -124,7 +152,15 @@ export const RepoLayout = (props: RouteSectionProps) => {
       value={{
         did: () => params.repo!,
         pds: () => current()?.pds,
-        rpc: () => current()?.rpc,
+        rpc: () => {
+          // in effective Stratos mode, route repo reads through the enrolled
+          // service using the authenticated agent's DPoP credentials
+          const a = agent();
+          if (a && stratosMode() && targetEnrollment()) {
+            return createServiceClient(a, targetEnrollment()!.service);
+          }
+          return current()?.rpc;
+        },
         didDoc: () => current()?.didDoc,
         error: () => current()?.error,
       }}
@@ -334,7 +370,12 @@ const RepoView = () => {
 
   const shouldFetch = createLatch(() => !hidden() && (!!repo.rpc() || !!repo.error()));
 
-  const [repoData] = createResource(shouldFetch, fetchRepo);
+  // refetch when effective Stratos mode flips — the enrolled service can
+  // expose collections the public PDS does not
+  const [repoData] = createResource(
+    () => (shouldFetch() ? `stratos:${stratosMode()}` : undefined),
+    fetchRepo,
+  );
 
   const toggleCollapsed = (authority: string) => {
     setNsids((prev) => ({
@@ -422,7 +463,7 @@ const RepoView = () => {
                       icon="lucide--tag"
                     />
                   </Show>
-                  <Show when={error()?.length === 0 || error() === undefined}>
+                  <Show when={(error()?.length === 0 || error() === undefined) && !stratosMode()}>
                     <ActionMenu
                       label="Download repo"
                       icon={

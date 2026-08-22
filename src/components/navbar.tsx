@@ -1,9 +1,17 @@
 import * as TID from "@atcute/tid";
 import { A, useParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, JSX, Match, Show, Switch } from "solid-js";
+import { createEffect, createMemo, createSignal, For, JSX, Match, Show, Switch } from "solid-js";
 
 import { canHover } from "../layout";
 import { didDocCache } from "../lib/api";
+import {
+  serviceMismatch,
+  setStratosActive,
+  stratosActive,
+  stratosEnrollment,
+  stratosMode,
+  targetEnrollment,
+} from "../stratos";
 import { addToClipboard } from "../utils/copy";
 import { localDateFromTimestamp } from "../utils/date";
 import Tooltip from "./tooltip";
@@ -149,7 +157,9 @@ export const NavBar = () => {
                     href={pds()!}
                     inactiveClass="text-blue-500 py-0.5 w-full font-medium hover:text-blue-600 transition-colors duration-150 dark:text-blue-400 dark:hover:text-blue-300"
                   >
-                    {pds()}
+                    <Show when={stratosMode() && targetEnrollment()} fallback={pds()}>
+                      {new URL(targetEnrollment()!.service).hostname}
+                    </Show>
                   </A>
                 </Show>
               }
@@ -158,10 +168,70 @@ export const NavBar = () => {
             </Show>
           </Show>
         </div>
-        <Show when={pds() && pds() !== "Missing PDS"}>
-          <CopyButton content={pds()!} label="Copy PDS" />
-        </Show>
+        <div class="flex items-center gap-1">
+          <Show when={stratosEnrollment() && targetEnrollment()}>
+            <Tooltip
+              text={
+                serviceMismatch()
+                  ? "Different Stratos service — cannot browse"
+                  : stratosActive()
+                    ? "Stratos active — click to switch to PDS"
+                    : "Switch to Stratos"
+              }
+            >
+              <button
+                type="button"
+                disabled={serviceMismatch()}
+                onclick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!serviceMismatch()) setStratosActive((v) => !v);
+                }}
+                classList={{
+                  "flex items-center rounded px-1.5 py-1 transition-all duration-200 sm:py-1.5": true,
+                  "text-purple-600 hover:bg-purple-100/70 dark:text-purple-400 dark:hover:bg-purple-900/40":
+                    stratosActive() && !serviceMismatch(),
+                  "text-neutral-400 hover:bg-neutral-200/70 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-700/70 dark:hover:text-neutral-300":
+                    !stratosActive() && !serviceMismatch(),
+                  "text-amber-500 cursor-not-allowed opacity-60 dark:text-amber-400":
+                    serviceMismatch(),
+                }}
+                aria-label={
+                  serviceMismatch()
+                    ? "Different Stratos service"
+                    : stratosActive()
+                      ? "Stratos active"
+                      : "Stratos inactive"
+                }
+                aria-pressed={stratosActive()}
+              >
+                <span
+                  classList={{
+                    iconify: true,
+                    "lucide--shield": !serviceMismatch(),
+                    "lucide--shield-alert": serviceMismatch(),
+                  }}
+                ></span>
+              </button>
+            </Tooltip>
+          </Show>
+          <Show when={pds() && pds() !== "Missing PDS"}>
+            <CopyButton content={pds()!} label="Copy PDS" />
+          </Show>
+        </div>
       </div>
+
+      <Show when={stratosMode() && targetEnrollment()?.boundaries?.length}>
+        <div class="flex flex-wrap gap-1 px-2 py-1">
+          <For each={targetEnrollment()!.boundaries}>
+            {(boundary) => (
+              <span class="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                {boundary.value}
+              </span>
+            )}
+          </For>
+        </div>
+      </Show>
 
       <div class="flex flex-col">
         <Show when={params.repo}>
