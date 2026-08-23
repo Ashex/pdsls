@@ -9,3 +9,5 @@ public/opensearch.xml
 public/_worker.js
 .wrangler
 .claude
+.rommie
+AGENTS.md
