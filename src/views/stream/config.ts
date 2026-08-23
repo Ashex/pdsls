@@ -2,15 +2,16 @@ import { localDateFromTimestamp } from "../../utils/date";
 
 export type StreamType = "jetstream" | "firehose" | "spacedust";
 
-export type FormField = {
+type FormField = {
   name: string;
   label: string;
-  type: "text" | "textarea" | "checkbox";
+  type: "text" | "checkbox" | "tags";
+  datetimePicker?: boolean;
   placeholder?: string;
   searchParam: string;
 };
 
-export type RecordInfo = {
+type RecordInfo = {
   type: string;
   did?: string;
   collection?: string;
@@ -19,7 +20,7 @@ export type RecordInfo = {
   time?: string;
 };
 
-export type StreamConfig = {
+type StreamConfig = {
   label: string;
   description: string;
   icon: string;
@@ -27,9 +28,7 @@ export type StreamConfig = {
   fields: FormField[];
   useFirehoseLib: boolean;
   buildUrl: (instance: string, formData: FormData) => string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parseRecord: (record: any) => RecordInfo;
-  showEventTypes: boolean;
   collectionsLabel: string;
 };
 
@@ -40,21 +39,20 @@ export const STREAM_CONFIGS: Record<StreamType, StreamConfig> = {
     icon: "lucide--radio-tower",
     defaultInstance: "wss://jetstream1.us-east.bsky.network/subscribe",
     useFirehoseLib: false,
-    showEventTypes: true,
     collectionsLabel: "Top Collections",
     fields: [
       {
         name: "collections",
         label: "Collections",
-        type: "textarea",
-        placeholder: "Comma-separated list of collections",
+        type: "tags",
+        placeholder: "app.bsky.feed.post",
         searchParam: "collections",
       },
       {
         name: "dids",
         label: "DIDs",
-        type: "textarea",
-        placeholder: "Comma-separated list of DIDs",
+        type: "tags",
+        placeholder: "did:plc:xyz...",
         searchParam: "dids",
       },
       {
@@ -63,6 +61,7 @@ export const STREAM_CONFIGS: Record<StreamType, StreamConfig> = {
         type: "text",
         placeholder: "Leave empty for live-tail",
         searchParam: "cursor",
+        datetimePicker: true,
       },
       {
         name: "allEvents",
@@ -104,7 +103,6 @@ export const STREAM_CONFIGS: Record<StreamType, StreamConfig> = {
     icon: "lucide--rss",
     defaultInstance: "wss://bsky.network",
     useFirehoseLib: true,
-    showEventTypes: true,
     collectionsLabel: "Top Collections",
     fields: [
       {
@@ -115,7 +113,7 @@ export const STREAM_CONFIGS: Record<StreamType, StreamConfig> = {
         searchParam: "cursor",
       },
     ],
-    buildUrl: (instance) => {
+    buildUrl: (instance, _formData) => {
       let url = instance;
       url = url.replace("/xrpc/com.atproto.sync.subscribeRepos", "");
       if (!(url.startsWith("wss://") || url.startsWith("ws://"))) {
@@ -140,28 +138,27 @@ export const STREAM_CONFIGS: Record<StreamType, StreamConfig> = {
     icon: "lucide--link",
     defaultInstance: "wss://spacedust.microcosm.blue/subscribe",
     useFirehoseLib: false,
-    showEventTypes: false,
     collectionsLabel: "Top Sources",
     fields: [
       {
         name: "sources",
         label: "Sources",
-        type: "textarea",
-        placeholder: "e.g. app.bsky.graph.follow:subject",
+        type: "tags",
+        placeholder: "app.bsky.graph.follow:subject",
         searchParam: "sources",
       },
       {
         name: "subjectDids",
         label: "Subject DIDs",
-        type: "textarea",
-        placeholder: "Comma-separated list of DIDs",
+        type: "tags",
+        placeholder: "did:plc:xyz...",
         searchParam: "subjectDids",
       },
       {
         name: "subjects",
         label: "Subjects",
-        type: "textarea",
-        placeholder: "Comma-separated list of AT URIs",
+        type: "tags",
+        placeholder: "at://did:plc:xyz.../app.bsky.feed.post/abc",
         searchParam: "subjects",
       },
       {

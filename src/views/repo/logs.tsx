@@ -1,0 +1,372 @@
+import {
+  CompatibleOperationOrTombstone,
+  defs,
+  IndexedEntry,
+  IndexedEntryLog,
+} from "@atcute/did-plc";
+import { useLocation } from "@solidjs/router";
+import { createEffect, createResource, createSignal, For, onCleanup, Show } from "solid-js";
+import * as v from "valibot";
+
+import Tooltip from "../../components/tooltip.jsx";
+import { createOperationHistory, DiffEntry, groupBy } from "../../lib/plc-logs.js";
+import { localDateFromTimestamp } from "../../utils/date.js";
+import PlcValidateWorker from "../../workers/plc-validate.ts?worker";
+import { plcDirectory } from "../settings.jsx";
+
+type PlcEvent = "handle" | "rotation_key" | "service" | "verification_method";
+
+const plcEventFilters: { event?: PlcEvent; icon: string; label: string }[] = [
+  { icon: "lucide--list-filter", label: "All" },
+  { event: "handle", icon: "lucide--at-sign", label: "Alias" },
+  { event: "service", icon: "lucide--hard-drive", label: "Service" },
+  { event: "verification_method", icon: "lucide--shield-check", label: "Verification" },
+  { event: "rotation_key", icon: "lucide--key-round", label: "Rotation" },
+];
+
+export const PlcLogView = (props: { did: string }) => {
+  const location = useLocation();
+  const [activePlcEvent, setActivePlcEvent] = createSignal<PlcEvent | undefined>();
+  const [validLog, setValidLog] = createSignal<boolean | undefined>(undefined);
+  const [rawLogs, setRawLogs] = createSignal<IndexedEntryLog | undefined>(undefined);
+
+  const shouldShowDiff = (diff: DiffEntry) =>
+    !activePlcEvent() || diff.type.startsWith(activePlcEvent()!);
+
+  const shouldShowEntry = (diffs: DiffEntry[]) =>
+    !activePlcEvent() || diffs.some((d) => d.type.startsWith(activePlcEvent()!));
+
+  const fetchPlcLogs = async () => {
+    const res = await fetch(`${plcDirectory()}/${props.did}/log/audit`);
+    const json = await res.json();
+    const logs = v.parse(defs.indexedEntryLog, json);
+    setRawLogs(logs);
+    const opHistory = createOperationHistory(logs).reverse();
+    return Array.from(groupBy(opHistory, (item) => item.orig));
+  };
+
+  const [plcOps] =
+    createResource<[IndexedEntry<CompatibleOperationOrTombstone>, DiffEntry[]][]>(fetchPlcLogs);
+
+  let worker: Worker | undefined;
+  onCleanup(() => worker?.terminate());
+
+  createEffect(() => {
+    const logs = rawLogs();
+    if (logs) {
+      setValidLog(undefined);
+      worker?.terminate();
+      worker = new PlcValidateWorker();
+      worker.onmessage = (e: MessageEvent<{ valid: boolean }>) => {
+        setValidLog(e.data.valid);
+        worker?.terminate();
+        worker = undefined;
+      };
+      worker.postMessage({ did: props.did, logs });
+    }
+  });
+
+  createEffect(() => {
+    const hash = location.hash;
+    if (hash.startsWith("#logs:")) {
+      const createdAt = hash.slice(6);
+      requestAnimationFrame(() => {
+        const element = document.getElementById(`log-${createdAt}`);
+        if (element) element.scrollIntoView({ behavior: "instant", block: "start" });
+      });
+    }
+  });
+
+  const FilterButton = (props: { event?: PlcEvent; icon: string; label: string }) => {
+    const isActive = () => activePlcEvent() === props.event;
+    const toggleFilter = () => setActivePlcEvent(isActive() ? undefined : props.event);
+
+    return (
+      <button
+        type="button"
+        aria-label={`${props.label} logs`}
+        aria-pressed={isActive()}
+        class="flex h-7 shrink-0 items-center rounded-md border text-xs font-medium transition-colors sm:w-auto sm:justify-start sm:gap-1 sm:px-2"
+        classList={{
+          "w-auto justify-start gap-1 px-2": isActive(),
+          "w-7 justify-center px-0": !isActive(),
+          "border-neutral-300 bg-neutral-50 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200":
+            isActive(),
+          "border-transparent text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700/50 dark:hover:text-neutral-200":
+            !isActive(),
+        }}
+        onclick={toggleFilter}
+      >
+        <span class={`iconify ${props.icon}`} />
+        <span class={isActive() ? "inline" : "hidden sm:inline"}>{props.label}</span>
+      </button>
+    );
+  };
+
+  const ValidationStatus = () => (
+    <div class="mr-1.5 flex shrink-0 items-center justify-center text-sm">
+      <Show when={validLog() === true}>
+        <Tooltip text="Valid log">
+          <span class="iconify lucide--check text-green-600 dark:text-green-400"></span>
+        </Tooltip>
+      </Show>
+      <Show when={validLog() === false}>
+        <Tooltip text="Validation failed">
+          <span class="iconify lucide--x text-red-500 dark:text-red-400"></span>
+        </Tooltip>
+      </Show>
+      <Show when={validLog() === undefined}>
+        <Tooltip text="Validating...">
+          <span class="iconify lucide--loader-circle animate-spin text-neutral-500 dark:text-neutral-400"></span>
+        </Tooltip>
+      </Show>
+    </div>
+  );
+
+  const DiffItem = (props: { diff: DiffEntry }) => {
+    const diff = props.diff;
+
+    const getDiffConfig = () => {
+      switch (diff.type) {
+        case "identity_created":
+          return { icon: "lucide--bell", title: "Identity created" };
+        case "identity_tombstoned":
+          return { icon: "lucide--skull", title: "Identity tombstoned" };
+        case "handle_added":
+          return {
+            icon: "lucide--at-sign",
+            title: "Alias added",
+            value: diff.handle,
+            isAddition: true,
+          };
+        case "handle_removed":
+          return {
+            icon: "lucide--at-sign",
+            title: "Alias removed",
+            value: diff.handle,
+            isRemoval: true,
+          };
+        case "handle_changed":
+          return {
+            icon: "lucide--at-sign",
+            title: "Alias updated",
+            oldValue: diff.prev_handle,
+            newValue: diff.next_handle,
+          };
+        case "rotation_key_updated":
+          const addedRotationKeyCount = diff.added_rotation_keys.length;
+          const removedRotationKeyCount = diff.removed_rotation_keys.length;
+
+          return {
+            icon: "lucide--key-round",
+            title:
+              addedRotationKeyCount === 1 && removedRotationKeyCount === 0
+                ? "Rotation key added"
+                : removedRotationKeyCount === 1 && addedRotationKeyCount === 0
+                  ? "Rotation key removed"
+                  : "Rotation keys updated",
+            addedValues: diff.added_rotation_keys,
+            removedValues: diff.removed_rotation_keys,
+          };
+        case "service_added":
+          return {
+            icon: "lucide--hard-drive",
+            title: "Service added",
+            badge: diff.service_id,
+            value: diff.service_endpoint,
+            isAddition: true,
+          };
+        case "service_removed":
+          return {
+            icon: "lucide--hard-drive",
+            title: "Service removed",
+            badge: diff.service_id,
+            value: diff.service_endpoint,
+            isRemoval: true,
+          };
+        case "service_changed":
+          return {
+            icon: "lucide--hard-drive",
+            title: "Service updated",
+            badge: diff.service_id,
+            oldValue: diff.prev_service_endpoint,
+            newValue: diff.next_service_endpoint,
+          };
+        case "verification_method_added":
+          return {
+            icon: "lucide--shield-check",
+            title: "Verification method added",
+            badge: diff.method_id,
+            value: diff.method_key,
+            isAddition: true,
+          };
+        case "verification_method_removed":
+          return {
+            icon: "lucide--shield-check",
+            title: "Verification method removed",
+            badge: diff.method_id,
+            value: diff.method_key,
+            isRemoval: true,
+          };
+        case "verification_method_changed":
+          return {
+            icon: "lucide--shield-check",
+            title: "Verification method updated",
+            badge: diff.method_id,
+            oldValue: diff.prev_method_key,
+            newValue: diff.next_method_key,
+          };
+        default:
+          return { icon: "lucide--circle-help", title: "Unknown log entry" };
+      }
+    };
+
+    const config = getDiffConfig();
+    const {
+      icon,
+      title,
+      value = "",
+      oldValue = "",
+      newValue = "",
+      addedValues = [],
+      removedValues = [],
+      badge = "",
+      isAddition = false,
+      isRemoval = false,
+    } = config;
+
+    return (
+      <div
+        classList={{
+          "grid grid-cols-[auto_1fr] gap-y-0.5 gap-x-2": true,
+          "opacity-70": diff.orig.nullified,
+        }}
+      >
+        <div class={`${icon} iconify shrink-0 self-center`} />
+        <div class="flex min-w-0 items-center gap-1.5">
+          <p
+            classList={{
+              "font-medium text-sm": true,
+              "line-through": diff.orig.nullified,
+            }}
+          >
+            {title}
+          </p>
+          <Show when={badge}>
+            <span class="shrink-0 rounded bg-neutral-200 px-1.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300">
+              #{badge}
+            </span>
+          </Show>
+          <Show when={diff.orig.nullified}>
+            <span class="ml-auto rounded bg-neutral-200 px-2 py-0.5 text-xs font-medium dark:bg-neutral-700">
+              Nullified
+            </span>
+          </Show>
+        </div>
+        <Show when={value}>
+          <div></div>
+          <div
+            classList={{
+              "text-sm flex items-start gap-2 min-w-0": true,
+              "text-green-700 dark:text-green-300": isAddition,
+              "text-red-700 dark:text-red-300": isRemoval,
+              "text-neutral-600 dark:text-neutral-400": !isAddition && !isRemoval,
+            }}
+          >
+            <Show when={isAddition}>
+              <span class="shrink-0">+</span>
+            </Show>
+            <Show when={isRemoval}>
+              <span class="shrink-0">−</span>
+            </Show>
+            <span class="truncate">{value}</span>
+          </div>
+        </Show>
+        <Show when={oldValue && newValue}>
+          <div></div>
+          <div class="flex min-w-0 flex-col text-sm">
+            <div class="flex items-start gap-2 text-red-700 dark:text-red-300">
+              <span class="shrink-0">−</span>
+              <span class="truncate">{oldValue}</span>
+            </div>
+            <div class="flex items-start gap-2 text-green-700 dark:text-green-300">
+              <span class="shrink-0">+</span>
+              <span class="truncate">{newValue}</span>
+            </div>
+          </div>
+        </Show>
+        <Show when={addedValues.length > 0 || removedValues.length > 0}>
+          <div></div>
+          <div class="flex min-w-0 flex-col text-sm">
+            <For each={removedValues}>
+              {(removedValue) => (
+                <div class="flex items-start gap-2 text-red-700 dark:text-red-300">
+                  <span class="shrink-0">−</span>
+                  <span class="truncate">{removedValue}</span>
+                </div>
+              )}
+            </For>
+            <For each={addedValues}>
+              {(addedValue) => (
+                <div class="flex items-start gap-2 text-green-700 dark:text-green-300">
+                  <span class="shrink-0">+</span>
+                  <span class="truncate">{addedValue}</span>
+                </div>
+              )}
+            </For>
+          </div>
+        </Show>
+      </div>
+    );
+  };
+
+  return (
+    <div class="flex w-full flex-col gap-3 wrap-anywhere">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex min-w-0 flex-1 items-center gap-1">
+          <For each={plcEventFilters}>
+            {(filter) => (
+              <FilterButton event={filter.event} icon={filter.icon} label={filter.label} />
+            )}
+          </For>
+        </div>
+        <ValidationStatus />
+      </div>
+      <div class="flex flex-col gap-3">
+        <For each={plcOps()}>
+          {([entry, diffs]) => {
+            const isHighlighted = () => location.hash === `#logs:${entry.createdAt}`;
+            return (
+              <Show when={shouldShowEntry(diffs)}>
+                <div
+                  id={`log-${entry.createdAt}`}
+                  class="group flex scroll-mt-3 flex-col gap-1 rounded-lg transition-colors"
+                >
+                  <span class="relative text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+                    <a href={`#logs:${entry.createdAt}`} class="relative hover:underline">
+                      <span class="absolute top-1/2 -left-4.5 flex -translate-y-1/2 items-center text-neutral-500 opacity-0 transition-opacity group-hover:opacity-100 dark:text-neutral-400">
+                        <span class="iconify lucide--link text-xs"></span>
+                      </span>
+                      {localDateFromTimestamp(new Date(entry.createdAt).getTime())}
+                    </a>
+                  </span>
+                  <div
+                    class="flex flex-col gap-2 rounded-md border bg-neutral-50 p-3 text-sm dark:bg-neutral-800"
+                    classList={{
+                      "border-neutral-200 dark:border-neutral-700": !isHighlighted(),
+                      "border-blue-500 dark:border-blue-400": isHighlighted(),
+                    }}
+                  >
+                    <For each={diffs.filter(shouldShowDiff)}>
+                      {(diff) => <DiffItem diff={diff} />}
+                    </For>
+                  </div>
+                </div>
+              </Show>
+            );
+          }}
+        </For>
+      </div>
+    </div>
+  );
+};

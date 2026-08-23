@@ -1,0 +1,25 @@
+when:
+  - event: ["push", "manual"]
+    branch: ["**"]
+  - event: ["pull_request"]
+    branch: ["**"]
+
+engine: "nixery"
+
+dependencies:
+  nixpkgs/nixpkgs-unstable:
+    - bun
+    - git
+
+steps:
+  - name: "Install dependencies"
+    command: "bun install --frozen-lockfile"
+
+  - name: "Check formatting"
+    command: "bun run format:check"
+
+  - name: "Typecheck"
+    command: "bun run typecheck"
+
+  - name: "Build"
+    command: "bun run build"

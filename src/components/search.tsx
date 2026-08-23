@@ -10,10 +10,11 @@ import {
   onMount,
   Show,
 } from "solid-js";
+
 import { canHover } from "../layout";
-import { resolveLexiconAuthority, resolveLexiconAuthorityDirect } from "../utils/api";
-import { appHandleLink, appList, AppUrl } from "../utils/app-urls";
-import { createDebouncedValue } from "../utils/hooks/debounced";
+import { resolveLexiconAuthority, resolveLexiconAuthorityDirect } from "../lib/api";
+import { appHandleLink, appList, AppUrl } from "../lib/app-urls";
+import { createDebouncedValue } from "../lib/debounced";
 import { Button } from "./button";
 import { Modal } from "./modal";
 
@@ -49,6 +50,34 @@ const removeRecentSearch = (path: string) => {
 };
 
 export const [showSearch, setShowSearch] = createSignal(false);
+
+const EXAMPLES: (RecentSearch & { prefix: string })[] = [
+  {
+    path: "/at://did:plc:vwzwgnygau7ed7b7wt5ux7y2",
+    label: "retr0.id",
+    type: "handle",
+    prefix: "@",
+  },
+  {
+    path: "/at://did:plc:uu5axsmbm2or2dngy4gwchec/app.bsky.actor.profile/self",
+    label: "futur.blue/app.bsky.actor.profile/self",
+    type: "at-uri",
+    prefix: "at://",
+  },
+  { path: "/pds.witchcraft.systems", label: "pds.witchcraft.systems", type: "pds", prefix: "pds:" },
+  {
+    path: "/at://did:plc:re3ebnp5v7ffagz6rb6xfei4/com.atproto.lexicon.schema/site.standard.document#schema",
+    label: "site.standard.document",
+    type: "lexicon",
+    prefix: "lex:",
+  },
+  {
+    path: "/at://did:plc:ia76kvnndjutgedggx2ibrem/sh.tangled.repo/3lwaqf3fxhz22",
+    label: "tangled.org/mary.my.id/3lwaqf3fxhz22",
+    type: "at-uri",
+    prefix: "https://",
+  },
+];
 
 const SEARCH_PREFIXES: { prefix: string; description: string }[] = [
   { prefix: "@", description: "example.com" },
@@ -139,14 +168,14 @@ export const Search = () => {
   });
 
   createEffect(() => {
-    if (showSearch()) {
-      searchInput.focus();
-    } else {
-      setInput(undefined);
-      setSelectedIndex(-1);
-      setSearch(undefined);
-    }
+    if (showSearch()) setTimeout(() => searchInput?.focus());
   });
+
+  const resetSearch = () => {
+    setInput(undefined);
+    setSelectedIndex(-1);
+    setSearch(undefined);
+  };
 
   const fetchTypeahead = async (input: string | undefined) => {
     if (!input) return [];
@@ -256,6 +285,7 @@ export const Search = () => {
     <Modal
       open={showSearch()}
       onClose={() => setShowSearch(false)}
+      onClosed={resetSearch}
       alignTop
       contentClass="dark:bg-dark-200 dark:shadow-dark-700 pointer-events-auto mx-3 w-full max-w-lg rounded-lg border-[0.5px] min-w-0 border-neutral-300 bg-white shadow-md dark:border-neutral-700"
     >
@@ -284,7 +314,7 @@ export const Search = () => {
             autocapitalize="off"
             autocomplete="off"
             placeholder="Search or paste a link..."
-            ref={searchInput}
+            ref={(el) => (searchInput = el)}
             id="input"
             class="grow py-2.5 select-none placeholder:text-sm focus:outline-none"
             value={input() ?? ""}
@@ -306,9 +336,9 @@ export const Search = () => {
               } else if (e.key === "ArrowUp") {
                 e.preventDefault();
                 setSelectedIndex((prev) =>
-                  prev === -1 ?
-                    totalSuggestions - 1
-                  : (prev - 1 + totalSuggestions) % totalSuggestions,
+                  prev === -1
+                    ? totalSuggestions - 1
+                    : (prev - 1 + totalSuggestions) % totalSuggestions,
                 );
               } else if (e.key === "Enter") {
                 const index = selectedIndex();
@@ -343,11 +373,40 @@ export const Search = () => {
           />
         </div>
 
-        <Show when={getRecentSuggestions().length > 0 || search()?.length}>
+        <Show
+          when={
+            getRecentSuggestions().length > 0 ||
+            search()?.length ||
+            (!input() && recentSearches().length === 0)
+          }
+        >
           <div
-            class={`flex w-full flex-col overflow-hidden border-t border-neutral-200 dark:border-neutral-700 ${input() ? "rounded-b-md" : ""}`}
+            class="flex w-full flex-col overflow-hidden rounded-b-md border-t border-neutral-200 dark:border-neutral-700"
             onMouseDown={(e) => e.preventDefault()}
           >
+            {/* Suggestions (shown when no recents and no input) */}
+            <Show when={!input() && recentSearches().length === 0}>
+              <div class="mt-2 mb-1 flex px-3">
+                <span class="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                  Examples
+                </span>
+              </div>
+              <For each={EXAMPLES}>
+                {(example) => (
+                  <A
+                    href={example.path}
+                    class="dark:hover:bg-dark-100 flex items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-100"
+                    onClick={() => setShowSearch(false)}
+                  >
+                    <span class="truncate">
+                      <span class="font-medium">{example.prefix}</span>
+                      <span class="text-neutral-500 dark:text-neutral-400">{example.label}</span>
+                    </span>
+                  </A>
+                )}
+              </For>
+            </Show>
+
             {/* Recent searches */}
             <Show when={getRecentSuggestions().length > 0}>
               <div class="mt-2 mb-1 flex items-center justify-between px-3">
@@ -368,18 +427,23 @@ export const Search = () => {
               <For each={getRecentSuggestions()}>
                 {(recent, index) => {
                   const icon =
-                    recent.type === "handle" ? "lucide--at-sign"
-                    : recent.type === "did" ? "lucide--user-round"
-                    : recent.type === "at-uri" ? "lucide--link"
-                    : recent.type === "lexicon" ? "lucide--book-open"
-                    : recent.type === "pds" ? "lucide--hard-drive"
-                    : "lucide--globe";
+                    recent.type === "handle"
+                      ? "lucide--at-sign"
+                      : recent.type === "did"
+                        ? "lucide--user-round"
+                        : recent.type === "at-uri"
+                          ? "lucide--link"
+                          : recent.type === "lexicon"
+                            ? "lucide--book-open"
+                            : recent.type === "pds"
+                              ? "lucide--hard-drive"
+                              : "lucide--globe";
                   return (
                     <div
                       class={`group flex items-center ${
-                        index() === selectedIndex() ?
-                          "bg-neutral-200 dark:bg-neutral-700"
-                        : "dark:hover:bg-dark-100 hover:bg-neutral-100"
+                        index() === selectedIndex()
+                          ? "bg-neutral-200 dark:bg-neutral-700"
+                          : "dark:hover:bg-dark-100 hover:bg-neutral-100"
                       }`}
                     >
                       <A
@@ -420,9 +484,9 @@ export const Search = () => {
                 return (
                   <A
                     class={`flex items-center gap-2 px-3 py-1.5 ${
-                      adjustedIndex === selectedIndex() ?
-                        "bg-neutral-200 dark:bg-neutral-700"
-                      : "dark:hover:bg-dark-100 hover:bg-neutral-100 active:bg-neutral-200 dark:active:bg-neutral-700"
+                      adjustedIndex === selectedIndex()
+                        ? "bg-neutral-200 dark:bg-neutral-700"
+                        : "dark:hover:bg-dark-100 hover:bg-neutral-100 active:bg-neutral-200 dark:active:bg-neutral-700"
                     }`}
                     href={path}
                     onClick={() => {
@@ -446,26 +510,6 @@ export const Search = () => {
                 );
               }}
             </For>
-          </div>
-        </Show>
-        <Show when={!input()}>
-          <div class="flex flex-col gap-1 border-t border-neutral-200 px-3 py-2 text-xs text-neutral-500 dark:border-neutral-700 dark:text-neutral-400">
-            <div class="flex flex-wrap gap-1.5">
-              <div>
-                @<span class="text-neutral-400 dark:text-neutral-500">retr0.id</span>
-              </div>
-              <div>did:</div>
-              <div>at://</div>
-              <div>
-                lex:
-                <span class="text-neutral-400 dark:text-neutral-500">app.bsky.feed.post</span>
-              </div>
-              <div>
-                pds:
-                <span class="text-neutral-400 dark:text-neutral-500">tngl.sh</span>
-              </div>
-            </div>
-            <span>Bluesky, Tangled, Pinksea, Popfeed, or Blento links</span>
           </div>
         </Show>
       </form>

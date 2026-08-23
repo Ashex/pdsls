@@ -1,5 +1,5 @@
-import { isCid, isDid, isNsid, isResourceUri, Nsid } from "@atcute/lexicons/syntax";
-import { A, useNavigate, useParams } from "@solidjs/router";
+import { isCid, isDid, isNsid, isResourceUri } from "@atcute/lexicons/syntax";
+import { A, useLocation, useParams } from "@solidjs/router";
 import {
   createContext,
   createEffect,
@@ -7,29 +7,38 @@ import {
   createSignal,
   ErrorBoundary,
   For,
-  on,
+  onCleanup,
   Show,
   useContext,
 } from "solid-js";
-import { resolveLexiconAuthority } from "../utils/api";
+
 import { formatFileSize } from "../utils/format";
 import { hideMedia } from "../views/settings";
 import DidHoverCard from "./hover-card/did";
+import LexiconHoverCard from "./hover-card/lexicon";
 import RecordHoverCard from "./hover-card/record";
-import { pds } from "./navbar";
-import { addNotification, removeNotification } from "./notification";
 import VideoPlayer from "./video-player";
+import { ZoomableImage } from "./zoomable-image";
 
 interface JSONContext {
   repo: string;
+  pds?: string;
   truncate?: boolean;
   parentIsBlob?: boolean;
   newTab?: boolean;
   hideBlobs?: boolean;
+  keyLinks?: boolean;
+  path?: string;
+  preview?: boolean;
+  depth?: number;
+  fetchBlob?: (cid: string) => Promise<Blob>;
 }
 
 const JSONCtx = createContext<JSONContext>();
 const useJSONCtx = () => useContext(JSONCtx)!;
+
+const PREVIEW_EXPANDED_DEPTH = 2;
+const PREVIEW_EXPANDED_CHILD_LIMIT = 8;
 
 interface AtBlob {
   $type: string;
@@ -51,27 +60,8 @@ const isURL =
 
 const JSONString = (props: { data: string; isType?: boolean; isLink?: boolean }) => {
   const ctx = useJSONCtx();
-  const navigate = useNavigate();
   const params = useParams();
-
-  const handleClick = async (lex: string) => {
-    try {
-      const [nsid, anchor] = lex.split("#");
-      const authority = await resolveLexiconAuthority(nsid as Nsid);
-
-      const hash = anchor ? `#schema:${anchor}` : "#schema";
-      if (ctx.newTab)
-        window.open(`/at://${authority}/com.atproto.lexicon.schema/${nsid}${hash}`, "_blank");
-      else navigate(`/at://${authority}/com.atproto.lexicon.schema/${nsid}${hash}`);
-    } catch (err) {
-      console.error("Failed to resolve lexicon authority:", err);
-      const id = addNotification({
-        message: "Could not resolve schema",
-        type: "error",
-      });
-      setTimeout(() => removeNotification(id), 5000);
-    }
-  };
+  const location = useLocation();
 
   const MAX_LENGTH = 200;
   const isTruncated = () => ctx.truncate && props.data.length > MAX_LENGTH;
@@ -80,36 +70,27 @@ const JSONString = (props: { data: string; isType?: boolean; isLink?: boolean })
 
   return (
     <span>
-      "
+      <span class="text-neutral-500 dark:text-neutral-400">"</span>
       <For each={displayData().split(/(\s)/)}>
         {(part) => (
           <>
-            {isResourceUri(part) ?
+            {isResourceUri(part) ? (
               <RecordHoverCard uri={part} newTab={ctx.newTab} />
-            : isDid(part) ?
+            ) : isDid(part) ? (
               <DidHoverCard did={part} newTab={ctx.newTab} />
-            : isNsid(part.split("#")[0]) && props.isType ?
-              <button
-                type="button"
-                onClick={() => handleClick(part)}
-                class="cursor-pointer text-blue-500 hover:underline active:underline dark:text-blue-400"
-              >
-                {part}
-              </button>
-            : isCid(part) && props.isLink && ctx.parentIsBlob && params.repo ?
+            ) : isNsid(part.split("#")[0]) && props.isType ? (
+              <LexiconHoverCard lexicon={part} newTab={ctx.newTab} />
+            ) : isCid(part) && props.isLink && ctx.parentIsBlob && params.repo ? (
               <A
                 class="text-blue-500 hover:underline active:underline dark:text-blue-400"
-                rel="noopener"
-                target="_blank"
-                href={`https://${pds()}/xrpc/com.atproto.sync.getBlob?did=${params.repo}&cid=${part}`}
+                href={`/at://${params.repo}/blob/${part}`}
+                state={{ from: location.pathname + location.hash, label: "Back to record" }}
               >
                 {part}
               </A>
-            : (
-              isURL(part) &&
+            ) : isURL(part) &&
               ["http:", "https:", "web+at:"].includes(new URL(part).protocol) &&
-              part.split("\n").length === 1
-            ) ?
+              part.split("\n").length === 1 ? (
               <a
                 class="underline hover:text-blue-500 dark:hover:text-blue-400"
                 href={part}
@@ -118,14 +99,16 @@ const JSONString = (props: { data: string; isType?: boolean; isLink?: boolean })
               >
                 {part}
               </a>
-            : part}
+            ) : (
+              part
+            )}
           </>
         )}
       </For>
       <Show when={isTruncated()}>
         <span>…</span>
       </Show>
-      "
+      <span class="text-neutral-500 dark:text-neutral-400">"</span>
       <Show when={isTruncated()}>
         <span class="ml-1 text-neutral-500 dark:text-neutral-400">
           (+{remainingChars().toLocaleString()})
@@ -146,14 +129,6 @@ const JSONNumber = ({ data, isSize }: { data: number; isSize?: boolean }) => {
   );
 };
 
-const JSONBoolean = ({ data }: { data: boolean }) => {
-  return <span>{data ? "true" : "false"}</span>;
-};
-
-const JSONNull = () => {
-  return <span>null</span>;
-};
-
 const CollapsibleItem = (props: {
   label: string | number;
   value: JSONType;
@@ -161,53 +136,138 @@ const CollapsibleItem = (props: {
   isType?: boolean;
   isLink?: boolean;
   isSize?: boolean;
+  isIndex?: boolean;
   parentIsBlob?: boolean;
 }) => {
   const ctx = useJSONCtx();
-  const [show, setShow] = createSignal(true);
+  const location = useLocation();
+  const isObject = () => props.value === Object(props.value);
+  const isEmpty = () =>
+    Array.isArray(props.value)
+      ? (props.value as JSONType[]).length === 0
+      : Object.keys(props.value as object).length === 0;
+  const childCount = () =>
+    Array.isArray(props.value)
+      ? (props.value as JSONType[]).length
+      : Object.keys(props.value as object).length;
+  const valueDepth = () => (ctx.depth ?? 0) + 1;
+  const shouldCollapsePreview = () =>
+    ctx.preview &&
+    isObject() &&
+    !isEmpty() &&
+    (valueDepth() > PREVIEW_EXPANDED_DEPTH || childCount() > PREVIEW_EXPANDED_CHILD_LIMIT);
+  const [show, setShow] = createSignal(!shouldCollapsePreview());
   const isBlobContext = props.parentIsBlob ?? ctx.parentIsBlob;
+
+  const labelStr = () => {
+    const l = String(props.label);
+    return l.startsWith("#") ? l.slice(1) : l;
+  };
+  const fullPath = () => (ctx.path ? `${ctx.path}.${labelStr()}` : labelStr());
+  const isHighlighted = () => location.hash === `#record:${fullPath()}`;
+
+  createEffect(() => {
+    if (isHighlighted()) {
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`key-${fullPath()}`)
+          ?.scrollIntoView({ behavior: "instant", block: "center" });
+      });
+    }
+  });
+
+  const summary = () => {
+    if (Array.isArray(props.value)) {
+      const len = (props.value as JSONType[]).length;
+      return `[ ${len} ${len === 1 ? "item" : "items"} ]`;
+    }
+    const len = Object.keys(props.value as object).length;
+    return `{ ${len} ${len === 1 ? "key" : "keys"} }`;
+  };
 
   return (
     <span
       classList={{
         "group/indent flex gap-x-1 w-full": true,
-        "flex-col": props.value === Object(props.value),
+        "flex-col": isObject() && !isEmpty(),
       }}
     >
-      <button
-        class="group/clip relative flex size-fit shrink-0 items-center wrap-anywhere text-neutral-500 hover:text-neutral-700 active:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300 dark:active:text-neutral-300"
-        classList={{
-          "max-w-[40%] sm:max-w-[50%]": props.maxWidth !== undefined,
-        }}
-        onclick={() => setShow(!show())}
+      <span
+        class="relative flex size-fit shrink-0 items-center gap-x-1 wrap-anywhere"
+        classList={{ "max-w-[40%] sm:max-w-[50%]": props.maxWidth !== undefined && show() }}
       >
-        <span
-          classList={{
-            "dark:bg-dark-500 absolute w-4 flex items-center -left-4 bg-neutral-100 text-sm": true,
-            "hidden group-hover/clip:flex": show(),
-          }}
+        <Show
+          when={ctx.keyLinks}
+          fallback={
+            <span
+              classList={{
+                "text-indigo-500 dark:text-indigo-400": !props.isIndex,
+                "text-violet-500 dark:text-violet-400": props.isIndex,
+              }}
+            >
+              {props.label}
+              <span class="text-neutral-500 dark:text-neutral-400">:</span>
+            </span>
+          }
         >
-          {show() ?
-            <span class="iconify lucide--chevron-down"></span>
-          : <span class="iconify lucide--chevron-right"></span>}
-        </span>
-        {props.label}:
-      </button>
+          <a
+            href={`#record:${fullPath()}`}
+            id={`key-${fullPath()}`}
+            class="group/key rounded"
+            classList={{
+              "text-indigo-500 hover:text-indigo-700 active:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 dark:active:text-indigo-200":
+                !props.isIndex && !isHighlighted(),
+              "text-violet-500 hover:text-violet-700 active:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300 dark:active:text-violet-200":
+                props.isIndex && !isHighlighted(),
+              "bg-indigo-200 text-indigo-700 dark:bg-indigo-500/60 dark:text-indigo-200":
+                isHighlighted() && !props.isIndex,
+              "bg-violet-200 text-violet-700 dark:bg-violet-500/60 dark:text-violet-200":
+                isHighlighted() && props.isIndex,
+            }}
+          >
+            <span class="absolute top-1/2 -left-3.5 flex -translate-y-1/2 items-center text-xs text-neutral-500 opacity-0 transition-opacity group-hover/key:opacity-100 dark:text-neutral-400">
+              <span class="iconify lucide--link"></span>
+            </span>
+            {props.label}
+            <span class="text-neutral-500 dark:text-neutral-400">:</span>
+          </a>
+        </Show>
+        <Show when={!show() && summary()}>
+          <button
+            type="button"
+            class="cursor-default rounded whitespace-nowrap text-neutral-500 transition-colors hover:text-neutral-700 focus-visible:ring-2 focus-visible:ring-blue-400/30 focus-visible:outline-none dark:text-neutral-400 dark:hover:text-neutral-200"
+            onclick={() => setShow(true)}
+          >
+            {summary()}
+          </button>
+        </Show>
+      </span>
       <span
         classList={{
-          "self-center": props.value !== Object(props.value),
-          "pl-[calc(2ch-0.5px)] border-l-[0.5px] border-neutral-500/50 dark:border-neutral-400/50 has-hover:group-hover/indent:border-neutral-700 transition-colors dark:has-hover:group-hover/indent:border-neutral-300":
-            props.value === Object(props.value),
+          "self-center": !isObject() || isEmpty(),
+          "relative pl-[2ch]": isObject() && !isEmpty(),
           "invisible h-0 overflow-hidden": !show(),
         }}
       >
-        <JSONCtx.Provider value={{ ...ctx, parentIsBlob: isBlobContext }}>
-          <JSONValueInner
-            data={props.value}
-            isType={props.isType}
-            isLink={props.isLink}
-            isSize={props.isSize}
-          />
+        <Show when={isObject() && !isEmpty()}>
+          <span
+            class="group/fold absolute inset-y-0 left-0 z-10 flex w-4 -translate-x-1/2 items-center justify-center"
+            onclick={() => setShow(!show())}
+          >
+            <span class="h-full w-px bg-neutral-300 transition-colors group-hover/fold:bg-neutral-600 dark:bg-neutral-600 dark:group-hover/fold:bg-neutral-300" />
+          </span>
+        </Show>
+        <JSONCtx.Provider
+          value={{ ...ctx, parentIsBlob: isBlobContext, path: fullPath(), depth: valueDepth() }}
+        >
+          <Show when={!ctx.preview || show()}>
+            <JSONValueInner
+              data={props.value}
+              isType={props.isType}
+              isLink={props.isLink}
+              isSize={props.isSize}
+            />
+          </Show>
         </JSONCtx.Provider>
       </span>
     </span>
@@ -216,25 +276,6 @@ const CollapsibleItem = (props: {
 
 const JSONObject = (props: { data: { [x: string]: JSONType } }) => {
   const ctx = useJSONCtx();
-  const params = useParams();
-  const [hide, setHide] = createSignal(
-    localStorage.hideMedia === "true" || params.rkey === undefined,
-  );
-  const [mediaLoaded, setMediaLoaded] = createSignal(false);
-
-  createEffect(() => {
-    if (hideMedia()) setHide(hideMedia());
-  });
-
-  createEffect(
-    on(
-      hide,
-      (value) => {
-        if (value === false) setMediaLoaded(false);
-      },
-      { defer: true },
-    ),
-  );
 
   const isBlob = props.data.$type === "blob";
   const isBlobContext = isBlob || ctx.parentIsBlob;
@@ -255,70 +296,107 @@ const JSONObject = (props: { data: { [x: string]: JSONType } }) => {
     </For>
   );
 
-  const blob: AtBlob = props.data as unknown as AtBlob;
+  const blob: AtBlob = props.data as any;
   const canShowMedia = () =>
-    pds() &&
+    (ctx.pds || ctx.fetchBlob) &&
     !ctx.hideBlobs &&
-    (blob.mimeType.startsWith("image/") || blob.mimeType === "video/mp4");
+    (blob.mimeType.startsWith("image/") ||
+      blob.mimeType === "video/mp4" ||
+      blob.mimeType.startsWith("audio/"));
 
   const MediaDisplay = () => {
-    const [imageUrl] = createResource(
-      () => (blob.mimeType.startsWith("image/") ? blob.ref.$link : null),
-      async (cid) => {
-        const url = `https://${pds()}/xrpc/com.atproto.sync.getBlob?did=${ctx.repo}&cid=${cid}`;
+    const [overrideShow, setOverrideShow] = createSignal(false);
+    const [mediaError, setMediaError] = createSignal(false);
+    const hidden = () => hideMedia() && !overrideShow();
+    let objectUrl: string | undefined;
 
-        await new Promise<void>((resolve) => {
-          const img = new Image();
-          img.src = url;
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-        });
+    const [mediaUrl] = createResource(
+      () => blob.ref.$link,
+      async (cid) => {
+        setMediaError(false);
+
+        if (ctx.fetchBlob) {
+          try {
+            const data = await ctx.fetchBlob(cid);
+            objectUrl = URL.createObjectURL(data);
+            return objectUrl;
+          } catch {
+            setMediaError(true);
+            return;
+          }
+        }
+
+        const url = `${ctx.pds}/xrpc/com.atproto.sync.getBlob?did=${ctx.repo}&cid=${cid}`;
+
+        if (blob.mimeType.startsWith("image/")) {
+          await new Promise<void>((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          });
+        }
 
         return url;
       },
     );
 
+    onCleanup(() => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    });
+
+    const LoadingMedia = () => (
+      <div class="flex h-48 w-48 items-center justify-center rounded bg-neutral-200 dark:bg-neutral-800">
+        <span class="iconify lucide--loader-circle animate-spin text-xl text-neutral-400 dark:text-neutral-500" />
+      </div>
+    );
+
     return (
       <div>
-        <span class="group/media relative flex w-fit">
-          <Show when={!hide()}>
-            <Show when={blob.mimeType.startsWith("image/")}>
-              <Show
-                when={!imageUrl.loading && imageUrl()}
-                fallback={
-                  <div class="flex h-48 w-48 items-center justify-center rounded bg-neutral-200 dark:bg-neutral-800">
-                    <span class="iconify lucide--loader-circle animate-spin text-xl text-neutral-400 dark:text-neutral-500"></span>
-                  </div>
-                }
-              >
-                <img
-                  class="h-auto max-h-48 max-w-64 object-contain"
-                  src={imageUrl()}
-                  onLoad={() => setMediaLoaded(true)}
-                />
+        <span class="group/media relative my-0.5 flex w-fit">
+          <Show when={!hidden()}>
+            <Show
+              when={!mediaError()}
+              fallback={
+                <span class="font-sans text-sm text-neutral-500 dark:text-neutral-400">
+                  Failed to load media
+                </span>
+              }
+            >
+              <Show when={blob.mimeType.startsWith("image/")}>
+                <Show when={!mediaUrl.loading && mediaUrl()} fallback={<LoadingMedia />}>
+                  <ZoomableImage src={mediaUrl()} class="h-auto max-h-48 max-w-64" />
+                </Show>
+              </Show>
+              <Show when={blob.mimeType === "video/mp4"}>
+                <Show
+                  when={ctx.fetchBlob}
+                  fallback={
+                    <ErrorBoundary fallback={() => <span>Failed to load video</span>}>
+                      <VideoPlayer did={ctx.repo} cid={blob.ref.$link} />
+                    </ErrorBoundary>
+                  }
+                >
+                  <Show when={!mediaUrl.loading && mediaUrl()} fallback={<LoadingMedia />}>
+                    <video class="max-h-80 max-w-[20rem]" src={mediaUrl()} controls playsinline />
+                  </Show>
+                </Show>
+              </Show>
+              <Show when={blob.mimeType.startsWith("audio/")}>
+                <Show when={!mediaUrl.loading && mediaUrl()} fallback={<LoadingMedia />}>
+                  <audio class="my-0.5 max-w-96" controls>
+                    <source
+                      src={mediaUrl()}
+                      type={blob.mimeType === "audio/x-flac" ? "audio/flac" : blob.mimeType}
+                    />
+                  </audio>
+                </Show>
               </Show>
             </Show>
-            <Show when={blob.mimeType === "video/mp4"}>
-              <ErrorBoundary fallback={() => <span>Failed to load video</span>}>
-                <VideoPlayer
-                  did={ctx.repo}
-                  cid={blob.ref.$link}
-                  onLoad={() => setMediaLoaded(true)}
-                />
-              </ErrorBoundary>
-            </Show>
-            <Show when={mediaLoaded()}>
-              <button
-                onclick={() => setHide(true)}
-                class="absolute top-1 right-1 flex items-center rounded-lg bg-neutral-700/70 p-1.5 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover/media:opacity-100 hover:bg-neutral-700 active:bg-neutral-800 dark:bg-neutral-100/70 dark:text-neutral-900 dark:hover:bg-neutral-100 dark:active:bg-neutral-200"
-              >
-                <span class="iconify lucide--eye-off text-base"></span>
-              </button>
-            </Show>
           </Show>
-          <Show when={hide()}>
+          <Show when={hidden()}>
             <button
-              onclick={() => setHide(false)}
+              onclick={() => setOverrideShow(true)}
               class="flex items-center gap-1 rounded-md bg-neutral-200 px-2 py-1.5 text-sm transition-colors hover:bg-neutral-300 active:bg-neutral-400 dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:active:bg-neutral-500"
             >
               <span class="iconify lucide--image"></span>
@@ -329,6 +407,9 @@ const JSONObject = (props: { data: { [x: string]: JSONType } }) => {
       </div>
     );
   };
+
+  if (Object.keys(props.data).length === 0)
+    return <span class="text-neutral-400 dark:text-neutral-500">{"{ }"}</span>;
 
   if (blob.$type === "blob") {
     return (
@@ -345,9 +426,11 @@ const JSONObject = (props: { data: { [x: string]: JSONType } }) => {
 };
 
 const JSONArray = (props: { data: JSONType[] }) => {
+  if (props.data.length === 0)
+    return <span class="text-neutral-400 dark:text-neutral-500">[ ]</span>;
   return (
     <For each={props.data}>
-      {(value, index) => <CollapsibleItem label={`#${index()}`} value={value} />}
+      {(value, index) => <CollapsibleItem label={`#${index()}`} value={value} isIndex />}
     </For>
   );
 };
@@ -362,8 +445,9 @@ const JSONValueInner = (props: {
   if (typeof data === "string")
     return <JSONString data={data} isType={props.isType} isLink={props.isLink} />;
   if (typeof data === "number") return <JSONNumber data={data} isSize={props.isSize} />;
-  if (typeof data === "boolean") return <JSONBoolean data={data} />;
-  if (data === null) return <JSONNull />;
+  if (typeof data === "boolean")
+    return <span class="text-amber-500 dark:text-amber-400">{String(data)}</span>;
+  if (data === null) return <span class="text-neutral-400 dark:text-neutral-500">null</span>;
   if (Array.isArray(data)) return <JSONArray data={data} />;
   return <JSONObject data={data} />;
 };
@@ -371,17 +455,25 @@ const JSONValueInner = (props: {
 export const JSONValue = (props: {
   data: JSONType;
   repo: string;
+  pds?: string;
   truncate?: boolean;
   newTab?: boolean;
   hideBlobs?: boolean;
+  keyLinks?: boolean;
+  preview?: boolean;
+  fetchBlob?: (cid: string) => Promise<Blob>;
 }) => {
   return (
     <JSONCtx.Provider
       value={{
         repo: props.repo,
+        pds: props.pds,
         truncate: props.truncate,
         newTab: props.newTab,
         hideBlobs: props.hideBlobs,
+        keyLinks: props.keyLinks,
+        preview: props.preview,
+        fetchBlob: props.fetchBlob,
       }}
     >
       <JSONValueInner data={props.data} />

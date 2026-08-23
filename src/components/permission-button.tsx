@@ -1,11 +1,12 @@
 import { JSX } from "solid-js";
-import { hasUserScope } from "../auth/scope-utils";
+
+import { hasUserScope, type ScopeId } from "../auth/scope-utils";
 import { showPermissionPrompt } from "./permission-prompt";
 import Tooltip from "./tooltip";
 
-export interface PermissionButtonProps {
-  scope: "create" | "update" | "delete" | "blob";
-  tooltip: string;
+interface PermissionButtonProps {
+  scope: ScopeId;
+  tooltip?: string;
   class?: string;
   disabledClass?: string;
   onClick: () => void;
@@ -28,11 +29,14 @@ export const PermissionButton = (props: PermissionButtonProps) => {
     "flex items-center rounded-sm p-1.5 hover:bg-neutral-200 active:bg-neutral-300 dark:hover:bg-neutral-700 dark:active:bg-neutral-600";
   const disabledClass = props.disabledClass || "flex items-center rounded-sm p-1.5 opacity-40";
 
-  return (
-    <Tooltip text={hasPermission() ? props.tooltip : `${props.tooltip} (permission required)`}>
-      <button class={hasPermission() ? baseClass : disabledClass} onclick={handleClick}>
-        {props.children}
-      </button>
-    </Tooltip>
+  const tooltip = () =>
+    hasPermission() ? props.tooltip : `${props.tooltip ?? ""} (permission required)`.trimStart();
+
+  const button = (
+    <button class={hasPermission() ? baseClass : disabledClass} onclick={handleClick}>
+      {props.children}
+    </button>
   );
+
+  return props.tooltip ? <Tooltip text={tooltip()!}>{button}</Tooltip> : button;
 };

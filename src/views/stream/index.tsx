@@ -1,16 +1,31 @@
 import { Firehose } from "@skyware/firehose";
-import { Title } from "@solidjs/meta";
 import { A, useLocation, useSearchParams } from "@solidjs/router";
 import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
+
 import { Button } from "../../components/button";
 import DidHoverCard from "../../components/hover-card/did";
 import { JSONValue } from "../../components/json";
+import { TagInput } from "../../components/tag-input";
 import { TextInput } from "../../components/text-input";
 import { addToClipboard } from "../../utils/copy";
+import { websocketCloseReasons } from "../../utils/websocket";
 import { getStreamType, STREAM_CONFIGS, STREAM_TYPES, StreamType } from "./config";
 import { StreamStats, StreamStatsPanel } from "./stats";
 
 const LIMIT = 20;
+
+const microsToDatetimeLocal = (micros: string): string => {
+  const ms = Math.floor(Number(micros) / 1000);
+  if (isNaN(ms)) return "";
+  const d = new Date(ms);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
+const datetimeLocalToMicros = (dt: string): string => {
+  if (!dt) return "";
+  return (new Date(dt).getTime() * 1000).toString();
+};
 
 const TYPE_COLORS: Record<string, string> = {
   create: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
@@ -21,7 +36,6 @@ const TYPE_COLORS: Record<string, string> = {
   sync: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const StreamRecordItem = (props: { record: any; streamType: StreamType }) => {
   const [expanded, setExpanded] = createSignal(false);
   const config = () => STREAM_CONFIGS[props.streamType];
@@ -46,9 +60,11 @@ const StreamRecordItem = (props: { record: any; streamType: StreamType }) => {
           class="dark:hover:bg-dark-200 flex min-w-0 flex-1 items-start gap-2 rounded p-1 text-left hover:bg-neutral-200/70"
         >
           <span class="mt-0.5 shrink-0 text-neutral-400 dark:text-neutral-500">
-            {expanded() ?
+            {expanded() ? (
               <span class="iconify lucide--chevron-down"></span>
-            : <span class="iconify lucide--chevron-right"></span>}
+            ) : (
+              <span class="iconify lucide--chevron-right"></span>
+            )}
           </span>
           <div class="flex min-w-0 flex-1 flex-col gap-0.5">
             <div class="flex items-center gap-x-1.5 sm:gap-x-2">
@@ -104,7 +120,6 @@ export const StreamView = () => {
   const streamType = getStreamType(useLocation().pathname);
   const config = () => STREAM_CONFIGS[streamType];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [records, setRecords] = createSignal<any[]>([]);
   const [connected, setConnected] = createSignal(false);
   const [paused, setPaused] = createSignal(false);
@@ -113,7 +128,6 @@ export const StreamView = () => {
   const [stats, setStats] = createSignal<StreamStats>({
     totalEvents: 0,
     eventsPerSecond: 0,
-    eventTypes: {},
     collections: {},
   });
   const [currentTime, setCurrentTime] = createSignal(Date.now());
@@ -121,24 +135,27 @@ export const StreamView = () => {
   let socket: WebSocket;
   let firehose: Firehose;
   let formRef!: HTMLFormElement;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let pendingRecords: any[] = [];
   let rafId: number | null = null;
   let statsIntervalId: number | null = null;
   let statsUpdateIntervalId: number | null = null;
   let currentSecondEventCount = 0;
   let totalEventsCount = 0;
-  let eventTypesMap: Record<string, number> = {};
   let collectionsMap: Record<string, number> = {};
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const shouldShowTopCollections = () =>
+    streamType !== "jetstream" ||
+    searchParams.collections
+      ?.toString()
+      .split(",")
+      .filter((collection) => collection.trim()).length !== 1;
+
   const addRecord = (record: any) => {
     currentSecondEventCount++;
     totalEventsCount++;
 
     const rawEventType = record.kind || record.$type || "unknown";
     const eventType = rawEventType.includes("#") ? rawEventType.split("#").pop() : rawEventType;
-    eventTypesMap[eventType] = (eventTypesMap[eventType] || 0) + 1;
 
     if (eventType !== "account" && eventType !== "identity" && eventType !== "sync") {
       const collection =
@@ -180,11 +197,18 @@ export const StreamView = () => {
 
     pendingRecords = [];
     totalEventsCount = 0;
-    eventTypesMap = {};
     collectionsMap = {};
     setConnected(false);
     setPaused(false);
     setStats((prev) => ({ ...prev, eventsPerSecond: 0 }));
+  };
+
+  const onWebsocketClose = (event: CloseEvent) => {
+    const code = event.code.toString();
+    if (code === "1000" || code === "1005") return;
+
+    setNotice(`Connection closed: ${websocketCloseReasons[code] ?? "Unknown reason"}`);
+    disconnect();
   };
 
   const connectStream = async (formData: FormData) => {
@@ -221,14 +245,12 @@ export const StreamView = () => {
     setCurrentTime(now);
 
     totalEventsCount = 0;
-    eventTypesMap = {};
     collectionsMap = {};
 
     setStats({
       connectedAt: now,
       totalEvents: 0,
       eventsPerSecond: 0,
-      eventTypes: {},
       collections: {},
     });
 
@@ -236,7 +258,6 @@ export const StreamView = () => {
       setStats((prev) => ({
         ...prev,
         totalEvents: totalEventsCount,
-        eventTypes: { ...eventTypesMap },
         collections: { ...collectionsMap },
       }));
     }, 50);
@@ -255,7 +276,9 @@ export const StreamView = () => {
         if (!isFilteredEvent || streamType !== "jetstream" || searchParams.allEvents === "on")
           addRecord(rec);
       });
+      socket.addEventListener("close", onWebsocketClose);
       socket.addEventListener("error", () => {
+        socket.removeEventListener("close", onWebsocketClose);
         setNotice("Connection error");
         disconnect();
       });
@@ -266,7 +289,9 @@ export const StreamView = () => {
         cursor: cursor,
         autoReconnect: false,
       });
+      firehose.ws.addEventListener("close", onWebsocketClose);
       firehose.on("error", (err) => {
+        firehose.ws.removeEventListener("close", onWebsocketClose);
         console.error(err);
         const message = err instanceof Error ? err.message : "Unknown error";
         setNotice(`Connection error: ${message}`);
@@ -320,9 +345,9 @@ export const StreamView = () => {
     if (statsUpdateIntervalId !== null) clearInterval(statsUpdateIntervalId);
   });
 
+  document.title = `${config().label} - PDSls`;
   return (
     <>
-      <Title>{config().label} - PDSls</Title>
       <div class="flex w-full flex-col items-center gap-2">
         {/* Tab Navigation */}
         <div class="flex gap-4 font-medium">
@@ -347,8 +372,8 @@ export const StreamView = () => {
         {/* Connection Form */}
         <Show when={!connected()}>
           <form ref={formRef} class="flex w-full flex-col gap-2 p-2 text-sm">
-            <label class="flex items-center justify-end gap-x-1">
-              <span class="min-w-21 select-none">Instance</span>
+            <label class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-end sm:gap-x-1">
+              <span class="select-none sm:min-w-21">Instance</span>
               <TextInput
                 name="instance"
                 value={searchParams.instance ?? config().defaultInstance}
@@ -357,36 +382,73 @@ export const StreamView = () => {
             </label>
 
             <For each={config().fields}>
-              {(field) => (
-                <label class="flex items-center justify-end gap-x-1">
-                  <Show when={field.type === "checkbox"}>
-                    <input
-                      type="checkbox"
-                      name={field.name}
-                      id={field.name}
-                      checked={searchParams[field.searchParam] === "on"}
-                    />
-                  </Show>
-                  <span class="min-w-21 select-none">{field.label}</span>
-                  <Show when={field.type === "textarea"}>
-                    <textarea
-                      name={field.name}
-                      spellcheck={false}
-                      placeholder={field.placeholder}
-                      value={(searchParams[field.searchParam] as string) ?? ""}
-                      class="dark:bg-dark-100 grow rounded-lg bg-white px-2 py-1 outline-1 outline-neutral-200 focus:outline-[1.5px] focus:outline-neutral-600 dark:outline-neutral-600 dark:focus:outline-neutral-400"
-                    />
-                  </Show>
-                  <Show when={field.type === "text"}>
-                    <TextInput
-                      name={field.name}
-                      placeholder={field.placeholder}
-                      value={(searchParams[field.searchParam] as string) ?? ""}
-                      class="grow"
-                    />
-                  </Show>
-                </label>
-              )}
+              {(field) => {
+                let inputRef!: HTMLInputElement;
+                let pickerRef!: HTMLInputElement;
+                return (
+                  <label
+                    class={`flex gap-x-1 ${field.type === "checkbox" ? "items-center justify-end" : `flex-col gap-1 sm:flex-row sm:justify-end ${field.type === "tags" ? "sm:items-start" : "sm:items-center"}`}`}
+                  >
+                    <Show when={field.type === "checkbox"}>
+                      <input
+                        type="checkbox"
+                        name={field.name}
+                        id={field.name}
+                        checked={searchParams[field.searchParam] === "on"}
+                      />
+                    </Show>
+                    <span
+                      class={`select-none ${field.type === "checkbox" ? "min-w-21" : "sm:min-w-21"} ${field.type === "tags" ? "sm:mt-1" : ""}`}
+                    >
+                      {field.label}
+                    </span>
+                    <Show when={field.type === "tags"}>
+                      <TagInput
+                        name={field.name}
+                        placeholder={field.placeholder}
+                        initialValues={
+                          (searchParams[field.searchParam] as string)
+                            ?.split(",")
+                            .filter((v) => v.trim().length > 0) ?? []
+                        }
+                      />
+                    </Show>
+
+                    <Show when={field.type === "text"}>
+                      <div class="flex grow flex-wrap items-center gap-1.5">
+                        <TextInput
+                          ref={inputRef}
+                          name={field.name}
+                          placeholder={field.placeholder}
+                          value={(searchParams[field.searchParam] as string) ?? ""}
+                          class="min-w-0 grow basis-0"
+                          onInput={() => {
+                            if (field.datetimePicker && pickerRef) {
+                              pickerRef.value = microsToDatetimeLocal(inputRef.value);
+                            }
+                          }}
+                        />
+                        <Show when={field.datetimePicker}>
+                          <input
+                            ref={pickerRef}
+                            type="datetime-local"
+                            step="1"
+                            value={microsToDatetimeLocal(
+                              (searchParams[field.searchParam] as string) ??
+                                (Date.now() * 1000).toString(),
+                            )}
+                            class="dark:bg-dark-100 min-w-0 grow basis-0 rounded-md bg-white px-2 py-1 text-sm outline-1 outline-neutral-200 select-none focus:outline-neutral-400 dark:scheme-dark dark:outline-neutral-600 dark:focus:outline-neutral-400"
+                            onInput={(e) => {
+                              const micros = datetimeLocalToMicros(e.currentTarget.value);
+                              inputRef.value = micros;
+                            }}
+                          />
+                        </Show>
+                      </div>
+                    </Show>
+                  </label>
+                );
+              }}
             </For>
 
             <div class="flex justify-end gap-2">
@@ -415,7 +477,7 @@ export const StreamView = () => {
               stats={stats()}
               currentTime={currentTime()}
               streamType={streamType}
-              showAllEvents={searchParams.allEvents === "on"}
+              showCollections={shouldShowTopCollections()}
             />
             <div class="flex justify-end gap-2">
               <Button

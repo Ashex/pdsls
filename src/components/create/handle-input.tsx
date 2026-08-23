@@ -1,6 +1,7 @@
 import { Handle } from "@atcute/lexicons";
 import { createSignal, Show } from "solid-js";
-import { resolveHandle } from "../../utils/api";
+
+import { resolveHandle } from "../../lib/api";
 import { Button } from "../button.jsx";
 import { TextInput } from "../text-input.jsx";
 import { editorInstance } from "./state";
@@ -32,8 +33,8 @@ export const HandleInput = (props: { onClose: () => void }) => {
       });
       props.onClose();
       handleFormRef.reset();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to resolve handle");
+    } catch (err: any) {
+      setError(err.message || "Failed to resolve handle");
     } finally {
       setResolving(false);
     }

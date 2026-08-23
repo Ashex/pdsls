@@ -1,22 +1,22 @@
 import * as TID from "@atcute/tid";
-import { A, Params } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
+import { A, useParams } from "@solidjs/router";
+import { createEffect, createMemo, createSignal, For, JSX, Match, Show, Switch } from "solid-js";
+
 import { canHover } from "../layout";
-import { setStratosActive, stratosActive, stratosEnrollment, targetEnrollment } from "../stratos";
-import { didDocCache } from "../utils/api";
+import { didDocCache } from "../lib/api";
+import {
+  serviceMismatch,
+  setStratosActive,
+  stratosActive,
+  stratosEnrollment,
+  stratosMode,
+  targetEnrollment,
+} from "../stratos";
 import { addToClipboard } from "../utils/copy";
 import { localDateFromTimestamp } from "../utils/date";
-import { Favicon } from "./favicon";
 import Tooltip from "./tooltip";
 
 export const [pds, setPDS] = createSignal<string>();
-
-const serviceMismatch = () => {
-  const own = stratosEnrollment();
-  const target = targetEnrollment();
-  if (!own || !target) return false;
-  return own.service !== target.service;
-};
 
 const CopyButton = (props: { content: string; label: string }) => {
   return (
@@ -29,7 +29,7 @@ const CopyButton = (props: { content: string; label: string }) => {
             e.stopPropagation();
             addToClipboard(props.content);
           }}
-          class={`-mr-2 hidden items-center rounded px-2 py-1 text-neutral-500 transition-all duration-200 group-hover:flex hover:bg-neutral-200/70 hover:text-neutral-600 active:bg-neutral-300/70 sm:py-1.5 dark:text-neutral-400 dark:hover:bg-neutral-700/70 dark:hover:text-neutral-300 dark:active:bg-neutral-600/70`}
+          class={`pointer-events-none -mr-2 flex items-center rounded px-2 py-1 text-neutral-500 opacity-0 transition-all duration-200 group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-neutral-200/70 hover:text-neutral-600 active:bg-neutral-300/70 sm:py-1.5 dark:text-neutral-400 dark:hover:bg-neutral-700/70 dark:hover:text-neutral-300 dark:active:bg-neutral-600/70`}
           aria-label="Copy to clipboard"
         >
           <span class="iconify lucide--copy"></span>
@@ -39,66 +39,125 @@ const CopyButton = (props: { content: string; label: string }) => {
   );
 };
 
-export const NavBar = (props: { params: Params }) => {
-  const [handle, setHandle] = createSignal(props.params.repo);
+const HoverFavicon = (props: { domain: string; hovered: boolean; children: JSX.Element }) => {
+  const [hasHovered, setHasHovered] = createSignal(false);
+  const [loaded, setLoaded] = createSignal(false);
+  const [src, setSrc] = createSignal("");
+  let lastDomain = "";
+
+  createEffect(() => {
+    const domain = props.domain;
+    if (!domain || domain === lastDomain) return;
+    lastDomain = domain;
+    setHasHovered(false);
+    setLoaded(false);
+    setSrc("");
+  });
+
+  createEffect(() => {
+    if (props.hovered) setHasHovered(true);
+  });
+
+  const workerUrl = () => `/favicon?domain=${encodeURIComponent(props.domain)}`;
+  const directUrl = () => `https://${props.domain}/favicon.ico`;
+
+  return (
+    <div class="relative flex h-5 w-3.5 shrink-0 items-center justify-center sm:w-4">
+      <Show when={!props.hovered || !loaded()}>{props.children}</Show>
+      <Show when={hasHovered() && props.domain}>
+        <Switch>
+          <Match when={props.domain === "tangled.sh" || props.domain === "tangled.org"}>
+            <span
+              class="iconify i-tangled size-4"
+              classList={{ hidden: !props.hovered || !loaded() }}
+              ref={() => setLoaded(true)}
+            />
+          </Match>
+          <Match when={true}>
+            <img
+              src={src() || workerUrl()}
+              class="size-4"
+              classList={{ hidden: !props.hovered || !loaded() }}
+              onLoad={() => setLoaded(true)}
+              onError={() => {
+                if (!src()) {
+                  setSrc(directUrl());
+                } else {
+                  setLoaded(false);
+                }
+              }}
+            />
+          </Match>
+        </Switch>
+      </Show>
+    </div>
+  );
+};
+
+export const NavBar = () => {
+  const params = useParams();
+  const [handle, setHandle] = createSignal(params.repo);
+  const [pdsHovered, setPdsHovered] = createSignal(false);
   const [repoHovered, setRepoHovered] = createSignal(false);
-  const [hasHoveredRepo, setHasHoveredRepo] = createSignal(false);
-  const [faviconLoaded, setFaviconLoaded] = createSignal(false);
   const [collectionHovered, setCollectionHovered] = createSignal(false);
   const isCustomDomain = () => handle() && !handle()!.endsWith(".bsky.social");
 
   createEffect(() => {
-    if (pds() !== undefined && props.params.repo) {
-      const hdl =
-        didDocCache[props.params.repo]?.alsoKnownAs
-          ?.filter((alias) => alias.startsWith("at://"))[0]
-          ?.split("at://")[1] ?? props.params.repo;
-      if (hdl !== handle()) setHandle(hdl);
-    }
-  });
-
-  createEffect(() => {
-    handle();
-    setHasHoveredRepo(false);
-    setFaviconLoaded(false);
+    pds();
+    if (!params.repo) return;
+    const hdl =
+      didDocCache[params.repo]?.alsoKnownAs
+        ?.filter((alias) => alias.startsWith("at://"))[0]
+        ?.split("at://")[1] ?? params.repo;
+    setHandle(hdl);
   });
 
   const rkeyTimestamp = createMemo(() => {
-    if (!props.params.rkey || !TID.validate(props.params.rkey)) return undefined;
-    const timestamp = TID.parse(props.params.rkey).timestamp / 1000;
+    if (!params.rkey || !TID.validate(params.rkey)) return undefined;
+    const timestamp = TID.parse(params.rkey).timestamp / 1000;
     return timestamp <= Date.now() ? timestamp : undefined;
   });
 
   return (
     <nav class="flex w-full flex-col text-sm wrap-anywhere sm:text-base">
       {/* PDS Level */}
-      <div class="group relative flex items-center justify-between gap-1 rounded-md border-[0.5px] border-transparent bg-transparent px-2 transition-all duration-200 hover:border-neutral-300 hover:bg-neutral-50/40 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/40">
+      <div
+        class="group relative flex items-center justify-between gap-1 rounded-md border-[0.5px] border-transparent bg-transparent px-2 transition-all duration-200 hover:border-neutral-300 hover:bg-neutral-50/40 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/40"
+        onMouseEnter={() => {
+          if (canHover) setPdsHovered(true);
+        }}
+        onMouseLeave={() => {
+          if (canHover) setPdsHovered(false);
+        }}
+      >
         <div class="flex min-h-6 basis-full items-center gap-2 sm:min-h-7">
           <Tooltip text="PDS">
-            <span
-              classList={{
-                "iconify shrink-0 transition-colors duration-200": true,
-                "lucide--unplug text-red-500 dark:text-red-400":
-                  pds() === "Missing PDS" && props.params.repo?.startsWith("did:"),
-                "lucide--hard-drive text-neutral-500 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200":
-                  pds() !== "Missing PDS" || !props.params.repo?.startsWith("did:"),
-              }}
-            ></span>
+            <HoverFavicon
+              domain={pds() ?? ""}
+              hovered={pdsHovered() && !!pds() && pds() !== "Missing PDS"}
+            >
+              <span
+                classList={{
+                  "iconify shrink-0 transition-colors duration-200": true,
+                  "lucide--unplug text-red-500 dark:text-red-400":
+                    pds() === "Missing PDS" && params.repo?.startsWith("did:"),
+                  "lucide--hard-drive text-neutral-500 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200":
+                    pds() !== "Missing PDS" || !params.repo?.startsWith("did:"),
+                }}
+              ></span>
+            </HoverFavicon>
           </Tooltip>
-          <Show when={pds() && (pds() !== "Missing PDS" || props.params.repo?.startsWith("did:"))}>
+          <Show when={pds() && (pds() !== "Missing PDS" || params.repo?.startsWith("did:"))}>
             <Show
               when={pds() === "Missing PDS"}
               fallback={
-                <Show
-                  when={props.params.repo}
-                  fallback={<span class="py-0.5 font-medium">{pds()}</span>}
-                >
+                <Show when={params.repo} fallback={<span class="py-0.5 font-medium">{pds()}</span>}>
                   <A
                     end
                     href={pds()!}
                     inactiveClass="text-blue-500 py-0.5 w-full font-medium hover:text-blue-600 transition-colors duration-150 dark:text-blue-400 dark:hover:text-blue-300"
                   >
-                    <Show when={stratosActive() && targetEnrollment()} fallback={pds()}>
+                    <Show when={stratosMode() && targetEnrollment()} fallback={pds()}>
                       {new URL(targetEnrollment()!.service).hostname}
                     </Show>
                   </A>
@@ -113,10 +172,11 @@ export const NavBar = (props: { params: Params }) => {
           <Show when={stratosEnrollment() && targetEnrollment()}>
             <Tooltip
               text={
-                serviceMismatch() ? "Different Stratos service — cannot browse"
-                : stratosActive() ?
-                  "Stratos active — click to switch to PDS"
-                : "Switch to Stratos"
+                serviceMismatch()
+                  ? "Different Stratos service — cannot browse"
+                  : stratosActive()
+                    ? "Stratos active — click to switch to PDS"
+                    : "Switch to Stratos"
               }
             >
               <button
@@ -137,10 +197,11 @@ export const NavBar = (props: { params: Params }) => {
                     serviceMismatch(),
                 }}
                 aria-label={
-                  serviceMismatch() ? "Different Stratos service"
-                  : stratosActive() ?
-                    "Stratos active"
-                  : "Stratos inactive"
+                  serviceMismatch()
+                    ? "Different Stratos service"
+                    : stratosActive()
+                      ? "Stratos active"
+                      : "Stratos inactive"
                 }
                 aria-pressed={stratosActive()}
               >
@@ -160,7 +221,7 @@ export const NavBar = (props: { params: Params }) => {
         </div>
       </div>
 
-      <Show when={stratosActive() && targetEnrollment()?.boundaries?.length}>
+      <Show when={stratosMode() && targetEnrollment()?.boundaries?.length}>
         <div class="flex flex-wrap gap-1 px-2 py-1">
           <For each={targetEnrollment()!.boundaries}>
             {(boundary) => (
@@ -173,53 +234,34 @@ export const NavBar = (props: { params: Params }) => {
       </Show>
 
       <div class="flex flex-col">
-        <Show when={props.params.repo}>
+        <Show when={params.repo}>
           {/* Repository Level */}
           <div
             class="group relative flex items-center justify-between gap-1 rounded-md border-[0.5px] border-transparent bg-transparent px-2 transition-all duration-200 hover:border-neutral-300 hover:bg-neutral-50/40 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/40"
             onMouseEnter={() => {
-              if (canHover) {
-                setRepoHovered(true);
-                setHasHoveredRepo(true);
-              }
+              if (canHover) setRepoHovered(true);
             }}
             onMouseLeave={() => {
-              if (canHover) {
-                setRepoHovered(false);
-              }
+              if (canHover) setRepoHovered(false);
             }}
           >
             <div class="flex min-w-0 basis-full items-center gap-2">
               <Tooltip text="Repository">
-                <div class="relative flex h-5 w-3.5 shrink-0 items-center justify-center sm:w-4">
-                  <span
-                    class="iconify lucide--book-user absolute text-neutral-500 transition-colors duration-200 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200"
-                    classList={{
-                      hidden: !!(repoHovered() && isCustomDomain() && faviconLoaded()),
-                    }}
-                  ></span>
-                  <Show when={hasHoveredRepo() && isCustomDomain()}>
-                    <img
-                      src={`https://${handle()}/favicon.ico`}
-                      class="size-4"
-                      classList={{ hidden: !repoHovered() || !faviconLoaded() }}
-                      onLoad={() => setFaviconLoaded(true)}
-                      onError={() => setFaviconLoaded(false)}
-                    />
-                  </Show>
-                </div>
+                <HoverFavicon domain={handle() ?? ""} hovered={repoHovered() && !!isCustomDomain()}>
+                  <span class="iconify lucide--book-user text-neutral-500 transition-colors duration-200 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200"></span>
+                </HoverFavicon>
               </Tooltip>
               <Show
-                when={props.params.collection}
+                when={params.collection}
                 fallback={
                   <span class="flex min-w-0 gap-1 py-0.5 font-medium">
                     <Show
-                      when={handle() !== props.params.repo}
-                      fallback={<span class="truncate">{props.params.repo}</span>}
+                      when={handle() !== params.repo}
+                      fallback={<span class="truncate">{params.repo}</span>}
                     >
                       <span class="max-w-full shrink-0 truncate">{handle()}</span>
                       <span class="truncate text-neutral-500 dark:text-neutral-400">
-                        ({props.params.repo})
+                        ({params.repo})
                       </span>
                     </Show>
                   </span>
@@ -227,25 +269,25 @@ export const NavBar = (props: { params: Params }) => {
               >
                 <A
                   end
-                  href={`/at://${props.params.repo}`}
+                  href={`/at://${params.repo}`}
                   inactiveClass="flex grow min-w-0 gap-1 py-0.5 font-medium text-blue-500 hover:text-blue-600 transition-colors duration-150 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   <Show
-                    when={handle() !== props.params.repo}
-                    fallback={<span class="truncate">{props.params.repo}</span>}
+                    when={handle() !== params.repo}
+                    fallback={<span class="truncate">{params.repo}</span>}
                   >
                     <span class="max-w-full shrink-0 truncate">{handle()}</span>
-                    <span class="truncate">({props.params.repo})</span>
+                    <span class="truncate">({params.repo})</span>
                   </Show>
                 </A>
               </Show>
             </div>
-            <CopyButton content={props.params.repo!} label="Copy DID" />
+            <CopyButton content={params.repo!} label="Copy DID" />
           </div>
         </Show>
 
         {/* Collection Level */}
-        <Show when={props.params.collection}>
+        <Show when={params.collection}>
           <div
             class="group flex items-center justify-between gap-2 rounded-md border-[0.5px] border-transparent bg-transparent px-2 transition-all duration-200 hover:border-neutral-300 hover:bg-neutral-50/40 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/40"
             onMouseEnter={() => {
@@ -257,50 +299,39 @@ export const NavBar = (props: { params: Params }) => {
           >
             <div class="flex basis-full items-center gap-2">
               <Tooltip text="Collection">
-                <div class="relative flex h-5 w-3.5 shrink-0 items-center justify-center sm:w-4">
-                  <Show
-                    when={collectionHovered()}
-                    fallback={
-                      <span class="iconify lucide--folder-open text-neutral-500 transition-colors duration-200 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200"></span>
-                    }
-                  >
-                    {(() => {
-                      const parts = props.params.collection!.split(".");
-                      const authority = `${parts[0]}.${parts[1]}`;
-                      return <Favicon authority={authority} wrapper={(c) => c} />;
-                    })()}
-                  </Show>
-                </div>
+                <HoverFavicon
+                  domain={params.collection!.split(".").slice(0, 2).reverse().join(".")}
+                  hovered={collectionHovered()}
+                >
+                  <span class="iconify lucide--folder-open text-neutral-500 transition-colors duration-200 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200"></span>
+                </HoverFavicon>
               </Tooltip>
               <Show
-                when={props.params.rkey}
-                fallback={<span class="py-0.5 font-medium">{props.params.collection}</span>}
+                when={params.rkey}
+                fallback={<span class="py-0.5 font-medium">{params.collection}</span>}
               >
                 <A
                   end
-                  href={`/at://${props.params.repo}/${props.params.collection}`}
+                  href={`/at://${params.repo}/${params.collection}`}
                   inactiveClass="text-blue-500 dark:text-blue-400 grow py-0.5 font-medium hover:text-blue-600 transition-colors duration-150 dark:hover:text-blue-300"
                 >
-                  {props.params.collection}
+                  {params.collection}
                 </A>
               </Show>
             </div>
-            <CopyButton
-              content={`at://${props.params.repo}/${props.params.collection}`}
-              label="Copy AT URI"
-            />
+            <CopyButton content={`at://${params.repo}/${params.collection}`} label="Copy AT URI" />
           </div>
         </Show>
 
         {/* Record Level */}
-        <Show when={props.params.rkey}>
+        <Show when={params.rkey}>
           <div class="group flex items-center justify-between gap-2 rounded-md border-[0.5px] border-transparent bg-transparent px-2 transition-all duration-200 hover:border-neutral-300 hover:bg-neutral-50/40 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/40">
             <div class="flex basis-full items-center gap-2">
               <Tooltip text="Record">
                 <span class="iconify lucide--file-json text-neutral-500 transition-colors duration-200 group-hover:text-neutral-700 dark:text-neutral-400 dark:group-hover:text-neutral-200"></span>
               </Tooltip>
               <div class="flex min-w-0 gap-1 py-0.5 font-medium">
-                <span>{props.params.rkey}</span>
+                <span>{params.rkey}</span>
                 <Show when={rkeyTimestamp()}>
                   <span class="truncate text-neutral-500 dark:text-neutral-400">
                     ({localDateFromTimestamp(rkeyTimestamp()!)})
@@ -309,7 +340,7 @@ export const NavBar = (props: { params: Params }) => {
               </div>
             </div>
             <CopyButton
-              content={`at://${props.params.repo}/${props.params.collection}/${props.params.rkey}`}
+              content={`at://${params.repo}/${params.collection}/${params.rkey}`}
               label="Copy AT URI"
             />
           </div>

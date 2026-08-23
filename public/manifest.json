@@ -1,7 +1,7 @@
 {
   "name": "PDSls",
   "description": "",
-  "id": "pdsls.northsky.social",
+  "id": "dev.pdsls",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1f1f1f",

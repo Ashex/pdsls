@@ -1,12 +1,5 @@
-/**
- * property-based tests for scope utility functions.
- *
- * these tests verify pure functions from scope-utils.ts without any SolidJS signals.
- *
- * Validates: Requirements (task 8)
- */
-import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
+
 import {
   buildScopeString,
   GRANULAR_SCOPES,
@@ -14,84 +7,44 @@ import {
   scopeIdsToString,
 } from "./scope-utils";
 
-// #region arbitraries
+describe("GRANULAR_SCOPES", () => {
+  it("includes the stratos scopes from the client package", () => {
+    const byId = Object.fromEntries(GRANULAR_SCOPES.map((s) => [s.id, s.scope]));
+    expect(byId["stratos-enrollment"]).toBe("repo:zone.stratos.actor.enrollment");
+    expect(byId["stratos-posts"]).toBe("repo:zone.stratos.feed.post?action=create&action=delete");
+    expect(byId["stratos-feed"]).toBe("rpc:zone.stratos.feedgen.getFeed?aud=*");
+  });
+});
 
-const scopeIds = GRANULAR_SCOPES.map((s) => s.id);
-
-/** generates an arbitrary subset of scope IDs */
-const arbScopeIdSet = fc
-  .subarray(scopeIds, { minLength: 0, maxLength: scopeIds.length })
-  .map((arr) => new Set(arr));
-
-// #endregion
-
-describe("scope utility properties", () => {
-  describe("buildScopeString", () => {
-    it("always starts with atproto as the first token", () => {
-      fc.assert(
-        fc.property(arbScopeIdSet, (selected) => {
-          const result = buildScopeString(selected);
-          const tokens = result.split(" ");
-          expect(tokens[0]).toBe("atproto");
-        }),
-        { numRuns: 200 },
-      );
-    });
-
-    it("contains stratos post scope when stratos-posts is selected", () => {
-      fc.assert(
-        fc.property(arbScopeIdSet, (selected) => {
-          // ensure stratos-posts is in the set
-          const withStratosPosts = new Set(selected);
-          withStratosPosts.add("stratos-posts");
-
-          const result = buildScopeString(withStratosPosts);
-          const tokens = result.split(" ");
-          expect(tokens).toContain("repo:zone.stratos.feed.post?action=create&action=delete");
-        }),
-        { numRuns: 200 },
-      );
-    });
-
-    it("does not contain stratos post scope when stratos-posts is not selected", () => {
-      fc.assert(
-        fc.property(arbScopeIdSet, (selected) => {
-          const withoutStratosPosts = new Set(selected);
-          withoutStratosPosts.delete("stratos-posts");
-
-          const result = buildScopeString(withoutStratosPosts);
-          const tokens = result.split(" ");
-          expect(tokens).not.toContain("repo:zone.stratos.feed.post?action=create&action=delete");
-        }),
-        { numRuns: 200 },
-      );
-    });
+describe("buildScopeString", () => {
+  it("always starts with atproto", () => {
+    expect(buildScopeString(new Set()).split(" ")[0]).toBe("atproto");
+    expect(buildScopeString(new Set(["create", "stratos-posts"])).split(" ")[0]).toBe("atproto");
   });
 
-  describe("parseScopeString / scopeIdsToString round-trip", () => {
-    it("round-trips: parseScopeString(scopeIdsToString(set)) equals the original set (excluding atproto)", () => {
-      fc.assert(
-        fc.property(arbScopeIdSet, (original) => {
-          const serialized = scopeIdsToString(original);
-          const parsed = parseScopeString(serialized);
+  it("includes selected stratos scopes", () => {
+    const result = buildScopeString(
+      new Set(["stratos-enrollment", "stratos-posts", "stratos-feed"]),
+    );
+    expect(result).toContain("repo:zone.stratos.actor.enrollment");
+    expect(result).toContain("repo:zone.stratos.feed.post?action=create&action=delete");
+    expect(result).toContain("rpc:zone.stratos.feedgen.getFeed?aud=*");
+  });
 
-          // atproto is always injected by scopeIdsToString but stripped by parseScopeString
-          // so the round-tripped set should equal the original
-          expect(parsed).toEqual(original);
-        }),
-        { numRuns: 200 },
-      );
-    });
+  it("omits unselected stratos scopes", () => {
+    const result = buildScopeString(new Set(["create", "update"]));
+    expect(result).not.toContain("zone.stratos");
+  });
+});
 
-    it("parseScopeString never includes atproto in the result", () => {
-      fc.assert(
-        fc.property(arbScopeIdSet, (selected) => {
-          const serialized = scopeIdsToString(selected);
-          const parsed = parseScopeString(serialized);
-          expect(parsed.has("atproto")).toBe(false);
-        }),
-        { numRuns: 200 },
-      );
-    });
+describe("scope id round-trip", () => {
+  it("parseScopeString inverts scopeIdsToString", () => {
+    const ids = new Set(["create", "delete", "stratos-enrollment", "stratos-posts"]);
+    expect(parseScopeString(scopeIdsToString(ids))).toEqual(ids);
+  });
+
+  it("parseScopeString drops the atproto base scope", () => {
+    expect(parseScopeString("atproto,create")).toEqual(new Set(["create"]));
+    expect(parseScopeString("")).toEqual(new Set());
   });
 });

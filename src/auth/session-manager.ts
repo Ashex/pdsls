@@ -6,8 +6,10 @@ import {
   OAuthUserAgent,
   type Session,
 } from "@atcute/oauth-browser-client";
-import { discoverStratosEnrollment, setStratosActive, setStratosEnrollment } from "../stratos";
-import { resolveDidDoc } from "../utils/api";
+
+import { resolveDidDoc } from "../lib/api";
+import { discoverEnrollment, setStratosEnrollment } from "../stratos";
+import { oauthScopeStringToIds, scopeIdsToString } from "./scope-utils";
 import { agent as currentAgent, Sessions, setAgent, setSessions } from "./state";
 
 export const saveSessionToStorage = (sessions: Sessions) => {
@@ -54,8 +56,7 @@ export const retrieveSession = async (): Promise<void> => {
 
       localStorage.setItem("lastSignedIn", did);
 
-      const grantedScopes = localStorage.getItem("pendingScopes") || "atproto";
-      localStorage.removeItem("pendingScopes");
+      const grantedScopes = scopeIdsToString(oauthScopeStringToIds(auth.session.token.scope));
 
       const sessions = loadSessionsFromStorage();
       const newSessions: Sessions = sessions || {};
@@ -73,6 +74,9 @@ export const retrieveSession = async (): Promise<void> => {
           const rpc = new Client({ handler: new OAuthUserAgent(session) });
           const res = await rpc.get("com.atproto.server.getSession");
           newSessions[lastSignedIn].signedIn = true;
+          newSessions[lastSignedIn].grantedScopes = scopeIdsToString(
+            oauthScopeStringToIds(session.token.scope),
+          );
           saveSessionToStorage(newSessions);
           if (!res.ok) throw res.data.error;
           return session;
@@ -90,23 +94,21 @@ export const retrieveSession = async (): Promise<void> => {
   if (session) {
     const userAgent = new OAuthUserAgent(session);
     setAgent(userAgent);
-    setStratosActive(false);
+    // discover the user's Stratos enrollment in the background; the
+    // persisted mode preference only takes effect once this resolves
     const capturedDid = userAgent.sub;
-    discoverStratosEnrollment(capturedDid, userAgent.handle.bind(userAgent))
+    discoverEnrollment(capturedDid, userAgent.handle.bind(userAgent))
       .then((enrollment) => {
-        if (currentAgent()?.sub === capturedDid) {
-          setStratosEnrollment(enrollment);
-        }
+        if (currentAgent()?.sub === capturedDid) setStratosEnrollment(enrollment);
       })
       .catch(() => {
-        if (currentAgent()?.sub === capturedDid) {
-          setStratosEnrollment(null);
-        }
+        if (currentAgent()?.sub === capturedDid) setStratosEnrollment(null);
       });
   }
 };
 
 export const resumeSession = async (did: Did): Promise<void> => {
   localStorage.setItem("lastSignedIn", did);
+  setStratosEnrollment(undefined);
   await retrieveSession();
 };

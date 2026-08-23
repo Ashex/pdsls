@@ -27,7 +27,7 @@ export const useOAuthScopeFlow = (options: UseOAuthScopeFlowOptions = {}) => {
     setShowScopeSelector(true);
   };
 
-  const complete = async (scopeString: string, scopeIds: string) => {
+  const complete = async (scopeString: string) => {
     try {
       const account = pendingAccount();
 
@@ -36,21 +36,17 @@ export const useOAuthScopeFlow = (options: UseOAuthScopeFlowOptions = {}) => {
           await options.beforeRedirect(account);
           setShowScopeSelector(false);
           return;
-        } catch {
-          /* beforeRedirect may reject to signal re-auth needed */
-        }
+        } catch {}
       }
-
-      localStorage.setItem("pendingScopes", scopeIds);
 
       options.onRedirecting?.();
 
       const authUrl = await createAuthorizationUrl({
         scope: scopeString,
         target:
-          isHandle(account) || isDid(account) ?
-            { type: "account", identifier: account }
-          : { type: "pds", serviceUrl: account },
+          isHandle(account) || isDid(account)
+            ? { type: "account", identifier: account }
+            : { type: "pds", serviceUrl: account },
       });
 
       await new Promise((resolve) => setTimeout(resolve, 250));

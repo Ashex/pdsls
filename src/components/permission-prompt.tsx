@@ -1,10 +1,9 @@
-import { createSignal } from "solid-js";
-import { GRANULAR_SCOPES } from "../auth/scope-utils";
+import { createEffect, createSignal } from "solid-js";
+
+import { GRANULAR_SCOPES, type ScopeId } from "../auth/scope-utils";
 import { agent, setOpenManager, setPendingPermissionEdit } from "../auth/state";
 import { Button } from "./button";
 import { Modal } from "./modal";
-
-type ScopeId = "create" | "update" | "delete" | "blob";
 
 const [requestedScope, setRequestedScope] = createSignal<ScopeId | null>(null);
 
@@ -13,9 +12,16 @@ export const showPermissionPrompt = (scope: ScopeId) => {
 };
 
 export const PermissionPromptContainer = () => {
+  const [displayedScope, setDisplayedScope] = createSignal<ScopeId | null>(null);
+
+  createEffect(() => {
+    const scope = requestedScope();
+    if (scope !== null) setDisplayedScope(scope);
+  });
+
   const scopeLabel = () => {
-    const scope = GRANULAR_SCOPES.find((s) => s.id === requestedScope());
-    return scope?.label.toLowerCase() || requestedScope();
+    const scope = GRANULAR_SCOPES.find((s) => s.id === displayedScope());
+    return scope?.label.toLowerCase() || displayedScope();
   };
 
   const handleEditPermissions = () => {
@@ -30,6 +36,7 @@ export const PermissionPromptContainer = () => {
     <Modal
       open={requestedScope() !== null}
       onClose={() => setRequestedScope(null)}
+      onClosed={() => setDisplayedScope(null)}
       contentClass="dark:bg-dark-300 dark:shadow-dark-700 pointer-events-auto w-[calc(100%-2rem)] max-w-md rounded-lg border-[0.5px] border-neutral-300 bg-neutral-50 p-4 shadow-md dark:border-neutral-700"
     >
       <h2 class="mb-2 font-semibold">Permission required</h2>

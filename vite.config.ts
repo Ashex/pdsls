@@ -1,8 +1,10 @@
-import tailwindcss from "@tailwindcss/vite";
 import { execSync } from "child_process";
+
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
-import metadata from "./public/oauth-client-metadata.json";
+
+import metadata from "./public/oauth-client-metadata.json" with { type: "json" };
 
 const SERVER_HOST = "127.0.0.1";
 const SERVER_PORT = 13213;
@@ -21,9 +23,9 @@ const getVersion = (): string => {
       return `v${version}.dev${commits}+g${hash}${dirty ? "-dirty" : ""}`;
     }
 
-    return `v0.0.0.dev+g${describe}-stratos`;
+    return `v0.0.0.dev+g${describe}`;
   } catch {
-    return "v0.0.0-unknown-stratos";
+    return "v0.0.0-unknown";
   }
 };
 
@@ -65,5 +67,17 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
+  },
+  resolve: {
+    dedupe: [
+      "codemirror",
+      "@codemirror/state",
+      "@codemirror/view",
+      "@codemirror/language",
+      "@codemirror/lint",
+      "@codemirror/commands",
+      "@codemirror/search",
+      "@codemirror/autocomplete",
+    ],
   },
 });

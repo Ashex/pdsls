@@ -2,120 +2,296 @@ import { ComAtprotoServerDescribeServer, ComAtprotoSyncListRepos } from "@atcute
 import { Client, simpleFetchHandler } from "@atcute/client";
 import { InferXRPCBodyOutput } from "@atcute/lexicons";
 import * as TID from "@atcute/tid";
-import { Title } from "@solidjs/meta";
-import { A, useLocation, useParams } from "@solidjs/router";
-import { createResource, createSignal, For, Show } from "solid-js";
+import { A, type RouteSectionProps, useLocation, useParams } from "@solidjs/router";
+import { createWindowVirtualizer } from "@tanstack/solid-virtual";
+import { createEffect, createResource, createSignal, For, on, onCleanup, Show } from "solid-js";
+
 import { Button } from "../components/button";
-import DidHoverCard from "../components/hover-card/did";
 import { setPDS } from "../components/navbar";
+import { NestedLayout } from "../components/nested-layout.jsx";
+import { Spinner } from "../components/spinner.jsx";
 import { canHover } from "../layout";
+import { didDocCache, resolveDidDoc } from "../lib/api";
+import { createLatch } from "../lib/create-latch.js";
 import { localDateFromTimestamp } from "../utils/date";
 
 const LIMIT = 1000;
 
-export const PdsView = () => {
+let pdsCache:
+  | {
+      pds: string;
+      repos: ComAtprotoSyncListRepos.Repo[];
+      cursor: string | undefined;
+      version?: string;
+      serverInfos?: InferXRPCBodyOutput<ComAtprotoServerDescribeServer.mainSchema["output"]>;
+    }
+  | undefined;
+
+const RepoCard = (props: {
+  repo: ComAtprotoSyncListRepos.Repo;
+  expanded: boolean;
+  onToggle: () => void;
+}) => {
+  const [hovered, setHovered] = createSignal(false);
+  const expanded = () => props.expanded || hovered();
+  const [collapsing, setCollapsing] = createSignal(false);
+  let hoverTimeout: number | null = null;
+
+  createEffect(
+    on(expanded, (curr, prev) => {
+      if (prev && !curr) {
+        setCollapsing(true);
+        const t = setTimeout(() => setCollapsing(false), 250);
+        onCleanup(() => clearTimeout(t));
+      }
+    }),
+  );
+
+  const [handle] = createResource(
+    () => (expanded() ? props.repo.did : null),
+    async (did) => {
+      try {
+        const doc =
+          didDocCache[did] ??
+          (didDocCache[did] = await resolveDidDoc(did as `did:${string}:${string}`));
+        return (
+          doc.alsoKnownAs?.find((aka) => aka.startsWith("at://"))?.replace("at://", "") ?? null
+        );
+      } catch {
+        return null;
+      }
+    },
+  );
+
+  const handleMouseEnter = () => {
+    if (!canHover) return;
+    hoverTimeout = window.setTimeout(() => {
+      setHovered(true);
+      hoverTimeout = null;
+    }, 300);
+  };
+
+  const handleMouseLeave = () => {
+    if (!canHover) return;
+    if (hoverTimeout !== null) {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = null;
+    }
+    setHovered(false);
+  };
+
+  onCleanup(() => {
+    if (hoverTimeout !== null) clearTimeout(hoverTimeout);
+  });
+
+  return (
+    <div
+      classList={{
+        "group relative rounded-md border-[0.5px]": true,
+        "z-20": expanded(),
+        "z-10": collapsing(),
+        "transition-[background-color,border-color,box-shadow] duration-250":
+          expanded() || collapsing(),
+        "dark:hover:bg-dark-200 border-transparent hover:bg-neutral-200/50": !expanded(),
+        "dark:bg-dark-300 border-neutral-200 bg-neutral-50 shadow-sm dark:border-neutral-700 dark:shadow-dark-700":
+          expanded(),
+      }}
+    >
+      <div
+        class="flex min-w-0 flex-1 items-center"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <button
+          type="button"
+          onclick={() => {
+            if (!canHover) props.onToggle();
+          }}
+          class="flex min-w-0 flex-1 items-center px-2 py-1.5"
+        >
+          <div class="flex min-h-5 min-w-0 flex-1 items-center gap-x-2 text-xs sm:text-sm">
+            <span class="min-w-0 truncate font-mono" onclick={(e) => e.stopPropagation()}>
+              <A
+                href={`/at://${props.repo.did}`}
+                class="text-blue-500 hover:underline dark:text-blue-400"
+              >
+                {props.repo.did}
+              </A>
+            </span>
+            <Show when={!props.repo.active}>
+              <span class="flex shrink-0 items-center gap-1 text-red-500 dark:text-red-400">
+                <span
+                  class={`iconify ${
+                    props.repo.status === "deactivated"
+                      ? "lucide--user-round-x"
+                      : props.repo.status === "takendown"
+                        ? "lucide--shield-ban"
+                        : "lucide--unplug"
+                  }`}
+                ></span>
+                {props.repo.status ?? "inactive"}
+              </span>
+            </Show>
+          </div>
+        </button>
+        <Show when={expanded() || canHover}>
+          <A
+            href={`/at://${props.repo.did}`}
+            classList={{
+              "flex shrink-0 items-center p-2 transition-colors duration-250": true,
+              "invisible group-hover:visible not-hover:text-neutral-500 not-hover:dark:text-neutral-400":
+                !expanded(),
+            }}
+          >
+            <span class="iconify lucide--arrow-right"></span>
+          </A>
+        </Show>
+      </div>
+      <div
+        classList={{
+          "grid transition-[grid-template-rows] duration-250 ease-in-out": true,
+          "grid-rows-[1fr]": expanded(),
+          "grid-rows-[0fr]": !expanded(),
+        }}
+      >
+        <div class="overflow-hidden">
+          <div class="ml-2 flex flex-col gap-1.5 pb-1.5 font-mono text-xs text-neutral-500 dark:text-neutral-400">
+            <Show when={handle.loading}>
+              <span class="animate-pulse">resolving...</span>
+            </Show>
+            <Show when={!handle.loading && handle()}>
+              <span class="font-medium text-neutral-900 dark:text-neutral-200">@{handle()}</span>
+            </Show>
+            <Show when={TID.validate(props.repo.rev)}>
+              <div class="flex gap-1 text-neutral-700 dark:text-neutral-300">
+                <span>{props.repo.rev}</span>
+                <span>•</span>
+                <span>{localDateFromTimestamp(TID.parse(props.repo.rev).timestamp / 1000)}</span>
+              </div>
+            </Show>
+            <Show when={props.repo.head}>
+              <span class="truncate">{props.repo.head}</span>
+            </Show>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const InfoField = (props: { label: string; children: any }) => (
+  <div class="flex flex-col">
+    <span class="font-semibold">{props.label}</span>
+    {props.children}
+  </div>
+);
+
+export const PdsLayout = (props: RouteSectionProps) => {
   const params = useParams();
+  const hasChild = () => !!params.repo;
+  return (
+    <NestedLayout key={params.pds} hasChild={hasChild()} view={() => <PdsView />}>
+      {props.children}
+    </NestedLayout>
+  );
+};
+
+const PdsView = () => {
+  const params = useParams();
+  const hidden = () => !!params.repo;
   const location = useLocation();
-  const [version, setVersion] = createSignal<string>();
-  const [serverInfos, setServerInfos] =
-    createSignal<InferXRPCBodyOutput<ComAtprotoServerDescribeServer.mainSchema["output"]>>();
-  const [cursor, setCursor] = createSignal<string>();
-  setPDS(params.pds);
-  const pds =
-    params.pds!.startsWith("localhost") ? `http://${params.pds}` : `https://${params.pds}`;
+  if (params.pds !== "at:") setPDS(params.pds);
+  const pds = params.pds!.startsWith("localhost")
+    ? `http://${params.pds}`
+    : `https://${params.pds}`;
   const rpc = new Client({ handler: simpleFetchHandler({ service: pds }) });
+  const cached = pdsCache?.pds === pds ? pdsCache : undefined;
+  const [version, setVersion] = createSignal<string | undefined>(cached?.version);
+  const [serverInfos, setServerInfos] = createSignal<
+    InferXRPCBodyOutput<ComAtprotoServerDescribeServer.mainSchema["output"]> | undefined
+  >(cached?.serverInfos);
+  const [cursor, setCursor] = createSignal<string | undefined>(cached?.cursor);
+  const [isLoadingMore, setIsLoadingMore] = createSignal(false);
 
   const getVersion = async () => {
-    // @ts-expect-error: undocumented endpoint
-    const res = await rpc.get("_health", {});
-    setVersion((res.data as { version?: string }).version);
+    try {
+      // @ts-expect-error: undocumented endpoint
+      const res = await rpc.get("_health", {});
+      const v = (res.data as any).version as string;
+      setVersion(v);
+      if (pdsCache) pdsCache.version = v;
+    } catch (err) {
+      console.error("Failed to fetch version:", err);
+    }
   };
 
   const describeServer = async () => {
     const res = await rpc.get("com.atproto.server.describeServer");
     if (!res.ok) console.error(res.data.error);
-    else setServerInfos(res.data);
+    else {
+      setServerInfos(res.data);
+      if (pdsCache) pdsCache.serverInfos = res.data;
+    }
   };
 
-  const fetchRepos = async () => {
+  createEffect(() => {
+    if (hidden() || version() || serverInfos()) return;
     getVersion();
     describeServer();
+  });
+
+  const [repos, setRepos] = createSignal<ComAtprotoSyncListRepos.Repo[] | undefined>(cached?.repos);
+
+  const fetchRepos = async () => {
+    const loadingMore = isLoadingMore();
+    setIsLoadingMore(false);
+    if (!loadingMore && repos()) return;
     const res = await rpc.get("com.atproto.sync.listRepos", {
       params: { limit: LIMIT, cursor: cursor() },
     });
     if (!res.ok) throw new Error(res.data.error);
-    setCursor(res.data.repos.length < LIMIT ? undefined : res.data.cursor);
-    setRepos(repos()?.concat(res.data.repos) ?? res.data.repos);
+    const newCursor = res.data.repos.length < LIMIT ? undefined : res.data.cursor;
+    const newRepos = repos()?.concat(res.data.repos) ?? res.data.repos;
+    setCursor(newCursor);
+    setRepos(newRepos);
+    pdsCache = { ...pdsCache, pds, repos: newRepos, cursor: newCursor };
     return res.data;
   };
 
-  const [response, { refetch }] = createResource(fetchRepos);
-  const [repos, setRepos] = createSignal<ComAtprotoSyncListRepos.Repo[]>();
+  const shouldFetch = createLatch(() => !hidden());
 
-  const RepoCard = (repo: ComAtprotoSyncListRepos.Repo) => {
-    const [expanded, setExpanded] = createSignal(false);
-    const [hovering, setHovering] = createSignal(false);
+  const [response, { refetch }] = createResource(shouldFetch, fetchRepos);
 
-    return (
-      <div class="flex flex-col gap-1">
-        <div
-          class="dark:hover:bg-dark-200 flex min-w-0 flex-1 items-center rounded hover:bg-neutral-200/70"
-          onMouseEnter={() => canHover && setHovering(true)}
-          onMouseLeave={() => canHover && setHovering(false)}
-        >
-          <button
-            type="button"
-            onclick={() => setExpanded(!expanded())}
-            class="flex min-w-0 flex-1 items-center gap-2 p-1.5"
-          >
-            <span class="mt-0.5 flex shrink-0 items-center text-neutral-400 dark:text-neutral-500">
-              {expanded() ?
-                <span class="iconify lucide--chevron-down"></span>
-              : <span class="iconify lucide--chevron-right"></span>}
-            </span>
-            <div class="flex min-w-0 flex-1 items-center gap-x-2 text-sm">
-              <span class="min-w-0 truncate font-mono" onclick={(e) => e.stopPropagation()}>
-                <DidHoverCard newTab did={repo.did} />
-              </span>
-              <Show when={!repo.active}>
-                <span class="flex shrink-0 items-center gap-1 text-red-500 dark:text-red-400">
-                  <span
-                    class={`iconify ${
-                      repo.status === "deactivated" ? "lucide--user-round-x"
-                      : repo.status === "takendown" ? "lucide--shield-ban"
-                      : "lucide--unplug"
-                    }`}
-                  ></span>
-                  {repo.status ?? "inactive"}
-                </span>
-              </Show>
-            </div>
-          </button>
-          <Show when={expanded() || hovering()}>
-            <A
-              href={`/at://${repo.did}`}
-              class="flex shrink-0 items-center p-2 transition-colors not-hover:text-neutral-500 not-hover:dark:text-neutral-400"
-            >
-              <span class="iconify lucide--arrow-right"></span>
-            </A>
-          </Show>
-        </div>
-        <Show when={expanded()}>
-          <div class="mb-2 ml-7.5 flex flex-col gap-1 font-mono text-xs text-neutral-500 dark:text-neutral-400">
-            <Show when={repo.head}>
-              <span class="truncate">{repo.head}</span>
-            </Show>
-            <Show when={TID.validate(repo.rev)}>
-              <div class="flex gap-1 text-neutral-700 dark:text-neutral-300">
-                <span>{repo.rev}</span>
-                <span>•</span>
-                <span>{localDateFromTimestamp(TID.parse(repo.rev).timestamp / 1000)}</span>
-              </div>
-            </Show>
-          </div>
-        </Show>
-      </div>
-    );
+  const [expandedIndex, setExpandedIndex] = createSignal<number | null>(null);
+
+  let containerRef: HTMLDivElement | undefined;
+  const collapsedHeights = new Map<number, number>();
+  const virtualizer = createWindowVirtualizer({
+    get count() {
+      return repos()?.length ?? 0;
+    },
+    estimateSize: () => 33,
+    overscan: 10,
+    get scrollMargin() {
+      return containerRef?.offsetTop ?? 0;
+    },
+  });
+
+  const baseMeasure = virtualizer.measureElement.bind(virtualizer);
+  virtualizer.measureElement = (el: Element | null) => {
+    if (!el) return;
+    const indexStr = el.getAttribute("data-index");
+    if (indexStr == null) return;
+    const index = parseInt(indexStr, 10);
+    if (expandedIndex() === index) return;
+    collapsedHeights.set(index, (el as HTMLElement).offsetHeight);
+    baseMeasure(el);
+  };
+
+  virtualizer.indexFromElement = (node: Element) => {
+    const indexStr = node.getAttribute("data-index");
+    if (!indexStr) return -1;
+    return parseInt(indexStr, 10);
   };
 
   const Tab = (props: { tab: "repos" | "info" | "firehose"; label: string }) => (
@@ -127,19 +303,23 @@ export const PdsView = () => {
           (!location.hash && props.tab !== "repos"),
       }}
       href={
-        props.tab === "firehose" ?
-          `/firehose?instance=wss://${params.pds}`
-        : `/${params.pds}#${props.tab}`
+        props.tab === "firehose"
+          ? `/firehose?instance=wss://${params.pds}`
+          : `/${params.pds}#${props.tab}`
       }
     >
       {props.label}
     </A>
   );
 
+  if (!hidden()) document.title = `${params.pds} - PDSls`;
+
   return (
     <>
-      <Title>{params.pds} - PDSls</Title>
-      <Show when={repos() || response()}>
+      <Show when={!hidden() && !repos() && (response.state === "unresolved" || response.loading)}>
+        <Spinner />
+      </Show>
+      <Show when={!hidden() && (repos() || response.state === "ready")}>
         <div class="flex w-full flex-col px-2">
           <div class="mb-3 flex gap-4 text-sm sm:text-base">
             <Tab tab="repos" label="Repositories" />
@@ -147,29 +327,54 @@ export const PdsView = () => {
             <Tab tab="firehose" label="Firehose" />
           </div>
           <Show when={!location.hash || location.hash === "#repos"}>
-            <div class="-mx-2 flex flex-col pb-20">
-              <For each={repos()}>{(repo) => <RepoCard {...repo} />}</For>
+            <div
+              class="-mx-2 mb-10"
+              ref={containerRef}
+              style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}
+            >
+              <For each={virtualizer.getVirtualItems()}>
+                {(virtualItem) => {
+                  const isExpanded = () => expandedIndex() === virtualItem.index;
+                  return (
+                    <div
+                      data-index={virtualItem.index}
+                      ref={virtualizer.measureElement}
+                      style={{
+                        position: "absolute",
+                        top: `${virtualItem.start - virtualizer.options.scrollMargin}px`,
+                        left: 0,
+                        width: "100%",
+                        overflow: "visible",
+                      }}
+                    >
+                      <RepoCard
+                        repo={repos()![virtualItem.index]}
+                        expanded={isExpanded()}
+                        onToggle={() => setExpandedIndex(isExpanded() ? null : virtualItem.index)}
+                      />
+                    </div>
+                  );
+                }}
+              </For>
             </div>
           </Show>
           <div class="flex flex-col gap-3">
             <Show when={location.hash === "#info"}>
               <Show when={version()}>
                 {(version) => (
-                  <div class="flex flex-col">
-                    <span class="font-semibold">Version</span>
+                  <InfoField label="Version">
                     <span class="text-sm text-neutral-700 dark:text-neutral-300">{version()}</span>
-                  </div>
+                  </InfoField>
                 )}
               </Show>
               <Show when={serverInfos()}>
                 {(server) => (
                   <>
-                    <div class="flex flex-col">
-                      <span class="font-semibold">DID</span>
+                    <InfoField label="DID">
                       <span class="text-sm text-neutral-700 dark:text-neutral-300">
                         {server().did}
                       </span>
-                    </div>
+                    </InfoField>
                     <div class="flex items-center gap-1">
                       <span class="font-semibold">Invite Code Required</span>
                       <span
@@ -188,8 +393,7 @@ export const PdsView = () => {
                       </div>
                     </Show>
                     <Show when={server().availableUserDomains.length}>
-                      <div class="flex flex-col">
-                        <span class="font-semibold">Available User Domains</span>
+                      <InfoField label="Available User Domains">
                         <For each={server().availableUserDomains}>
                           {(domain) => (
                             <span class="text-sm wrap-anywhere text-neutral-700 dark:text-neutral-300">
@@ -197,45 +401,34 @@ export const PdsView = () => {
                             </span>
                           )}
                         </For>
-                      </div>
+                      </InfoField>
                     </Show>
-                    <Show when={server().links?.privacyPolicy}>
-                      <div class="flex flex-col">
-                        <span class="font-semibold">Privacy Policy</span>
-                        <a
-                          href={server().links?.privacyPolicy}
-                          class="text-sm text-neutral-700 hover:underline dark:text-neutral-300"
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          {server().links?.privacyPolicy}
-                        </a>
-                      </div>
-                    </Show>
-                    <Show when={server().links?.termsOfService}>
-                      <div class="flex flex-col">
-                        <span class="font-semibold">Terms of Service</span>
-                        <a
-                          href={server().links?.termsOfService}
-                          class="text-sm text-neutral-700 hover:underline dark:text-neutral-300"
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          {server().links?.termsOfService}
-                        </a>
-                      </div>
-                    </Show>
-                    <Show when={server().contact?.email}>
-                      <div class="flex flex-col">
-                        <span class="font-semibold">Contact</span>
-                        <a
-                          href={`mailto:${server().contact?.email}`}
-                          class="text-sm text-neutral-700 hover:underline dark:text-neutral-300"
-                        >
-                          {server().contact?.email}
-                        </a>
-                      </div>
-                    </Show>
+                    <For
+                      each={[
+                        { label: "Privacy Policy", url: server().links?.privacyPolicy },
+                        { label: "Terms of Service", url: server().links?.termsOfService },
+                        {
+                          label: "Contact",
+                          url: server().contact?.email
+                            ? `mailto:${server().contact?.email}`
+                            : undefined,
+                          display: server().contact?.email,
+                        },
+                      ].filter((l) => l.url)}
+                    >
+                      {(link) => (
+                        <InfoField label={link.label}>
+                          <a
+                            href={link.url}
+                            class="text-sm text-neutral-700 hover:underline dark:text-neutral-300"
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            {link.display ?? link.url}
+                          </a>
+                        </InfoField>
+                      )}
+                    </For>
                   </>
                 )}
               </Show>
@@ -243,8 +436,8 @@ export const PdsView = () => {
           </div>
         </div>
         <Show when={!location.hash || location.hash === "#repos"}>
-          <div class="dark:bg-dark-500 fixed bottom-0 z-5 flex w-screen justify-center bg-neutral-100 pt-2 pb-4">
-            <div class="flex items-center gap-3 pb-2">
+          <div class="bottom-controls-fade dark:bg-dark-500 fixed bottom-0 z-5 flex w-screen justify-center bg-neutral-100 pt-3 pb-6">
+            <div class="flex items-center gap-3">
               <p>
                 {repos()?.length} loaded
                 <Show when={repos()?.some((r) => !r.active)}>
@@ -256,7 +449,11 @@ export const PdsView = () => {
               </p>
               <Show when={cursor()}>
                 <Button
-                  onClick={() => refetch()}
+                  onClick={() => {
+                    setIsLoadingMore(true);
+                    setExpandedIndex(null);
+                    refetch();
+                  }}
                   disabled={response.loading}
                   classList={{ "w-20 h-7.5 justify-center": true }}
                 >

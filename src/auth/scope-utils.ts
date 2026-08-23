@@ -1,4 +1,13 @@
+import {
+  buildCollectionScope,
+  buildRpcScope,
+  STRATOS_SCOPES,
+} from "@northskysocial/stratos-client";
+
 import { agent, sessions } from "./state";
+
+export const SPACE_READ_SCOPE_ID = "space-read" as const;
+export const SPACE_READ_SCOPE = "space:*?authority=*&action=read_self";
 
 export const GRANULAR_SCOPES = [
   {
@@ -22,16 +31,31 @@ export const GRANULAR_SCOPES = [
     label: "Upload blobs",
   },
   {
+    id: SPACE_READ_SCOPE_ID,
+    scope: SPACE_READ_SCOPE,
+    label: "Read your Space records (alpha)",
+  },
+  {
     id: "stratos-enrollment",
-    scope: "repo:zone.stratos.actor.enrollment",
+    scope: buildCollectionScope(STRATOS_SCOPES.enrollment),
     label: "Stratos enrollment",
   },
   {
     id: "stratos-posts",
-    scope: "repo:zone.stratos.feed.post?action=create&action=delete",
+    scope: buildCollectionScope(STRATOS_SCOPES.post, ["create", "delete"]),
     label: "Stratos posts",
   },
-];
+  {
+    id: "stratos-feed",
+    scope: buildRpcScope(STRATOS_SCOPES.getFeed),
+    label: "Stratos feeds",
+  },
+] as const;
+
+export type ScopeId = (typeof GRANULAR_SCOPES)[number]["id"];
+
+/** scope ids that require the Stratos enrollment scope to be useful */
+export const STRATOS_DEPENDENT_SCOPES = ["stratos-posts", "stratos-feed"];
 
 export const BASE_SCOPES = ["atproto"];
 
@@ -50,14 +74,26 @@ export const parseScopeString = (scopeIdsString: string): Set<string> => {
   return new Set(ids.filter((id) => id !== "atproto"));
 };
 
-export const hasScope = (grantedScopes: string | undefined, scopeId: string): boolean => {
+export const oauthScopeStringToIds = (scopeString: string): Set<string> => {
+  const granted = new Set(scopeString.split(" ").filter(Boolean));
+  return new Set(GRANULAR_SCOPES.filter(({ scope }) => granted.has(scope)).map(({ id }) => id));
+};
+
+const hasScope = (grantedScopes: string | undefined, scopeId: string): boolean => {
   if (!grantedScopes) return false;
   return grantedScopes.split(",").includes(scopeId);
 };
 
-export const hasUserScope = (scopeId: string): boolean => {
-  if (!agent()) return false;
-  const grantedScopes = sessions[agent()!.sub]?.grantedScopes;
+export const hasUserScope = (scopeId: ScopeId): boolean => {
+  const currentAgent = agent();
+  if (!currentAgent) return false;
+
+  const configuredScope = GRANULAR_SCOPES.find(({ id }) => id === scopeId)?.scope;
+  if (configuredScope && currentAgent.session.token.scope) {
+    return currentAgent.session.token.scope.split(" ").includes(configuredScope);
+  }
+
+  const grantedScopes = sessions[currentAgent.sub]?.grantedScopes;
   if (!grantedScopes) return true;
   return hasScope(grantedScopes, scopeId);
 };

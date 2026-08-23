@@ -11,6 +11,7 @@ import {
   useContext,
 } from "solid-js";
 import { Portal } from "solid-js/web";
+
 import { addToClipboard } from "../utils/copy";
 
 const MenuContext = createContext<{
@@ -37,7 +38,9 @@ export const CopyMenu = (props: { content: string; label: string; icon?: string 
       class="flex items-center gap-2 rounded-md p-1.5 whitespace-nowrap hover:bg-neutral-200/50 active:bg-neutral-200 dark:hover:bg-neutral-700 dark:active:bg-neutral-600"
     >
       <Show when={props.icon}>
-        <span class={"iconify shrink-0 " + props.icon}></span>
+        <span
+          class={"iconify shrink-0 text-neutral-500 dark:text-neutral-400 " + props.icon}
+        ></span>
       </Show>
       <span class="whitespace-nowrap">{props.label}</span>
     </button>
@@ -64,7 +67,9 @@ export const NavMenu = (props: {
     >
       <div class="flex items-center gap-2">
         <Show when={props.icon}>
-          <span class={"iconify shrink-0 " + props.icon}></span>
+          <span
+            class={"iconify shrink-0 text-neutral-500 dark:text-neutral-400 " + props.icon}
+          ></span>
         </Show>
         <span class="whitespace-nowrap">{props.label}</span>
       </div>
@@ -80,19 +85,26 @@ export const NavMenu = (props: {
   );
 };
 
-export const ActionMenu = (props: { label: string; icon: string; onClick: () => void }) => {
+export const ActionMenu = (props: {
+  label: string;
+  icon: string;
+  onClick: () => void;
+  keepOpen?: boolean;
+}) => {
   const ctx = useContext(MenuContext);
 
   return (
     <button
       onClick={() => {
         props.onClick();
-        ctx?.setShowMenu(false);
+        if (!props.keepOpen) ctx?.setShowMenu(false);
       }}
       class="flex items-center gap-2 rounded-md p-1.5 whitespace-nowrap hover:bg-neutral-200/50 active:bg-neutral-200 dark:hover:bg-neutral-700 dark:active:bg-neutral-600"
     >
       <Show when={props.icon}>
-        <span class={"iconify shrink-0 " + props.icon}></span>
+        <span
+          class={"iconify shrink-0 text-neutral-500 dark:text-neutral-400 " + props.icon}
+        ></span>
       </Show>
       <span class="whitespace-nowrap">{props.label}</span>
     </button>
@@ -151,7 +163,7 @@ export const DropdownMenu = (props: {
     <div class="relative">
       <button
         class={
-          "flex items-center hover:bg-neutral-200 active:bg-neutral-300 dark:hover:bg-neutral-700 dark:active:bg-neutral-600 " +
+          "flex items-center hover:bg-neutral-200 active:bg-neutral-300 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700 " +
           props.buttonClass
         }
         ref={setMenuButton}

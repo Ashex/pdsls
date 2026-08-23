@@ -1,20 +1,21 @@
 import { onCleanup, onMount } from "solid-js";
-import { pds } from "./navbar";
 
-export interface VideoPlayerProps {
+import { useRepo } from "../lib/repo-context.jsx";
+
+interface VideoPlayerProps {
   did: string;
   cid: string;
-  onLoad: () => void;
 }
 
 const VideoPlayer = (props: VideoPlayerProps) => {
+  const repo = useRepo();
   let video!: HTMLVideoElement;
   let objectUrl: string | undefined;
 
   onMount(async () => {
     // thanks bf <3
     const res = await fetch(
-      `https://${pds()}/xrpc/com.atproto.sync.getBlob?did=${props.did}&cid=${props.cid}`,
+      `${repo.pds()}/xrpc/com.atproto.sync.getBlob?did=${props.did}&cid=${props.cid}`,
     );
     if (!res.ok) throw new Error(res.statusText);
     const blob = await res.blob();
@@ -27,13 +28,7 @@ const VideoPlayer = (props: VideoPlayerProps) => {
   });
 
   return (
-    <video
-      ref={video}
-      class="max-h-80 max-w-[20rem]"
-      controls
-      playsinline
-      onLoadedData={props.onLoad}
-    >
+    <video ref={video} class="max-h-80 max-w-[20rem]" controls playsinline>
       <source type="video/mp4" />
     </video>
   );

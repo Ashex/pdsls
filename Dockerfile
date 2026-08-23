@@ -1,23 +1,23 @@
-# NPM build layer
+# Build layer
 
-FROM node:alpine AS build
+FROM oven/bun:1-alpine AS build
 
 ARG APP_DOMAIN
 ARG APP_PROTOCOL
 ENV APP_DOMAIN=${APP_DOMAIN}
 ENV APP_PROTOCOL=${APP_PROTOCOL}
 
-RUN npm install -g pnpm
-
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json bun.lock .npmrc ./
+RUN --mount=type=secret,id=node_auth_token \
+    NODE_AUTH_TOKEN=$(cat /run/secrets/node_auth_token 2>/dev/null || echo "") \
+    bun install --frozen-lockfile
 
 COPY . .
 
-RUN node scripts/generate-metadata.js
-RUN pnpm build
+RUN bun scripts/generate-metadata.js
+RUN bun run build
 
 # NGINX serving layer
 

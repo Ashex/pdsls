@@ -2,10 +2,11 @@ import { Did } from "@atcute/lexicons";
 import { deleteStoredSession, getSession, OAuthUserAgent } from "@atcute/oauth-browser-client";
 import { A } from "@solidjs/router";
 import { createEffect, For, onMount, Show } from "solid-js";
-import { createStore, produce } from "solid-js/store";
+import { produce } from "solid-js/store";
+
 import { ActionMenu, DropdownMenu, MenuProvider, NavMenu } from "../components/dropdown.jsx";
 import { Modal } from "../components/modal.jsx";
-import { setStratosActive, setStratosEnrollment } from "../stratos";
+import { setStratosEnrollment } from "../stratos";
 import { Login } from "./login.jsx";
 import { useOAuthScopeFlow } from "./scope-flow.js";
 import { ScopeSelector } from "./scope-selector.jsx";
@@ -20,10 +21,12 @@ import {
 } from "./session-manager.js";
 import {
   agent,
+  avatars,
   openManager,
   pendingPermissionEdit,
   sessions,
   setAgent,
+  setAvatars,
   setOpenManager,
   setPendingPermissionEdit,
   setSessions,
@@ -50,7 +53,6 @@ const AccountDropdown = (props: { did: Did; onEditPermissions: (did: Did) => voi
     if (currentSession === did) {
       setAgent(undefined);
       setStratosEnrollment(undefined);
-      setStratosActive(false);
     }
   };
 
@@ -79,8 +81,6 @@ const AccountDropdown = (props: { did: Did; onEditPermissions: (did: Did) => voi
 };
 
 export const AccountManager = () => {
-  const [avatars, setAvatars] = createStore<Record<Did, string>>();
-
   const getThumbnailUrl = (avatarUrl: string) => {
     return avatarUrl.replace("img/avatar/", "img/avatar_thumbnail/");
   };
@@ -127,8 +127,8 @@ export const AccountManager = () => {
     <>
       <Modal
         open={openManager()}
-        onClose={() => {
-          setOpenManager(false);
+        onClose={() => setOpenManager(false)}
+        onClosed={() => {
           setShowAddAccount(false);
           scopeFlow.cancel();
         }}
@@ -203,11 +203,13 @@ export const AccountManager = () => {
       </Modal>
       <button
         onclick={() => setOpenManager(true)}
-        class={`flex items-center rounded-md ${agent() && avatars[agent()!.sub] ? "p-1.25" : "p-1.5"} hover:bg-neutral-200 active:bg-neutral-300 dark:hover:bg-neutral-700 dark:active:bg-neutral-600`}
+        class={`flex items-center rounded-md ${agent() && avatars[agent()!.sub] ? "p-1.25" : "p-1.5"} hover:bg-neutral-200 active:bg-neutral-300 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700`}
       >
-        {agent() && avatars[agent()!.sub] ?
+        {agent() && avatars[agent()!.sub] ? (
           <img src={getThumbnailUrl(avatars[agent()!.sub])} class="size-5 rounded-full" />
-        : <span class="iconify lucide--circle-user-round text-lg"></span>}
+        ) : (
+          <span class="iconify lucide--circle-user-round text-lg"></span>
+        )}
       </button>
     </>
   );

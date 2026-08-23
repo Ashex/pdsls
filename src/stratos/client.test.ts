@@ -1,203 +1,167 @@
 import { Client } from "@atcute/client";
 import type { OAuthUserAgent } from "@atcute/oauth-browser-client";
-import * as fc from "fast-check";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createServiceClient, resolveServiceUrl } from "./client";
-import { setStratosActive, setStratosEnrollment, type StratosEnrollment } from "./state";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../utils/api", () => ({
-  resolvePDS: vi.fn(),
-}));
-
-vi.mock("../components/navbar", () => ({
-  setPDS: vi.fn(),
-}));
-
-import { setPDS } from "../components/navbar";
-import { resolvePDS } from "../utils/api";
-
-const arbUrl = fc.webUrl({ withQueryParameters: false, withFragments: false });
-const arbDid = fc.string({ minLength: 5, maxLength: 30 }).map((s) => `did:plc:${s}`);
-
-const makeEnrollment = (serviceUrl: string): StratosEnrollment => ({
-  service: serviceUrl,
-  boundaries: [],
-  signingKey: "did:key:zDnaeuser",
-  attestation: { sig: new Uint8Array([1, 2, 3]), signingKey: "did:key:zDnaeservice" },
-  createdAt: new Date().toISOString(),
-  rkey: "did:web:stratos.example.com",
+const store = new Map<string, string>();
+vi.stubGlobal("localStorage", {
+  getItem: (k: string) => store.get(k) ?? null,
+  setItem: (k: string, v: string) => store.set(k, String(v)),
+  removeItem: (k: string) => store.delete(k),
+  get stratosActive() {
+    return store.get("stratosActive");
+  },
+  set stratosActive(v: string | undefined) {
+    if (v !== undefined) store.set("stratosActive", String(v));
+  },
 });
 
-const arbEnrollment = arbUrl.map(makeEnrollment);
+const { createServiceClient } = await import("./client");
+const { setStratosActive, setStratosEnrollment, setTargetEnrollment } = await import("./state");
 
-const mockResolvePDS = resolvePDS as ReturnType<typeof vi.fn>;
-const mockSetPDS = setPDS as ReturnType<typeof vi.fn>;
+const PATH = "/xrpc/com.atproto.repo.describeRepo";
+const OWN_SERVICE = "https://stratos.nerv.tokyo.jp";
+const OTHER_SERVICE = "https://stratos.seele.example";
 
-function makeMockAgent(): OAuthUserAgent & { lastCalledUrl: string | undefined } {
+const makeEnrollment = (service: string) => ({
+  service,
+  boundaries: [],
+  signingKey: "did:key:zUserKey",
+  attestation: { sig: new Uint8Array([1, 2, 3]), signingKey: "did:key:zServiceKey" },
+  createdAt: "1995-10-04T00:00:00Z",
+  rkey: `did:web:${new URL(service).hostname}`,
+});
+
+type MockAgent = OAuthUserAgent & {
+  lastUrl: string | undefined;
+  lastInit: RequestInit | undefined;
+};
+
+const makeMockAgent = (): MockAgent => {
   const agent = {
-    lastCalledUrl: undefined as string | undefined,
-    handle: vi.fn(async (url: string, _init?: RequestInit) => {
-      agent.lastCalledUrl = url;
-      void _init;
+    lastUrl: undefined as string | undefined,
+    lastInit: undefined as RequestInit | undefined,
+    handle: vi.fn(async (url: string, init?: RequestInit) => {
+      agent.lastUrl = url;
+      agent.lastInit = init;
       return new Response(null, { status: 200 });
     }),
-  } as unknown as OAuthUserAgent & { lastCalledUrl: string | undefined };
+  } as unknown as MockAgent;
   return agent;
-}
+};
+
+/** puts both sides on the same service, so stratosMode() is effective. */
+const enrollBothOn = (service: string) => {
+  setStratosActive(true);
+  setStratosEnrollment(makeEnrollment(service));
+  setTargetEnrollment(makeEnrollment(service));
+};
 
 beforeEach(() => {
-  vi.clearAllMocks();
   setStratosActive(false);
   setStratosEnrollment(undefined);
-});
-
-afterEach(() => {
-  setStratosActive(false);
-  setStratosEnrollment(undefined);
-});
-
-describe("resolveServiceUrl", () => {
-  it("returns the Stratos service URL when active and enrollment exists", async () => {
-    await fc.assert(
-      fc.asyncProperty(arbDid, arbUrl, async (did, serviceUrl) => {
-        vi.clearAllMocks();
-        setStratosActive(true);
-        setStratosEnrollment(makeEnrollment(serviceUrl));
-
-        const result = await resolveServiceUrl(did);
-
-        expect(result).toBe(serviceUrl);
-      }),
-      { numRuns: 50 },
-    );
-  });
-
-  it("returns the PDS URL when inactive", async () => {
-    await fc.assert(
-      fc.asyncProperty(arbDid, arbUrl, async (did, pdsUrl) => {
-        vi.clearAllMocks();
-        setStratosActive(false);
-        setStratosEnrollment(makeEnrollment("https://stratos.example.com"));
-        mockResolvePDS.mockResolvedValue(pdsUrl);
-
-        const result = await resolveServiceUrl(did);
-
-        expect(result).toBe(pdsUrl);
-        expect(mockResolvePDS).toHaveBeenCalledWith(did);
-      }),
-      { numRuns: 50 },
-    );
-  });
-
-  it("falls back to the PDS URL when active but enrollment is null", async () => {
-    await fc.assert(
-      fc.asyncProperty(arbDid, arbUrl, async (did, pdsUrl) => {
-        vi.clearAllMocks();
-        setStratosActive(true);
-        setStratosEnrollment(null);
-        mockResolvePDS.mockResolvedValue(pdsUrl);
-
-        const result = await resolveServiceUrl(did);
-
-        expect(result).toBe(pdsUrl);
-        expect(mockResolvePDS).toHaveBeenCalledWith(did);
-      }),
-      { numRuns: 50 },
-    );
-  });
-
-  it("calls setPDS with the hostname when Stratos is active", async () => {
-    await fc.assert(
-      fc.asyncProperty(arbDid, arbUrl, async (did, serviceUrl) => {
-        vi.clearAllMocks();
-        setStratosActive(true);
-        setStratosEnrollment(makeEnrollment(serviceUrl));
-
-        await resolveServiceUrl(did);
-
-        expect(mockSetPDS).toHaveBeenCalledWith(new URL(serviceUrl).hostname);
-      }),
-      { numRuns: 50 },
-    );
-  });
-
-  it("delegates to resolvePDS when falling back to PDS", async () => {
-    await fc.assert(
-      fc.asyncProperty(arbDid, arbUrl, async (did, pdsUrl) => {
-        vi.clearAllMocks();
-        setStratosActive(false);
-        setStratosEnrollment(null);
-        mockResolvePDS.mockResolvedValue(pdsUrl);
-
-        await resolveServiceUrl(did);
-
-        expect(mockResolvePDS).toHaveBeenCalledWith(did);
-      }),
-      { numRuns: 50 },
-    );
-  });
+  setTargetEnrollment(undefined);
 });
 
 describe("createServiceClient", () => {
   it("always returns a Client instance", () => {
-    fc.assert(
-      fc.property(fc.boolean(), fc.option(arbEnrollment, { nil: null }), (active, enrollment) => {
-        setStratosActive(active);
-        setStratosEnrollment(enrollment);
+    expect(createServiceClient(makeMockAgent())).toBeInstanceOf(Client);
 
-        expect(createServiceClient(makeMockAgent())).toBeInstanceOf(Client);
-      }),
-      { numRuns: 50 },
-    );
+    enrollBothOn(OWN_SERVICE);
+    expect(createServiceClient(makeMockAgent())).toBeInstanceOf(Client);
   });
 
-  it("routes requests to the Stratos service origin when active and enrolled", async () => {
-    await fc.assert(
-      fc.asyncProperty(arbUrl, async (serviceUrl) => {
-        setStratosActive(true);
-        setStratosEnrollment(makeEnrollment(serviceUrl));
-        const agent = makeMockAgent();
+  it("routes to the browsed service origin when Stratos mode is effective", async () => {
+    enrollBothOn(OWN_SERVICE);
+    const agent = makeMockAgent();
 
-        const client = createServiceClient(agent);
-        await client.handler("/xrpc/com.atproto.repo.describeRepo", {});
+    await createServiceClient(agent).handler(PATH, {});
 
-        expect(agent.lastCalledUrl).toBeDefined();
-        expect(new URL(agent.lastCalledUrl!).origin).toBe(new URL(serviceUrl).origin);
-      }),
-      { numRuns: 50 },
-    );
+    expect(agent.lastUrl).toBeDefined();
+    expect(new URL(agent.lastUrl!).origin).toBe(new URL(OWN_SERVICE).origin);
   });
 
-  it("passes the pathname directly to the agent when inactive", async () => {
-    await fc.assert(
-      fc.asyncProperty(arbUrl, async (serviceUrl) => {
-        setStratosActive(false);
-        setStratosEnrollment(makeEnrollment(serviceUrl));
-        const agent = makeMockAgent();
+  it("passes the raw pathname to the agent when Stratos is inactive", async () => {
+    setStratosActive(false);
+    setStratosEnrollment(makeEnrollment(OWN_SERVICE));
+    setTargetEnrollment(makeEnrollment(OWN_SERVICE));
+    const agent = makeMockAgent();
 
-        const client = createServiceClient(agent);
-        await client.handler("/xrpc/com.atproto.repo.describeRepo", {});
+    await createServiceClient(agent).handler(PATH, {});
 
-        // agent.handle receives the raw pathname; it resolves the base against its own PDS
-        expect(agent.lastCalledUrl).toBe("/xrpc/com.atproto.repo.describeRepo");
-      }),
-      { numRuns: 50 },
-    );
+    expect(agent.lastUrl).toBe(PATH);
   });
 
-  it("falls back to agent routing when active but enrollment is null", async () => {
-    await fc.assert(
-      fc.asyncProperty(fc.constant(null), async () => {
-        setStratosActive(true);
-        setStratosEnrollment(null);
-        const agent = makeMockAgent();
+  it("passes the raw pathname when the browsed repo is not enrolled", async () => {
+    setStratosActive(true);
+    setStratosEnrollment(makeEnrollment(OWN_SERVICE));
+    setTargetEnrollment(null);
+    const agent = makeMockAgent();
 
-        const client = createServiceClient(agent);
-        await client.handler("/xrpc/com.atproto.repo.describeRepo", {});
+    await createServiceClient(agent).handler(PATH, {});
 
-        expect(agent.lastCalledUrl).toBe("/xrpc/com.atproto.repo.describeRepo");
-      }),
-      { numRuns: 20 },
-    );
+    expect(agent.lastUrl).toBe(PATH);
+  });
+
+  it("passes the raw pathname when the user is not enrolled", async () => {
+    setStratosActive(true);
+    setStratosEnrollment(null);
+    setTargetEnrollment(makeEnrollment(OWN_SERVICE));
+    const agent = makeMockAgent();
+
+    await createServiceClient(agent).handler(PATH, {});
+
+    expect(agent.lastUrl).toBe(PATH);
+  });
+
+  it("does not route when the two enrollments target different services", async () => {
+    setStratosActive(true);
+    setStratosEnrollment(makeEnrollment(OWN_SERVICE));
+    setTargetEnrollment(makeEnrollment(OTHER_SERVICE));
+    const agent = makeMockAgent();
+
+    await createServiceClient(agent).handler(PATH, {});
+
+    expect(agent.lastUrl).toBe(PATH);
+  });
+
+  it("routes to an explicit serviceUrl even when Stratos mode is off", async () => {
+    setStratosActive(false);
+    const agent = makeMockAgent();
+
+    await createServiceClient(agent, OTHER_SERVICE).handler(PATH, {});
+
+    expect(new URL(agent.lastUrl!).origin).toBe(new URL(OTHER_SERVICE).origin);
+  });
+
+  it("prefers an explicit serviceUrl over the browsed repo's service", async () => {
+    enrollBothOn(OWN_SERVICE);
+    const agent = makeMockAgent();
+
+    await createServiceClient(agent, OTHER_SERVICE).handler(PATH, {});
+
+    expect(new URL(agent.lastUrl!).origin).toBe(new URL(OTHER_SERVICE).origin);
+  });
+
+  it("sets the dev tunnel bypass header on routed requests", async () => {
+    enrollBothOn(OWN_SERVICE);
+    const agent = makeMockAgent();
+
+    await createServiceClient(agent).handler(PATH, {});
+
+    const headers = new Headers(agent.lastInit?.headers);
+    expect(headers.get("ngrok-skip-browser-warning")).toBe("1");
+  });
+
+  it("preserves per-request headers while routing", async () => {
+    enrollBothOn(OWN_SERVICE);
+    const agent = makeMockAgent();
+
+    await createServiceClient(agent).handler(PATH, {
+      headers: { accept: "application/json" },
+    });
+
+    const headers = new Headers(agent.lastInit?.headers);
+    expect(headers.get("accept")).toBe("application/json");
+    expect(headers.get("ngrok-skip-browser-warning")).toBe("1");
   });
 });

@@ -1,6 +1,13 @@
 node_modules
+.pnpm-store/
+.ci-tools/
 dist
 .env
 .DS_Store
 public/oauth-client-metadata.json
 public/opensearch.xml
+public/_worker.js
+.wrangler
+.claude
+.rommie
+AGENTS.md
