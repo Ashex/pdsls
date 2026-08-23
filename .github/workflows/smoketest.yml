@@ -40,3 +40,14 @@ jobs:
 
       - name: Check formatting
         run: bun run format:check
+
+      # Serve the built bundle and request it once. The other steps prove the
+      # app compiles. This step proves it also starts.
+      - name: Start preview server and verify
+        run: |
+          bun run serve &
+          SERVER_PID=$!
+          curl --fail --silent --show-error --output /dev/null \
+            --retry 10 --retry-delay 1 --retry-connrefused --max-time 30 \
+            http://localhost:4173 || { kill $SERVER_PID 2>/dev/null; exit 1; }
+          kill $SERVER_PID 2>/dev/null || true
