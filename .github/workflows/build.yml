@@ -69,3 +69,37 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+  deploy_to_kubernetes:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: build-and-push-image
+    permissions:
+      contents: read
+    steps:
+      - name: Trigger release through webhook
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
+        with:
+          token: ${{ secrets.DEPLOYMENT_WEBHOOK_TOKEN }}
+          repository: ${{ secrets.DEPLOYMENT_WEBHOOK_REPOSITORY }}
+          event-type: restart-pdsls
+
+  notify_deployment:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: deploy_to_kubernetes
+    permissions:
+      contents: read
+    steps:
+      - name: Wait for successful deployment (1 minute)
+        run: sleep 60s
+
+      - name: Notify Discord of successful deployment
+        uses: rjstone/discord-webhook-notify@13eb215cbf853107dd9386c4a2f4035b7988cfc2 # v2.3.0
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: info
+          username: 'Github Actions deployment'
+          title: 'PDSlss deployment successful!'
+          description: 'Latest build has been deployed to production successfully!'
+          details: 'Commit: ${{ github.event.head_commit.message }}'
