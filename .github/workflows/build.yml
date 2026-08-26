@@ -99,7 +99,7 @@ jobs:
         with:
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
           severity: info
-          username: 'Github Actions deployment'
-          title: 'PDSlss deployment successful!'
-          description: 'Latest build has been deployed to production successfully!'
-          details: 'Commit: ${{ github.event.head_commit.message }}'
+          username: "Github Actions deployment"
+          title: "PDSlss deployment successful!"
+          description: "Latest build has been deployed to production successfully!"
+          details: "Commit: ${{ github.event.head_commit.message }}"
